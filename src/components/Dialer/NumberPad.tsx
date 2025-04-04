@@ -1,7 +1,9 @@
 'use client';
 
-import { Grid, Button, Paper } from '@mantine/core';
+import { Grid, Button, Paper, Text } from '@mantine/core';
 import { useEffect, useMemo } from 'react';
+import { IconBackspace } from '@tabler/icons-react';
+import { motion } from 'framer-motion';
 
 interface NumberPadProps {
   value: string;
@@ -10,8 +12,26 @@ interface NumberPadProps {
 }
 
 export function NumberPad({ value, onChange, disabled }: NumberPadProps) {
-  const buttons = useMemo(() => ['+', '1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#', 'Space'], []);
-  const validKeys = useMemo(() => new Set([...buttons, ' ', 'Backspace']), [buttons]);
+  const buttons = useMemo(() => [
+    { label: '1', value: '1' },
+    { label: '2', value: '2' },
+    { label: '3', value: '3' },
+    { label: '4', value: '4' },
+    { label: '5', value: '5' },
+    { label: '6', value: '6' },
+    { label: '7', value: '7' },
+    { label: '8', value: '8' },
+    { label: '9', value: '9' },
+    { label: '*', value: '*' },
+    { label: '0', value: '0' },
+    { label: '#', value: '#' },
+    { label: '+', value: '+' },
+    { label: 'Space', value: ' ' }
+  ], []);
+  
+  const validKeys = useMemo(() => 
+    new Set([...buttons.map(b => b.value), 'Backspace', ' ']), 
+  [buttons]);
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -21,8 +41,6 @@ export function NumberPad({ value, onChange, disabled }: NumberPadProps) {
         event.preventDefault();
         if (key === 'Backspace') {
           handleBackspace();
-        } else if (key === ' ') {
-          onChange(value + ' ');
         } else {
           onChange(value + key);
         }
@@ -33,7 +51,7 @@ export function NumberPad({ value, onChange, disabled }: NumberPadProps) {
   }, [value, onChange, disabled, validKeys]);
 
   const handleClick = (digit: string) => {
-    onChange(value + (digit === 'Space' ? ' ' : digit));
+    onChange(value + digit);
   };
 
   const handleBackspace = () => {
@@ -41,37 +59,62 @@ export function NumberPad({ value, onChange, disabled }: NumberPadProps) {
   };
 
   return (
-    <Paper radius="2xl" p="lg" mt="xl" shadow="md" className="bg-white/10 backdrop-blur-md border border-white/10">
-      <Grid gutter="sm">
-        {buttons.map((digit) => (
-          <Grid.Col span={digit === 'Space' ? 8 : 4} key={digit}>
+    <Paper radius="xl" p="lg">
+      <Paper 
+        p="md" 
+        mb="md" 
+        radius="lg" 
+        className="border border-white/10"
+      >
+        <Text 
+          size="md" 
+          className="font-mono tracking-wider text-white"
+          style={{ minHeight: '2rem' }}
+        >
+          {value || <span className="text-gray-500">Enter a number</span>}
+        </Text>
+      </Paper>
+      
+      <Grid gutter="xs">
+        {buttons.map((button) => (
+          <Grid.Col span={button.label === 'Space' ? 8 : 4} key={button.label}>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Button
+                fullWidth
+                size="lg"
+                radius="xl"
+                variant="light"
+                color="violet"
+                className="number-pad-button font-mono h-14"
+                onClick={() => handleClick(button.value)}
+                disabled={disabled}
+              >
+                {button.label}
+              </Button>
+            </motion.div>
+          </Grid.Col>
+        ))}
+        <Grid.Col span={4}>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
             <Button
               fullWidth
               size="lg"
               radius="xl"
-              variant="outline"
-              className="font-mono text-white"
-              onClick={() => handleClick(digit)}
-              disabled={disabled}
-              style={{ height: '3.5rem' }}
+              variant="subtle"
+              color="red"
+              className="number-pad-button h-14"
+              onClick={handleBackspace}
+              disabled={!value || disabled}
             >
-              {digit}
+              <IconBackspace size={20} />
             </Button>
-          </Grid.Col>
-        ))}
-        <Grid.Col span={4}>
-          <Button
-            fullWidth
-            size="lg"
-            radius="xl"
-            variant="light"
-            className="font-mono text-white"
-            onClick={handleBackspace}
-            disabled={!value || disabled}
-            style={{ height: '3.5rem' }}
-          >
-            ⌫
-          </Button>
+          </motion.div>
         </Grid.Col>
       </Grid>
     </Paper>

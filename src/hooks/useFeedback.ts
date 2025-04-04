@@ -1,31 +1,26 @@
-import { useState } from 'react';
-import axios from 'axios';
+import { useState } from "react";
+import axios from "axios";
 
-interface FeedbackData {
+export interface FeedbackData {
   callId: string;
-  rating: number;
-  notes: string;
-  callDuration: number;
+  callOutcome: "ANSWERED" | "WENT_TO_VOICEMAIL" | "NO_ANSWER" | "CALL_DROPPED" | "TECHNICAL_ISSUE" | "WRONG_NUMBER";
+  leadStatus: "HIGH_POTENTIAL" | "WARM_LEAD" | "COLD_LEAD" | "NOT_A_FIT" | "USING_COMPETITOR";
+  notes?: string;
 }
 
 export const useFeedback = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const API_BASE_URL = 'http://localhost:8080/api';
+  const API_BASE_URL = "http://localhost:8080/api";
 
   const submitFeedback = async (data: FeedbackData) => {
     setIsSubmitting(true);
     setError(null);
 
     try {
-      await axios.post(`${API_BASE_URL}/calls/feedback`, {
-        callId: data.callId,
-        rating: data.rating,
-        notes: data.notes,
-        duration: data.callDuration
-      });
+      await axios.post(`${API_BASE_URL}/calls/feedback`, data);
     } catch (err) {
-      setError('Failed to submit feedback. Please try again.');
+      setError("Failed to submit feedback. Please try again.");
       throw err;
     } finally {
       setIsSubmitting(false);
@@ -35,6 +30,6 @@ export const useFeedback = () => {
   return {
     submitFeedback,
     isSubmitting,
-    error
+    error,
   };
 };

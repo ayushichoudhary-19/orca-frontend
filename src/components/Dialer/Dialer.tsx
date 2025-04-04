@@ -1,15 +1,16 @@
-// components/Dialer/Dialer.tsx
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button, Group, Text, ActionIcon, Paper, Stack } from "@mantine/core";
+import { Group, Text, ActionIcon, Stack, Title } from "@mantine/core";
 import {
   IconPhone,
   IconPhoneOff,
   IconVolume,
+  IconVolumeOff,
   IconMicrophone,
   IconMicrophoneOff,
 } from "@tabler/icons-react";
+import { motion } from "framer-motion";
 import { CallStatusBadge } from "./CallStatusBadge";
 
 interface DialerProps {
@@ -62,78 +63,102 @@ export function Dialer({
   };
 
   return (
-    <Paper
-      radius="2xl"
-      p="xl"
-      shadow="lg"
-      className="bg-white/10 backdrop-blur-md border border-white/10 transition-all"
+    <motion.div
+      className="w-full rounded-3xl p-8 flex flex-col items-center justify-center"
+      initial={{ scale: 0.95, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 0.3 }}
     >
-      <Stack align="center" gap="xs">
-        <Text size="lg" fw={600} className="text-white tracking-wide">
+      <Stack
+        align="center"
+        gap="xs"
+        className="mb-6 p-2"
+        style={{
+          padding: "10px",
+        }}
+      >
+        <Title
+          order={3}
+          className="tracking-tight"
+          style={{
+            marginTop: "10px",
+          }}
+        >
           {number || "Enter a number"}
-        </Text>
+        </Title>
+
         <CallStatusBadge status={status} />
+
         {status !== "idle" && (
-          <Text size="xs" c="gray.4" mt={-2}>
+          <Text size="lg" className="font-mono text-gray-300 mt-1">
             {formatDuration(duration)}
           </Text>
         )}
       </Stack>
 
-      <Group justify="center" mt="xl" gap="lg">
+      <Group justify="center" gap="xl"
+      style={{
+        marginTop: "30px",
+      }}
+      >
         <ActionIcon
-          variant="light"
-          size="xl"
+          variant={muted ? "filled" : "light"}
+          size={60}
           radius="xl"
           color={muted ? "red" : "gray"}
           onClick={handleMuteToggle}
           disabled={status === "idle" || status === "ended"}
+          className="transition-all duration-200 hover:shadow-lg"
+          my={10}
         >
           {muted ? (
-            <IconMicrophoneOff size={24} />
+            <IconMicrophoneOff size={18} />
           ) : (
-            <IconMicrophone size={24} />
+            <IconMicrophone size={18} />
           )}
         </ActionIcon>
 
-        <ActionIcon
-          variant="light"
-          size="xl"
-          radius="xl"
-          color={speaker ? "blue" : "gray"}
-          onClick={handleSpeakerToggle}
-          disabled={status === "idle" || status === "ended"}
-        >
-          <IconVolume size={24} />
-        </ActionIcon>
-      </Group>
-
-      <Group justify="center" mt="xl">
-        {status === "idle" && (
-          <Button
-            size="lg"
+        {status === "idle" ? (
+          <ActionIcon
+            variant="filled"
+            size={60}
             radius="xl"
-            leftSection={<IconPhone size={20} />}
             color="green"
             onClick={onCallStart}
             disabled={!number}
+            className="transition-all duration-200 hover:shadow-lg"
+            my={10}
           >
-            Call
-          </Button>
+            <IconPhone size={18} />
+          </ActionIcon>
+        ) : status !== "ended" && (
+          <ActionIcon
+            variant="filled"
+            size={60}
+            radius="xl"
+            color="red"
+            onClick={() => onCallEnd(callId)}
+            className="transition-all duration-200 hover:shadow-lg"
+            my={10}
+          >
+            <IconPhoneOff size={18} />
+          </ActionIcon>
         )}
 
-        {status !== "idle" && status !== "ended" && (
-          <Button
-            size="lg"
-            radius="xl"
-            leftSection={<IconPhoneOff size={20} />}
-            color="red"
-            onClick={() => onCallEnd(callId)} // Pass the callId to onCallEnd
-          >
-            End
-          </Button>
-        )}
+        <ActionIcon
+          variant={speaker ? "filled" : "light"}
+          size={60}
+          radius="xl"
+          color={speaker ? "violet" : "gray"}
+          onClick={handleSpeakerToggle}
+          disabled={status === "idle" || status === "ended"}
+          className="transition-all duration-200 hover:shadow-lg"
+          my={10}
+        >
+          {speaker ? <IconVolume size={18} /> : <IconVolumeOff size={18} />}
+        </ActionIcon>
       </Group>
-    </Paper>
+
+    </motion.div>
   );
 }

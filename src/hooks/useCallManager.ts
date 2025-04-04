@@ -65,10 +65,10 @@ export const useCallManager = () => {
 
   // Update call duration
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let internval: NodeJS.Timeout;
     
     if (call.status === 'connected' && call.startTime) {
-      interval = setInterval(() => {
+      internval = setInterval(() => {
         setCall(prev => ({
           ...prev,
           duration: Math.floor((Date.now() - prev.startTime!.getTime()) / 1000)
@@ -76,7 +76,7 @@ export const useCallManager = () => {
       }, 1000);
     }
 
-    return () => clearInterval(interval);
+    return () => clearInterval(internval);
   }, [call.status, call.startTime]);
 
   const startCall = async (to: string) => {
@@ -92,16 +92,33 @@ export const useCallManager = () => {
   
       const connection = await device.connect({ params: { To: to } });
       
-      connection.on('accept', () => {
+      connection.on('accept', async () => {
+        const callSid = connection.parameters.CallSid;
+        console.log('connection params: ', connection.parameters);
+        const from = process.env.TWILIO_PHONE_NUMBER;
+
+        console.log('Call accepted:', callSid)
         setCall(prev => ({
           ...prev,
-          id: connection.parameters.CallSid, // Make sure to set the call ID
+          id: callSid,
           status: 'connected',
           startTime: new Date(),
           duration: 0,
           connection
         }));
+      
+        // ✅ Save the call record to backend using Twilio SID
+        try {
+          await axios.post(`${API_BASE_URL}/calls/call`, {
+            id: callSid,
+            to,
+            from,
+          });
+        } catch (error) {
+          console.error('Failed to save call:', error);
+        }
       });
+      
 
       connection.on('disconnect', () => {
         setCall(prev => ({
@@ -109,9 +126,6 @@ export const useCallManager = () => {
           status: 'ended'
         }));
       });
-
-      // Save call to backend
-      // await axios.post(`${API_BASE_URL}/calls`, { to });
     } catch (error) {
       console.error('Call failed:', error);
       setCall(prev => ({
