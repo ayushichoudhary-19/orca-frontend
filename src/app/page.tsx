@@ -95,6 +95,7 @@ export default function CallPage() {
             number={number}
             status={call.status}
             duration={call.duration}
+            callId={call.id}
             onCallStart={() => startCall(number)}
             onCallEnd={endCall}
             onMuteToggle={toggleMute}

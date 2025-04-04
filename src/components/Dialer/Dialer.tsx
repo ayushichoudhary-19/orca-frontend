@@ -16,8 +16,9 @@ interface DialerProps {
   number: string;
   status: "idle" | "calling" | "ringing" | "connected" | "ended";
   duration: number;
+  callId: string;
   onCallStart: () => void;
-  onCallEnd: () => void;
+  onCallEnd: (callId: string) => void;
   onMuteToggle: (muted: boolean) => void;
   onSpeakerToggle: (speaker: boolean) => void;
 }
@@ -26,6 +27,7 @@ export function Dialer({
   number,
   status,
   duration,
+  callId,
   onCallStart,
   onCallEnd,
   onMuteToggle,
@@ -126,7 +128,7 @@ export function Dialer({
             radius="xl"
             leftSection={<IconPhoneOff size={20} />}
             color="red"
-            onClick={onCallEnd}
+            onClick={() => onCallEnd(callId)} // Pass the callId to onCallEnd
           >
             End
           </Button>

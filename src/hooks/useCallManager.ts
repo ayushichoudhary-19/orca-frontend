@@ -89,12 +89,13 @@ export const useCallManager = () => {
         to,
         status: 'calling'
       }));
-
+  
       const connection = await device.connect({ params: { To: to } });
       
       connection.on('accept', () => {
         setCall(prev => ({
           ...prev,
+          id: connection.parameters.CallSid, // Make sure to set the call ID
           status: 'connected',
           startTime: new Date(),
           duration: 0,
@@ -132,7 +133,9 @@ export const useCallManager = () => {
         status: 'ended'
       }));
       
-      await axios.post(`${API_BASE_URL}/calls/end`, { callId: call.id });
+      if (call.id) { // Add this check
+        await axios.post(`${API_BASE_URL}/calls/end`, { callId: call.id });
+      }
     } catch (error) {
       console.error('Failed to end call:', error);
     }
