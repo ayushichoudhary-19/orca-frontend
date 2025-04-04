@@ -2,14 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Button,
-  Group,
-  Text,
-  ActionIcon,
-  Paper,
-  Stack,
-} from "@mantine/core";
+import { Button, Group, Text, ActionIcon, Paper, Stack } from "@mantine/core";
 import {
   IconPhone,
   IconPhoneOff,
@@ -114,7 +107,7 @@ export function Dialer({
       </Group>
 
       <Group justify="center" mt="xl">
-        {status === "idle" ? (
+        {status === "idle" && (
           <Button
             size="lg"
             radius="xl"
@@ -125,7 +118,9 @@ export function Dialer({
           >
             Call
           </Button>
-        ) : (
+        )}
+
+        {status !== "idle" && status !== "ended" && (
           <Button
             size="lg"
             radius="xl"

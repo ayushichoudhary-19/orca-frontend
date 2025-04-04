@@ -1,7 +1,7 @@
 'use client';
 
 import { Grid, Button, Paper } from '@mantine/core';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 interface NumberPadProps {
   value: string;
@@ -10,8 +10,8 @@ interface NumberPadProps {
 }
 
 export function NumberPad({ value, onChange, disabled }: NumberPadProps) {
-  const buttons = ['+', '1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#', 'Space'];
-  const validKeys = new Set([...buttons, ' ', 'Backspace']);
+  const buttons = useMemo(() => ['+', '1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#', 'Space'], []);
+  const validKeys = useMemo(() => new Set([...buttons, ' ', 'Backspace']), [buttons]);
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
@@ -30,7 +30,7 @@ export function NumberPad({ value, onChange, disabled }: NumberPadProps) {
     };
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [value, onChange, disabled, handleBackspace, validKeys]);
+  }, [value, onChange, disabled, validKeys]);
 
   const handleClick = (digit: string) => {
     onChange(value + (digit === 'Space' ? ' ' : digit));
