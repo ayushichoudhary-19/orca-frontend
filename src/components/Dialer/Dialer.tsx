@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Group, Text, ActionIcon, Stack, Title } from "@mantine/core";
 import {
   IconPhone,
-  IconPhoneOff,
   IconVolume,
   IconVolumeOff,
   IconMicrophone,
@@ -141,7 +140,7 @@ export function Dialer({
             className="transition-all duration-200 hover:shadow-lg"
             my={10}
           >
-            <IconPhoneOff size={18} />
+            <IconPhone size={18} />
           </ActionIcon>
         )}
 
