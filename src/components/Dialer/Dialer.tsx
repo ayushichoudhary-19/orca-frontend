@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Group, Text, ActionIcon, Stack } from "@mantine/core";
+import {
+  Group,
+  Text,
+  ActionIcon,
+  Stack,
+  Textarea,
+  Avatar,
+} from "@mantine/core";
 import {
   IconPhone,
   IconVolume,
@@ -21,10 +28,12 @@ interface DialerProps {
   onCallEnd: (callId: string) => void;
   onMuteToggle: (muted: boolean) => void;
   onSpeakerToggle: (speaker: boolean) => void;
+  name: string;
 }
 
 export function Dialer({
   number,
+  name,
   status,
   duration,
   callId,
@@ -33,8 +42,10 @@ export function Dialer({
   onMuteToggle,
   onSpeakerToggle,
 }: DialerProps) {
+  const [notes, setNotes] = useState("");
   const [muted, setMuted] = useState(false);
   const [speaker, setSpeaker] = useState(false);
+  const [isTextAreaFocused, setIsTextAreaFocused] = useState(false);
 
   const formatDuration = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
@@ -61,39 +72,62 @@ export function Dialer({
     onSpeakerToggle(newSpeaker);
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isTextAreaFocused) {
+        e.stopPropagation();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isTextAreaFocused]);
+
   return (
     <motion.div
-      className="w-full rounded-3xl px-4 flex flex-col items-center justify-center border-none bg-transparent"
+      className="w-full rounded-3xl flex flex-col items-center justify-start space-y-6"
+      style={{
+        backgroundColor: "#f9fcfe",
+        // backgroundColor: "white",
+        padding: "20px",
+      }}
       initial={{ scale: 0.95, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      <Stack
-        align="center"
-        gap="md"
-        className="mb-5 p-4"
-      >
+      {/* Contact Info */}
+      <Stack align="center" gap="xs" className="w-full">
+        <Avatar size={110} radius="50%" color="ocean">
+          {name ? name[0].toUpperCase() : "?"}
+        </Avatar>
+        <CallStatusBadge status={status} />
+        {name && (
+          <Text fw={600} size="xl" className="text-center tracking-tight">
+            {name}
+          </Text>
+        )}
         {number && (
           <Text
-            size="xl"
-            fw={700}
-            mt={5}
+            size="md"
+            fw={600}
+            className="text-center  tracking-tight -mt-1 text-[#8b94a9]"
           >
             {number}
           </Text>
         )}
 
-        <CallStatusBadge status={status} />
-
         {status !== "idle" && (
-          <Text size="lg" className="font-mono text-gray-300 mt-1">
+          <Text size="sm" className="font-mono text-[#8b94a9] mb-[20px]">
             {formatDuration(duration)}
           </Text>
         )}
       </Stack>
 
-      <Group justify="center" gap="xl" mt={5}
-      >
+      {/* Notes */}
+    
+
+      {/* Action Buttons */}
+      <Group justify="center" gap="xl" className="mt-4">
         <ActionIcon
           variant={muted ? "filled" : "light"}
           size={60}
@@ -102,7 +136,6 @@ export function Dialer({
           onClick={handleMuteToggle}
           disabled={status === "idle" || status === "ended"}
           className="transition-all duration-200 hover:shadow-lg"
-          my={5}
         >
           {muted ? (
             <IconMicrophoneOff size={18} />
@@ -113,27 +146,28 @@ export function Dialer({
 
         {status === "idle" ? (
           <ActionIcon
-          variant="filled"
-          size={60}
-          radius="xl"
-          className={`${number ? '##86e1c6' : ''} text-white hover:brightness-110 shadow-lg`}
-          onClick={onCallStart}
-          disabled={!number}
-        >
-          <IconPhone size={18} />
-        </ActionIcon>
-        ) : status !== "ended" && (
-          <ActionIcon
             variant="filled"
             size={60}
             radius="xl"
-            color="red"
-            onClick={() => onCallEnd(callId)}
-            className="transition-all duration-200 hover:shadow-lg"
-            my={5}
+            className={`text-white hover:brightness-110 shadow-lg`}
+            onClick={onCallStart}
+            disabled={!number}
           >
             <IconPhone size={18} />
           </ActionIcon>
+        ) : (
+          status !== "ended" && (
+            <ActionIcon
+              variant="filled"
+              size={60}
+              radius="xl"
+              color="red"
+              onClick={() => onCallEnd(callId)}
+              className="transition-all duration-200 hover:shadow-lg"
+            >
+              <IconPhone size={18} />
+            </ActionIcon>
+          )
         )}
 
         <ActionIcon
@@ -144,12 +178,37 @@ export function Dialer({
           onClick={handleSpeakerToggle}
           disabled={status === "idle" || status === "ended"}
           className="transition-all duration-200 hover:shadow-lg"
-          my={5}
         >
           {speaker ? <IconVolume size={18} /> : <IconVolumeOff size={18} />}
         </ActionIcon>
       </Group>
-
+        <Textarea
+        placeholder="Take notes during the call..."
+        minRows={4}
+        my={20}
+        value={notes}
+        onChange={(e) => setNotes(e.currentTarget.value)}
+        onFocus={() => setIsTextAreaFocused(true)}
+        onBlur={() => setIsTextAreaFocused(false)}
+        className="w-full"
+        styles={{
+          input: {
+            // backgroundColor: "#f9fcfe",
+            backgroundColor: "white",
+            border: "none",
+            height: "100px",
+            padding: "12px",
+            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.08)",
+            color: "#1a1a1a",
+            borderRadius: "12px",
+            "&:focus": {
+              border: "none",
+              outline: "none",
+              boxShadow: "none",
+            },
+          },
+        }}
+      />
     </motion.div>
   );
 }

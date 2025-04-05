@@ -38,18 +38,18 @@ export const ContactList = ({ contacts, currentContact, onSelect }: ContactListP
   }
 
   return (
-    <Paper withBorder radius="md" p="md" mt="md"
+    <Paper radius="md" p="md" mt="md"
     className='gradient-horizontal-light-2'
     >
       <Title order={4} mb="md" className="text-lg font-medium tracking-tight">
         Contact Queue
       </Title>
-      <ScrollArea h="calc(60vh - 200px)" scrollbarSize={6} type="auto" viewportRef={scrollAreaRef}>
+      <ScrollArea h="calc(70vh - 200px)" scrollbarSize={6} type="auto" viewportRef={scrollAreaRef}>
         <List spacing="xs" size="sm" center>
           {contacts.map((contact, idx) => (
             <motion.div
               key={`${contact.name}-${idx}`}
-              data-index={idx}  // Add this attribute for scrolling
+              data-index={idx}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.05, duration: 0.3 }}

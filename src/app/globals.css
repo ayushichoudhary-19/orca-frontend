@@ -2,21 +2,86 @@
 @tailwind components;
 @tailwind utilities;
 
-
 .gradient-vertical-blue {
-    background-image: linear-gradient(to bottom, #7192E9, #4469CA);
-  }
-  
-  .gradient-horizontal-light-1 {
-    background-image: linear-gradient(to right, #dae0f2, #dbe1f2);
-  }
-  
-  .gradient-horizontal-light-2 {
-    background-image: linear-gradient(to right, #c8d1ea, #ccd1eb);
-  }
-  
-  .gradient-horizontal-bold {
-    background-image: linear-gradient(to right, #7d91e2, #627ed4);
-  }
-  
-  
+  background-image: linear-gradient(to bottom, #7192e9, #4469ca);
+}
+
+.gradient-horizontal-light-1 {
+  background-image: linear-gradient(to right, #dae0f2, #dbe1f2);
+}
+
+.gradient-horizontal-light-2 {
+  background-image: linear-gradient(to right, #c8d1ea, #ccd1eb);
+}
+
+.gradient-horizontal-bold {
+  background-image: linear-gradient(to right, #7d91e2, #627ed4);
+}
+
+.tabs-container {
+  display: flex;
+  gap: 24px;
+  padding: 12px;
+  padding-bottom: 0px;
+}
+
+.tab-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 8px 4px;
+  color: #afb2b3;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.tab-item:hover {
+  color: #6e7277;
+}
+
+.tab-item.active {
+  color: #4169e1;
+}
+
+.tab-item.active::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #4169e1;
+  border-radius: 3px 3px 0 0;
+}
+
+.tab-divider {
+  width: calc(100% - 32px);
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 0px auto 0 auto;
+  border-radius: 2px;
+}
+
+.tab-icon {
+  margin-right: 2px;
+}
+
+/* Markdown block styles */
+
+.markdown-content {
+  color: #848690;
+}
+
+.markdown-content h2 {
+  color: #4a4b57;
+  margin-top: 0;
+}
+
+.markdown-content strong {
+  color: #5a5b68;
+}

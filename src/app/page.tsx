@@ -106,45 +106,48 @@ export default function CallPage() {
       transition={{ duration: 0.5 }}
       className="min-h-screen"
     >
-      <Toaster position="top-center" />
+      <Toaster position="top-center"/>
 
-      <div className="flex flex-row w-full min-h-screen">
-        {/* Two columns layout */}
-        <div className="w-full md:w-2/3 min-h-screen flex flex-col" style={{
-          background: "linear-gradient(to right, #dae0f2, #dbe1f2)"
-        }}>
-          {/* First column with contact list */}
-          <div className="w-full p-6 flex-grow"> 
+      <div
+        className="flex flex-row w-full min-h-screen"
+        style={{
+          background: "linear-gradient(to right,#dbe1f2,  #dae0f2)",
+        }}
+      >
+        {/* Contact List column */}
+        <div
+          className="w-full md:w-1/3 min-h-screen"
+          style={{
+            position: "relative",
+            zIndex: 1,
+          }}
+        >
+          <div className="w-full p-6">
             <MotionPaper
               p="xl"
-              pb='0'
-              pt='sm'
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.4 }}
-              className="bg-transparent h-full flex flex-col"
+              className="bg-transparent"
             >
               <Tabs defaultValue="list" variant="pills" radius="xl">
                 <Tabs.List grow mb="md">
-                  <Tabs.Tab
-                    value="list"
-                    leftSection={<IconList size={16} />}
-                    className="font-medium"
-                  >
+                  <Tabs.Tab value="list" leftSection={<IconList size={16} />}>
                     Contacts
                   </Tabs.Tab>
-                  <Tabs.Tab
-                    value="pad"
-                    leftSection={<IconDialpad size={16} />}
-                    className="font-medium"
-                  >
+                  <Tabs.Tab value="pad" leftSection={<IconDialpad size={16} />}>
                     Dial Pad
                   </Tabs.Tab>
                 </Tabs.List>
 
                 <Tabs.Panel value="list">
                   <UploadNumbers onUpload={handleUpload} />
-                  <Paper mt="md" p="sm" radius="md" className="gradient-horizontal-light-2 w-max">
+                  <Paper
+                    mt="md"
+                    p="sm"
+                    radius="md"
+                    className="gradient-horizontal-light-2 w-max"
+                  >
                     <Group justify="space-between">
                       <Text size="sm" fw={500}>
                         Auto Dial
@@ -176,16 +179,32 @@ export default function CallPage() {
               </Tabs>
             </MotionPaper>
           </div>
+        </div>
 
-          {/* Dialer section below contact list */}
-          <div className="w-full p-6 mb-6">
+        {/* Dialer column */}
+        <div
+          className="w-full md:w-1/3 min-h-screen flex items-center justify-center"
+          style={{
+            boxShadow: "-16px 0 40px -8px rgba(0, 0, 0, 0.05)",
+            zIndex: 2,
+            borderTopLeftRadius: "24px",
+            borderBottomLeftRadius: "24px",
+            position: "relative",
+            overflow: "hidden",
+            backgroundColor: "#f9fcfe",
+            // backgroundColor: "white"
+          }}
+        >
+          <div className="w-full px-4">
             <MotionPaper
-              className="glass-card border-none bg-transparent shadow-xl backdrop-blur-lg"
+              className="border-none bg-transparent backdrop-blur-lg"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.4 }}
+              p="xl"
             >
               <Dialer
+                name={contacts[currentContact]?.name || ""}
                 number={number}
                 status={call.status}
                 duration={call.duration}
