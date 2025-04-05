@@ -84,21 +84,18 @@ export function ScriptReader() {
             <Tabs.Tab
               value="script"
               leftSection={<IconMessageCircle size={16} />}
-              color="violet"
             >
               Script
             </Tabs.Tab>
             <Tabs.Tab
               value="objections"
               leftSection={<IconNotes size={16} />}
-              color="violet"
             >
               Objections
             </Tabs.Tab>
             <Tabs.Tab
               value="questions"
               leftSection={<IconListCheck size={16} />}
-              color="violet"
             >
               Questions
             </Tabs.Tab>

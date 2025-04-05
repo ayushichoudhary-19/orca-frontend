@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Group, Text, ActionIcon, Stack, Title } from "@mantine/core";
+import { Group, Text, ActionIcon, Stack } from "@mantine/core";
 import {
   IconPhone,
   IconVolume,
@@ -63,28 +63,25 @@ export function Dialer({
 
   return (
     <motion.div
-      className="w-full rounded-3xl p-8 flex flex-col items-center justify-center"
+      className="w-full rounded-3xl px-4 flex flex-col items-center justify-center border-none bg-transparent"
       initial={{ scale: 0.95, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
       <Stack
         align="center"
-        gap="xs"
-        className="mb-6 p-2"
-        style={{
-          padding: "10px",
-        }}
+        gap="md"
+        className="mb-5 p-4"
       >
-        <Title
-          order={3}
-          className="tracking-tight"
-          style={{
-            marginTop: "10px",
-          }}
-        >
-          {number || "Enter a number"}
-        </Title>
+        {number && (
+          <Text
+            size="xl"
+            fw={700}
+            mt={5}
+          >
+            {number}
+          </Text>
+        )}
 
         <CallStatusBadge status={status} />
 
@@ -95,10 +92,7 @@ export function Dialer({
         )}
       </Stack>
 
-      <Group justify="center" gap="xl"
-      style={{
-        marginTop: "30px",
-      }}
+      <Group justify="center" gap="xl" mt={5}
       >
         <ActionIcon
           variant={muted ? "filled" : "light"}
@@ -108,7 +102,7 @@ export function Dialer({
           onClick={handleMuteToggle}
           disabled={status === "idle" || status === "ended"}
           className="transition-all duration-200 hover:shadow-lg"
-          my={10}
+          my={5}
         >
           {muted ? (
             <IconMicrophoneOff size={18} />
@@ -119,17 +113,15 @@ export function Dialer({
 
         {status === "idle" ? (
           <ActionIcon
-            variant="filled"
-            size={60}
-            radius="xl"
-            color="green"
-            onClick={onCallStart}
-            disabled={!number}
-            className="transition-all duration-200 hover:shadow-lg"
-            my={10}
-          >
-            <IconPhone size={18} />
-          </ActionIcon>
+          variant="filled"
+          size={60}
+          radius="xl"
+          className={`${number ? '##86e1c6' : ''} text-white hover:brightness-110 shadow-lg`}
+          onClick={onCallStart}
+          disabled={!number}
+        >
+          <IconPhone size={18} />
+        </ActionIcon>
         ) : status !== "ended" && (
           <ActionIcon
             variant="filled"
@@ -138,7 +130,7 @@ export function Dialer({
             color="red"
             onClick={() => onCallEnd(callId)}
             className="transition-all duration-200 hover:shadow-lg"
-            my={10}
+            my={5}
           >
             <IconPhone size={18} />
           </ActionIcon>
@@ -148,11 +140,11 @@ export function Dialer({
           variant={speaker ? "filled" : "light"}
           size={60}
           radius="xl"
-          color={speaker ? "violet" : "gray"}
+          color={speaker ? "primary" : "gray"}
           onClick={handleSpeakerToggle}
           disabled={status === "idle" || status === "ended"}
           className="transition-all duration-200 hover:shadow-lg"
-          my={10}
+          my={5}
         >
           {speaker ? <IconVolume size={18} /> : <IconVolumeOff size={18} />}
         </ActionIcon>

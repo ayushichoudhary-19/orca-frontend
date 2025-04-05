@@ -4,6 +4,7 @@ import { Grid, Button, Paper, Text } from '@mantine/core';
 import { useEffect, useMemo } from 'react';
 import { IconBackspace } from '@tabler/icons-react';
 import { motion } from 'framer-motion';
+import { theme } from '@/app/theme';
 
 interface NumberPadProps {
   value: string;
@@ -59,19 +60,28 @@ export function NumberPad({ value, onChange, disabled }: NumberPadProps) {
   };
 
   return (
-    <Paper radius="xl" p="lg">
+    <Paper radius="xl" p="lg"
+    style={{
+      background: 'transparent',
+    }}
+    >
       <Paper 
         p="md" 
         mb="md" 
         radius="lg" 
-        className="border border-white/10"
+        className="bg-transparent"
       >
         <Text 
           size="md" 
           className="font-mono tracking-wider text-white"
           style={{ minHeight: '2rem' }}
         >
-          {value || <span className="text-gray-500">Enter a number</span>}
+          {value || <span 
+          style={{
+            color: theme.colors?.ocean?.[7],
+            fontWeight: 500,
+          }}
+          >Enter a number</span>}
         </Text>
       </Paper>
       
@@ -87,7 +97,6 @@ export function NumberPad({ value, onChange, disabled }: NumberPadProps) {
                 size="lg"
                 radius="xl"
                 variant="light"
-                color="violet"
                 className="number-pad-button font-mono h-14"
                 onClick={() => handleClick(button.value)}
                 disabled={disabled}

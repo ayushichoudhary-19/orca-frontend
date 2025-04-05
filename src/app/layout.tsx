@@ -1,31 +1,9 @@
 import type { Metadata } from "next";
 import '@mantine/core/styles.css';
 import "./globals.css";
-import { createTheme, MantineProvider } from '@mantine/core';
-
-const theme = createTheme({
-  primaryColor: 'violet',
-  primaryShade: 6,
-  fontFamily: 'EuclidSquare, ui-sans-serif, system-ui, sans-serif',
-  headings: {
-  fontFamily: 'EuclidSquare, ui-sans-serif, system-ui, sans-serif',
-  fontWeight: '600',
-},
-
-  components: {
-    Button: {
-      defaultProps: {
-        radius: 'xl',
-      },
-    },
-    Paper: {
-      defaultProps: {
-        radius: 'md',
-      },
-    },
-  },
-});
-
+import { MantineProvider } from '@mantine/core';
+import Sidebar from "@/components/Sidebar";
+import { theme } from "./theme";
 
 export const metadata: Metadata = {
   title: "Cold Calling App",
@@ -40,9 +18,14 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-         <MantineProvider theme={theme}>
-            {children}
-          </MantineProvider>
+        <MantineProvider theme={theme}>
+          <div className="flex">
+            <Sidebar />
+            <main className="ml-[72px] flex-1 min-h-screen">
+              {children}
+            </main>
+          </div>
+        </MantineProvider>
       </body>
     </html>
   );

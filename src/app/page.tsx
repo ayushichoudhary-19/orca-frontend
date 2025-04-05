@@ -7,7 +7,6 @@ import { useCallManager } from "@/hooks/useCallManager";
 import { useFeedback, FeedbackData } from "@/hooks/useFeedback";
 import {
   Container,
-  Grid,
   Tabs,
   Paper,
   PaperProps,
@@ -100,8 +99,8 @@ export default function CallPage() {
 
   return (
     <MotionContainer
-      size="xl"
-      py="xl"
+      size="xxl"
+      p={0}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -109,106 +108,102 @@ export default function CallPage() {
     >
       <Toaster position="top-center" />
 
-      <Grid>
-        <Grid.Col span={{ base: 12, md: 3 }}>
-          <MotionPaper
-            p="md"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.1, duration: 0.4 }}
-            style={{
-              height: "100%",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Tabs defaultValue="list" variant="pills" radius="xl">
-              <Tabs.List grow mb="md">
-                <Tabs.Tab
-                  value="list"
-                  leftSection={<IconList size={16} />}
-                  className="font-medium"
-                >
-                  Contacts
-                </Tabs.Tab>
-                <Tabs.Tab
-                  value="pad"
-                  leftSection={<IconDialpad size={16} />}
-                  className="font-medium"
-                >
-                  Dial Pad
-                </Tabs.Tab>
-              </Tabs.List>
+      <div className="flex flex-row w-full min-h-screen">
+        {/* Two columns layout */}
+        <div className="w-full md:w-2/3 min-h-screen flex flex-col" style={{
+          background: "linear-gradient(to right, #dae0f2, #dbe1f2)"
+        }}>
+          {/* First column with contact list */}
+          <div className="w-full p-6 flex-grow"> 
+            <MotionPaper
+              p="xl"
+              pb='0'
+              pt='sm'
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.1, duration: 0.4 }}
+              className="bg-transparent h-full flex flex-col"
+            >
+              <Tabs defaultValue="list" variant="pills" radius="xl">
+                <Tabs.List grow mb="md">
+                  <Tabs.Tab
+                    value="list"
+                    leftSection={<IconList size={16} />}
+                    className="font-medium"
+                  >
+                    Contacts
+                  </Tabs.Tab>
+                  <Tabs.Tab
+                    value="pad"
+                    leftSection={<IconDialpad size={16} />}
+                    className="font-medium"
+                  >
+                    Dial Pad
+                  </Tabs.Tab>
+                </Tabs.List>
 
-              <Tabs.Panel value="list">
-                <UploadNumbers onUpload={handleUpload} />
-                <Paper mt="md" p="sm" radius="md">
-                  <Group justify="space-between">
-                    <Text size="sm" fw={500}>
-                      Auto Dial
-                    </Text>
-                    <Switch
-                      checked={autoDial}
-                      onChange={(e) => setAutoDial(e.currentTarget.checked)}
-                      size="md"
-                      color="violet"
-                    />
-                  </Group>
-                </Paper>
-                <ContactList
-                  contacts={contacts}
-                  currentContact={currentContact}
-                  onSelect={(c) => {
-                    setManualNumber(c.number);
-                    setNumber(c.number);
-                  }}
-                />
-              </Tabs.Panel>
+                <Tabs.Panel value="list">
+                  <UploadNumbers onUpload={handleUpload} />
+                  <Paper mt="md" p="sm" radius="md" className="gradient-horizontal-light-2 w-max">
+                    <Group justify="space-between">
+                      <Text size="sm" fw={500}>
+                        Auto Dial
+                      </Text>
+                      <Switch
+                        checked={autoDial}
+                        onChange={(e) => setAutoDial(e.currentTarget.checked)}
+                        size="md"
+                      />
+                    </Group>
+                  </Paper>
+                  <ContactList
+                    contacts={contacts}
+                    currentContact={currentContact}
+                    onSelect={(c) => {
+                      setManualNumber(c.number);
+                      setNumber(c.number);
+                    }}
+                  />
+                </Tabs.Panel>
 
-              <Tabs.Panel value="pad">
-                <NumberPad
-                  value={number}
-                  onChange={setNumber}
-                  disabled={call.status !== "idle"}
-                />
-              </Tabs.Panel>
-            </Tabs>
-          </MotionPaper>
-        </Grid.Col>
+                <Tabs.Panel value="pad">
+                  <NumberPad
+                    value={number}
+                    onChange={setNumber}
+                    disabled={call.status !== "idle"}
+                  />
+                </Tabs.Panel>
+              </Tabs>
+            </MotionPaper>
+          </div>
 
-        <Grid.Col span={{ base: 12, md: 5 }}>
-          <MotionPaper
-            className="glass-card"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.4 }}
-            style={{
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              minHeight: "500px",
-            }}
-          >
-            <Dialer
-              number={number}
-              status={call.status}
-              duration={call.duration}
-              callId={call.id}
-              onCallStart={() => startCall(number)}
-              onCallEnd={endCall}
-              onMuteToggle={toggleMute}
-              onSpeakerToggle={toggleSpeaker}
-            />
-          </MotionPaper>
-        </Grid.Col>
+          {/* Dialer section below contact list */}
+          <div className="w-full p-6 mb-6">
+            <MotionPaper
+              className="glass-card border-none bg-transparent shadow-xl backdrop-blur-lg"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.4 }}
+            >
+              <Dialer
+                number={number}
+                status={call.status}
+                duration={call.duration}
+                callId={call.id}
+                onCallStart={() => startCall(number)}
+                onCallEnd={endCall}
+                onMuteToggle={toggleMute}
+                onSpeakerToggle={toggleSpeaker}
+              />
+            </MotionPaper>
+          </div>
+        </div>
 
-        <Grid.Col span={{ base: 12, md: 4 }} className="px-10">
+        {/* Script Reader column */}
+        <div className="w-full md:w-1/3 p-4 bg-white min-h-screen">
           <ScriptReader />
-        </Grid.Col>
-      </Grid>
+        </div>
+      </div>
 
       <FeedbackModal
         opened={showFeedback}

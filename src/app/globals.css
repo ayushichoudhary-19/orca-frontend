@@ -2,89 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body,
-#__next {
-  height: 100%;
-}
 
-:root {
-  --background: #f9fafb;
-  --foreground: #1f2937;
-
-  --primary: #6366f1;
-  --primary-foreground: #ffffff;
-
-  --secondary: #e0e7ff;
-  --secondary-foreground: #3730a3;
-
-  --accent: #8b5cf6;
-  --accent-foreground: #ffffff;
-
-  --muted: #f3f4f6;
-  --muted-foreground: #6b7280;
-
-  --card: rgba(255, 255, 255, 0.8);
-  --card-foreground: #1f2937;
-
-  --border: rgba(0, 0, 0, 0.05);
-  --input: #e5e7eb;
-
-  --ring: #6366f1;
-  --radius: 0.75rem;
-
-  --font-sans: EuclidSquare, ui-sans-serif, system-ui, sans-serif;
-}
-
-body {
-  background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%);
-  color: var(--foreground);
-  font-feature-settings: "rlig" 1, "calt" 1;
-  font-family: var(--font-sans);
-}
-
-/* Card glass effect */
-.glass-card {
-  background: var(--card);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--border);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
-}
-
-/* Gradient text if needed */
-.gradient-text {
-  background: linear-gradient(to right, #8b5cf6, #6366f1);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Button & pad transitions */
-.number-pad-button {
-  transition: all 0.2s ease;
-}
-.number-pad-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-}
-.number-pad-button:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.call-button {
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-.call-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: all 0.5s ease;
-}
-.call-button:hover::before {
-  left: 100%;
-}
+.gradient-vertical-blue {
+    background-image: linear-gradient(to bottom, #7192E9, #4469CA);
+  }
+  
+  .gradient-horizontal-light-1 {
+    background-image: linear-gradient(to right, #dae0f2, #dbe1f2);
+  }
+  
+  .gradient-horizontal-light-2 {
+    background-image: linear-gradient(to right, #c8d1ea, #ccd1eb);
+  }
+  
+  .gradient-horizontal-bold {
+    background-image: linear-gradient(to right, #7d91e2, #627ed4);
+  }
+  
+  
