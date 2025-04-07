@@ -1,18 +1,20 @@
+import { Contact } from '@/components/Contacts/ContactList';
 import { useState } from 'react';
 
 export function useAutoDialer(startCallFn: (number: string) => void, endCallFn: () => void) {
-  const [contacts, setContacts] = useState<{ name: string; number: string }[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [currentContact, setCurrentContact] = useState(0);
 
-  const handleUpload = (data: { name: string; number: string }[]) => {
+  const handleUpload = (data: Contact[]) => {
     setContacts(data);
     setCurrentContact(0);
   };
 
   const goToNextContact = () => {
     if (currentContact + 1 < contacts.length) {
-      setCurrentContact((prev) => prev + 1);
-      const nextNumber = contacts[currentContact + 1].number;
+      const nextIndex = currentContact + 1;
+      setCurrentContact(nextIndex);
+      const nextNumber = contacts[nextIndex].number;
       startCallFn(nextNumber);
     }
   };

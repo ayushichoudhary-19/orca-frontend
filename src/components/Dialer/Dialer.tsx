@@ -20,9 +20,10 @@ import {
 } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import { CallStatusBadge } from "./CallStatusBadge";
+import { Contact } from "../Contacts/ContactList";
 
 interface DialerProps {
-  number: string;
+  contact: Contact;
   status: "idle" | "calling" | "ringing" | "connected" | "ended";
   duration: number;
   callId: string;
@@ -30,12 +31,10 @@ interface DialerProps {
   onCallEnd: (callId: string) => void;
   onMuteToggle: (muted: boolean) => void;
   onSpeakerToggle: (speaker: boolean) => void;
-  name: string;
 }
 
 export function Dialer({
-  number,
-  name,
+  contact,
   status,
   duration,
   callId,
@@ -114,21 +113,21 @@ export function Dialer({
     >
       {/* Contact Info */}
       <Stack align="center" gap="xs" className="w-full mb-5">
-        {name && number ? (
+        {contact ? (
           <>
             <Avatar size={110} radius="50%" color="ocean">
-              {name[0].toUpperCase()}
+              {contact.name[0].toUpperCase()}
             </Avatar>
             <CallStatusBadge status={status} />
             <Text fw={600} size="xl" className="text-center tracking-tight">
-              {name}
+              {contact.name}
             </Text>
             <Text
               size="md"
               fw={600}
               className="text-center tracking-tight -mt-1 text-[#8b94a9]"
             >
-              {number}
+              {contact.number}
             </Text>
             {status !== "idle" && (
               <Text size="sm" className="font-mono text-[#8b94a9] mb-[20px]">
@@ -152,6 +151,8 @@ export function Dialer({
       </Stack>
 
       {/* Action Buttons */}
+      {contact && (
+          <>
       <Group
         justify="center"
         gap="xl"
@@ -182,7 +183,7 @@ export function Dialer({
             radius="xl"
             className="text-white shadow-lg"
             onClick={onCallStart}
-            disabled={!number}
+            disabled={!contact.number}
           >
             <IconPhone size={18} />
           </ActionIcon>
@@ -213,6 +214,9 @@ export function Dialer({
           {speaker ? <IconVolume size={18} /> : <IconVolumeOff size={18} />}
         </ActionIcon>
       </Group>
+      </>
+      )
+    }
 
       {/* Notes */}
       {status !== "idle" && callId && (

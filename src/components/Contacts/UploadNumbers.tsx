@@ -5,9 +5,10 @@ import { IconUpload, IconFileSpreadsheet } from "@tabler/icons-react";
 import Papa from "papaparse";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { Contact } from "./ContactList";
 
 interface UploadNumbersProps {
-  onUpload: (contacts: { name: string; number: string }[]) => void;
+  onUpload: (contacts: Contact[]) => void;
 }
 
 export const UploadNumbers = ({ onUpload }: UploadNumbersProps) => {
@@ -24,8 +25,8 @@ export const UploadNumbers = ({ onUpload }: UploadNumbersProps) => {
       Papa.parse(selectedFile, {
         header: true,
         complete: (results) => {
-          const contacts = results.data as { name: string; number: string }[];
-          const validContacts = contacts.filter((c) => c.name && c.number);
+          const contacts = results.data as Contact[];
+          const validContacts = contacts.filter((c) => c.name && c.number && c.email && c.address);
           onUpload(validContacts);
           setUploading(false);
         },

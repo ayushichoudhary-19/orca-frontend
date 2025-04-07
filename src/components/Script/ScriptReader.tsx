@@ -11,12 +11,27 @@ import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
+import { Contact } from "../Contacts/ContactList";
+
+function replacePlaceholders(template: string, contact?: Contact) {
+  console.log("contact", contact);
+  return template
+    .replace(/\{\{Name\}\}/gi, contact?.name || "{{name}}")
+    .replace(/\{\{Email\}\}/gi, contact?.email || "{{email}}")
+    .replace(/\{\{Address\}\}/gi, contact?.address || "{{address}}")
+    .replace(/\{\{Number\}\}/gi, contact?.number || "{{number}}")
+}
 
 const coldCallScript = `
 ## Cold Call Script
 
 **Opener**  
 Hey {{Name}}, this is *You* from **Uptut**, how are ya?
+
+**Verification**
+If I am not wrong, you currently live in **{{Address}}**.
+Can you confirm that this is your current address?
+Also, if we want to reach you, is {{Email}} your current email address?
 
 **Permission Ask**  
 If I give you a 27-second spiel and it sounds useful, we can chat. If not, feel free to hang up. Does that sound fair?
@@ -55,7 +70,7 @@ const qualificationQuestions = `
 7. What's your timeline for implementing a solution like this?
 `;
 
-export function ScriptReader() {
+export function ScriptReader({ contact }: { contact?: Contact }) {
   const [activeTab, setActiveTab] = useState<string>("script");
 
   return (
@@ -65,37 +80,35 @@ export function ScriptReader() {
       transition={{ duration: 0.4 }}
       className="h-full"
     >
-     <Paper className="h-full rounded-none flex flex-col overflow-hidden p-6 border-l border-l-[#edeeef]"
-      style={{
-        backgroundColor: "#f9fcfe",
-        // backgroundColor: "white",
-      }}
+      <Paper
+        className="h-full rounded-none flex flex-col overflow-hidden p-6 border-l border-l-[#edeeef]"
+        style={{ backgroundColor: "#f9fcfe" }}
       >
         {/* Tabs */}
-          <div className="tabs-container">
-            <button
-              className={`tab-item ${activeTab === "script" ? "active" : ""}`}
-              onClick={() => setActiveTab("script")}
-            >
-              <IconMessageCircle size={16} className="tab-icon" />
-              <span>Script</span>
-            </button>
-            <button
-              className={`tab-item ${activeTab === "objections" ? "active" : ""}`}
-              onClick={() => setActiveTab("objections")}
-            >
-              <IconNotes size={16} className="tab-icon" />
-              <span>Objection Handling</span>
-            </button>
-            <button
-              className={`tab-item ${activeTab === "questions" ? "active" : ""}`}
-              onClick={() => setActiveTab("questions")}
-            >
-              <IconListCheck size={16} className="tab-icon" />
-              <span>Questions</span>
-            </button>
-          </div>
-          <div className="tab-divider"></div>
+        <div className="tabs-container">
+          <button
+            className={`tab-item ${activeTab === "script" ? "active" : ""}`}
+            onClick={() => setActiveTab("script")}
+          >
+            <IconMessageCircle size={16} className="tab-icon" />
+            <span>Script</span>
+          </button>
+          <button
+            className={`tab-item ${activeTab === "objections" ? "active" : ""}`}
+            onClick={() => setActiveTab("objections")}
+          >
+            <IconNotes size={16} className="tab-icon" />
+            <span>Objection Handling</span>
+          </button>
+          <button
+            className={`tab-item ${activeTab === "questions" ? "active" : ""}`}
+            onClick={() => setActiveTab("questions")}
+          >
+            <IconListCheck size={16} className="tab-icon" />
+            <span>Questions</span>
+          </button>
+        </div>
+        <div className="tab-divider"></div>
 
         {/* Markdown Content */}
         <ScrollArea
@@ -107,11 +120,12 @@ export function ScriptReader() {
             padding: "30px",
             borderRadius: "12px 0 0 12px",
             overflow: "auto",
-            backgroundColor:"#f9fcfe",
-            // backgroundColor: "white",
+            backgroundColor: "#f9fcfe",
           }}
         >
-          {activeTab === "script" && <MarkdownBlock content={coldCallScript} />}
+          {activeTab === "script" && (
+            <MarkdownBlock content={replacePlaceholders(coldCallScript, contact)} />
+          )}
           {activeTab === "objections" && <MarkdownBlock content={objectionHandling} />}
           {activeTab === "questions" && <MarkdownBlock content={qualificationQuestions} />}
         </ScrollArea>
@@ -122,13 +136,7 @@ export function ScriptReader() {
 
 function MarkdownBlock({ content }: { content: string }) {
   return (
-    <div className="markdown-content prose max-w-none"
-
-    style={{
-      backgroundColor: "#f9fcfe",
-      // backgroundColor: "white",
-    }}
-    >
+    <div className="markdown-content prose max-w-none" style={{ backgroundColor: "#f9fcfe" }}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeRaw]}

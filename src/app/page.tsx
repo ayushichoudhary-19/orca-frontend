@@ -51,6 +51,9 @@ export default function CallPage() {
     setManualNumber,
   } = useAutoDialer(startCall, endCall);
 
+  // Add this to get the current contact object
+  const currentContactData = contacts[currentContact];
+
   const hasHandledCallEndRef = useRef(false);
 
   useEffect(() => {
@@ -218,12 +221,11 @@ export default function CallPage() {
               p="xl"
             >
               <Dialer
-                name={contacts[currentContact]?.name || ""}
-                number={number}
+                contact={currentContactData} // Update this line
                 status={call.status}
                 duration={call.duration}
                 callId={call.id}
-                onCallStart={() => startCall(number)}
+                onCallStart={() => startCall(currentContactData?.number || '')} // Update this line
                 onCallEnd={endCall}
                 onMuteToggle={toggleMute}
                 onSpeakerToggle={toggleSpeaker}
@@ -234,7 +236,7 @@ export default function CallPage() {
 
         {/* Script Reader column */}
         <div className="w-full md:w-1/3 p-4 bg-white min-h-screen">
-          <ScriptReader />
+          <ScriptReader contact={currentContactData} /> {/* Update this line */}
         </div>
       </div>
 

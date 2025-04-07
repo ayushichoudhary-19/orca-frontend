@@ -3,11 +3,13 @@ import { theme } from '@/app/theme';
 import { List, Paper, Text, Title, ScrollArea, Avatar, Group, Badge } from '@mantine/core';
 import { IconUser, IconPhone } from '@tabler/icons-react';
 import { motion } from 'framer-motion';
-import { useEffect, useRef } from 'react';  // Add this import at the top
+import { useEffect, useRef } from 'react';
 
-interface Contact {
+export interface Contact {
   name: string;
   number: string;
+  address: string;
+  email: string; 
 }
 
 interface ContactListProps {
@@ -17,7 +19,7 @@ interface ContactListProps {
 }
 
 export const ContactList = ({ contacts, currentContact, onSelect }: ContactListProps) => {
-  const scrollAreaRef = useRef<HTMLDivElement>(null);  // Add this ref
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   
   // Add this effect to handle auto-scrolling
   useEffect(() => {
