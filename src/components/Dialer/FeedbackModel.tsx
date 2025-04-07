@@ -1,4 +1,5 @@
 "use client";
+
 import {
   Modal,
   Button,
@@ -9,14 +10,19 @@ import {
   Badge,
   Box,
 } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { IconSend } from "@tabler/icons-react";
 import { FeedbackData } from "@/hooks/useFeedback";
+import { useDispatch, useSelector } from "react-redux";
+import { removeNote } from "@/store/notesSlice";
+import { RootState } from "@/store/store";
+import { theme } from "@/app/theme";
 
 interface FeedbackModalProps {
   opened: boolean;
   onClose: () => void;
+  callId: string;
   onSubmit: (feedback: {
     callOutcome: FeedbackData["callOutcome"];
     leadStatus: FeedbackData["leadStatus"];
@@ -45,15 +51,28 @@ export const FeedbackModal = ({
   opened,
   onClose,
   onSubmit,
+  callId,
 }: FeedbackModalProps) => {
+  const dispatch = useDispatch();
+  const savedNotes = useSelector(
+    (state: RootState) =>
+      ((state.notes as unknown) as { notes: { [key: string]: string } }).notes[callId] || ""
+  );
+
   const [callOutcome, setCallOutcome] = useState<
     FeedbackData["callOutcome"] | ""
   >("");
   const [leadStatus, setLeadStatus] = useState<FeedbackData["leadStatus"] | "">(
     ""
   );
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState(savedNotes);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (opened && callId) {
+      setNotes(savedNotes);
+    }
+  }, [opened, callId, savedNotes]);
 
   const handleSubmit = async () => {
     if (!callOutcome || !leadStatus) return;
@@ -65,6 +84,7 @@ export const FeedbackModal = ({
         leadStatus,
         notes: notes || undefined,
       });
+      dispatch(removeNote(callId));
     } finally {
       setIsSubmitting(false);
       setCallOutcome("");
@@ -78,74 +98,92 @@ export const FeedbackModal = ({
       opened={opened}
       onClose={onClose}
       title={
-        <Text className="text-xl font-semibold gradient-text">
+        <Text className="text-xl font-semibold text-gray-800">
           Call Feedback
         </Text>
       }
       centered
-      radius="lg"
+      radius="md"
       overlayProps={{
         blur: 3,
         opacity: 0.55,
       }}
-      classNames={{
-        content: "border border-white/10",
-        header: "border-b border-white/10 pb-3",
-      }}
+      size="md"
+      withCloseButton={false}
     >
       <Stack gap="md">
+        {/* Call Outcome Section */}
         <Box>
-          <Text fw={600} size="sm" mb={6}>
+          <Text fw={600} size="sm" mb={8}>
             What happened on the call? <span className="text-red-500">*</span>
           </Text>
-          <Group gap="xs">
+          <div className="flex flex-wrap"
+          style={{
+            gap: "10px",
+          }}
+          >
             {callOutcomes.map((option) => (
               <Badge
                 key={option.value}
+                radius="md"
                 variant={callOutcome === option.value ? "filled" : "light"}
-                color={callOutcome === option.value ? "violet" : "gray"}
+                color={
+                  callOutcome === option.value
+                    ? theme?.colors?.ocean?.[7] ?? ""
+                    : "gray.6"
+                }
                 onClick={() => setCallOutcome(option.value)}
                 style={{
                   cursor: "pointer",
-                  padding: "8px 14px",
-                  border:
-                    !callOutcome && isSubmitting
-                      ? "1px solid #f87171"
-                      : undefined,
+                  padding: "15px",
+                  fontSize: "14px",
+                  textTransform: "none",
+                  fontWeight: 500,
                 }}
               >
                 {option.label}
               </Badge>
             ))}
-          </Group>
+          </div>
         </Box>
 
+        {/* Lead Status Section */}
         <Box>
-          <Text fw={600} size="sm" mb={6}>
+          <Text fw={600} size="sm" mb={8}>
             Lead Status <span className="text-red-500">*</span>
           </Text>
-          <Group gap="xs">
+          <div className="flex flex-wrap"
+          
+          style={{
+            gap: "10px",
+          }}
+          >
             {leadStatuses.map((status) => (
               <Badge
                 key={status.value}
+                radius="md"
                 variant={leadStatus === status.value ? "filled" : "light"}
-                color={leadStatus === status.value ? "violet" : "gray"}
+                color={
+                  leadStatus === status.value
+                    ? theme?.colors?.ocean?.[7] ?? ""
+                    : "gray.6"
+                }
                 onClick={() => setLeadStatus(status.value)}
                 style={{
                   cursor: "pointer",
-                  padding: "8px 14px",
-                  border:
-                    !leadStatus && isSubmitting
-                      ? "1px solid #f87171"
-                      : undefined,
+                  padding: "15px",
+                  fontSize: "14px",
+                  textTransform: "none",
+                  fontWeight: 500,
                 }}
               >
                 {status.label}
               </Badge>
             ))}
-          </Group>
+          </div>
         </Box>
 
+        {/* Notes Input */}
         <Textarea
           label="Notes"
           placeholder="Type anything helpful here..."
@@ -154,19 +192,30 @@ export const FeedbackModal = ({
           minRows={3}
           autosize
           maxRows={6}
+          className="mt-2"
+          styles={{
+            input: {
+              borderRadius: "12px",
+              padding: "12px",
+              backgroundColor: "#f9fafb",
+              fontSize: "14px",
+              border: "1px solid #e0e0e0",
+              "&:focus": {
+                borderColor: theme?.colors?.ocean?.[7] ?? "#484f62",
+              },
+            },
+          }}
         />
 
+        {/* Submit Button */}
         <Group justify="right" mt="md">
-          <Button variant="subtle" onClick={onClose} color="gray">
-            Cancel
-          </Button>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               onClick={handleSubmit}
               disabled={!callOutcome || !leadStatus}
               loading={isSubmitting}
               leftSection={<IconSend size={16} />}
-              className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700"
+              className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white px-6 py-2 rounded-lg"
             >
               Submit Feedback
             </Button>

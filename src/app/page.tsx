@@ -225,6 +225,7 @@ export default function CallPage() {
       </div>
 
       <FeedbackModal
+        callId={call.id}
         opened={showFeedback}
         onClose={() => setShowFeedback(false)}
         onSubmit={handleFeedbackSubmit}

@@ -1,5 +1,10 @@
 "use client";
 
+import { useDispatch, useSelector } from 'react-redux';
+import { setNote } from '@/store/notesSlice';
+import { RootState } from '@/store/store';
+import { useDebouncedCallback } from 'use-debounce';
+import { toast } from '@/lib/toast';
 import { useState, useEffect } from "react";
 import {
   Group,
@@ -42,10 +47,30 @@ export function Dialer({
   onMuteToggle,
   onSpeakerToggle,
 }: DialerProps) {
-  const [notes, setNotes] = useState("");
+  const dispatch = useDispatch();
+  const savedNotes = useSelector((state: RootState) =>
+    (state.notes as { notes: { [key: string]: string } }).notes[callId] || ''
+  );
+
+  const [noteInput, setNoteInput] = useState(savedNotes);
   const [muted, setMuted] = useState(false);
   const [speaker, setSpeaker] = useState(false);
   const [isTextAreaFocused, setIsTextAreaFocused] = useState(false);
+
+  useEffect(() => {
+    setNoteInput(savedNotes);
+  }, [savedNotes, callId]);
+
+  const debouncedSave = useDebouncedCallback((value: string) => {
+    if (callId) {
+      dispatch(setNote({ callId, note: value }));
+    }
+  }, 1000);
+
+  const handleBlur = () => {
+    setIsTextAreaFocused(false);
+    toast.success("Notes saved");
+  };
 
   const formatDuration = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
@@ -88,7 +113,6 @@ export function Dialer({
       className="w-full rounded-3xl flex flex-col items-center justify-start space-y-6"
       style={{
         backgroundColor: "#f9fcfe",
-        // backgroundColor: "white",
         padding: "20px",
       }}
       initial={{ scale: 0.95, opacity: 0 }}
@@ -96,38 +120,50 @@ export function Dialer({
       transition={{ duration: 0.3 }}
     >
       {/* Contact Info */}
-      <Stack align="center" gap="xs" className="w-full">
-        <Avatar size={110} radius="50%" color="ocean">
-          {name ? name[0].toUpperCase() : "?"}
-        </Avatar>
-        <CallStatusBadge status={status} />
-        {name && (
-          <Text fw={600} size="xl" className="text-center tracking-tight">
-            {name}
-          </Text>
-        )}
-        {number && (
-          <Text
-            size="md"
-            fw={600}
-            className="text-center  tracking-tight -mt-1 text-[#8b94a9]"
-          >
-            {number}
-          </Text>
-        )}
+      <Stack align="center" gap="xs" className="w-full mb-5">
+  {name && number ? (
+    <>
+      <Avatar size={110} radius="50%" color="ocean">
+        {name[0].toUpperCase()}
+      </Avatar>
+      <CallStatusBadge status={status} />
+      <Text fw={600} size="xl" className="text-center tracking-tight">
+        {name}
+      </Text>
+      <Text
+        size="md"
+        fw={600}
+        className="text-center tracking-tight -mt-1 text-[#8b94a9]"
+      >
+        {number}
+      </Text>
+      {status !== "idle" && (
+        <Text size="sm" className="font-mono text-[#8b94a9] mb-[20px]">
+          {formatDuration(duration)}
+        </Text>
+      )}
+    </>
+  ) : (
+    <div className="flex flex-col items-center justify-center text-center px-4 py-6">
+      {/* You can replace this with any SVG you like */}
+      <IconPhone size={100} className="mb-2" color='#7d91e2' />
+      <Text fw={600} size="lg" className="text-[#7d91e2] mb-1">
+        No Active Call
+      </Text>
+      <Text size="xs" className="text-[#a0a7b8] max-w-xs">
+        Start a call to see contact details, take notes, and manage audio settings.
+      </Text>
+    </div>
+  )}
+</Stack>
 
-        {status !== "idle" && (
-          <Text size="sm" className="font-mono text-[#8b94a9] mb-[20px]">
-            {formatDuration(duration)}
-          </Text>
-        )}
-      </Stack>
-
-      {/* Notes */}
-    
 
       {/* Action Buttons */}
-      <Group justify="center" gap="xl" className="mt-4">
+      <Group justify="center" gap="xl"
+      style={{
+        marginTop: "20px",
+      }}
+      >
         <ActionIcon
           variant={muted ? "filled" : "light"}
           size={60}
@@ -149,7 +185,7 @@ export function Dialer({
             variant="filled"
             size={60}
             radius="xl"
-            className={`text-white hover:brightness-110 shadow-lg`}
+            className="text-white shadow-lg"
             onClick={onCallStart}
             disabled={!number}
           >
@@ -182,33 +218,39 @@ export function Dialer({
           {speaker ? <IconVolume size={18} /> : <IconVolumeOff size={18} />}
         </ActionIcon>
       </Group>
+
+      {/* Notes */}
+      {status !== "idle" && callId && (
         <Textarea
-        placeholder="Take notes during the call..."
-        minRows={4}
-        my={20}
-        value={notes}
-        onChange={(e) => setNotes(e.currentTarget.value)}
-        onFocus={() => setIsTextAreaFocused(true)}
-        onBlur={() => setIsTextAreaFocused(false)}
-        className="w-full"
-        styles={{
-          input: {
-            // backgroundColor: "#f9fcfe",
-            backgroundColor: "white",
-            border: "none",
-            height: "100px",
-            padding: "12px",
-            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.08)",
-            color: "#1a1a1a",
-            borderRadius: "12px",
-            "&:focus": {
+          placeholder="Take notes during the call..."
+          minRows={4}
+          my={20}
+          value={noteInput}
+          onChange={(e) => {
+            setNoteInput(e.target.value);
+            debouncedSave(e.target.value);
+          }}
+          onFocus={() => setIsTextAreaFocused(true)}
+          onBlur={handleBlur}
+          className="w-full"
+          styles={{
+            input: {
+              backgroundColor: "white",
               border: "none",
-              outline: "none",
-              boxShadow: "none",
+              height: "100px",
+              padding: "12px",
+              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.08)",
+              color: "#1a1a1a",
+              borderRadius: "12px",
+              "&:focus": {
+                border: "none",
+                outline: "none",
+                boxShadow: "none",
+              },
             },
-          },
-        }}
-      />
+          }}
+        />
+      )}
     </motion.div>
   );
 }

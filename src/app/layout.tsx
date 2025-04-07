@@ -4,10 +4,11 @@ import "./globals.css";
 import { MantineProvider } from '@mantine/core';
 import Sidebar from "@/components/Sidebar";
 import { theme } from "./theme";
+import Providers from './providers';
 
 export const metadata: Metadata = {
   title: "Cold Calling App",
-  description: "A modern call calling app",
+  description: "A modern cold calling app",
 };
 
 export default function RootLayout({
@@ -22,7 +23,9 @@ export default function RootLayout({
           <div className="flex">
             <Sidebar />
             <main className="ml-[72px] flex-1 min-h-screen">
-              {children}
+              <Providers>
+                {children}
+              </Providers>
             </main>
           </div>
         </MantineProvider>
