@@ -23,6 +23,7 @@ import { motion } from "framer-motion";
 import { IconList, IconDialpad } from "@tabler/icons-react";
 import { forwardRef } from "react";
 import { Toaster } from "react-hot-toast";
+import { CountdownOverlay } from "@/components/CountdownOverlay";
 import { toast } from "@/lib/toast";
 
 const PaperWithRef = forwardRef<HTMLDivElement, PaperProps>((props, ref) => (
@@ -40,6 +41,7 @@ export default function CallPage() {
   const [number, setNumber] = useState("");
   const [showFeedback, setShowFeedback] = useState(false);
   const [autoDial, setAutoDial] = useState(true);
+  const [showCountdown, setShowCountdown] = useState(false);
 
   const {
     contacts,
@@ -85,14 +87,16 @@ export default function CallPage() {
     try {
       await promise;
       setShowFeedback(false);
+
       if (autoDial) {
-        goToNextContact();
+        setShowCountdown(true);
       }
     } catch (error) {
       console.error("Error submitting feedback:", error);
       setShowFeedback(false);
+
       if (autoDial) {
-        goToNextContact();
+        setShowCountdown(true);
       }
     }
   };
@@ -106,7 +110,7 @@ export default function CallPage() {
       transition={{ duration: 0.5 }}
       className="min-h-screen"
     >
-      <Toaster position="top-center"/>
+      <Toaster position="top-center" />
 
       <div
         className="flex flex-row w-full min-h-screen"
@@ -195,6 +199,16 @@ export default function CallPage() {
             // backgroundColor: "white"
           }}
         >
+          {" "}
+          {showCountdown && (
+            <CountdownOverlay
+              seconds={8}
+              onComplete={() => {
+                setShowCountdown(false);
+                goToNextContact();
+              }}
+            />
+          )}
           <div className="w-full px-4">
             <MotionPaper
               className="border-none bg-transparent backdrop-blur-lg"

@@ -1,0 +1,70 @@
+.loader {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  background: transparent;
+  border-radius: 50%;
+  border: 1px solid rgba(199, 210, 254, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.loader::before {
+  content: '';
+  position: absolute;
+  inset: 20px;
+  background: transparent;
+  border: 1px dashed rgba(107, 141, 229, 0.8);
+  border-radius: 50%;
+  box-shadow: 
+    inset -5px -5px 25px rgba(107, 141, 229, 0.6), 
+    inset 5px 5px 35px rgba(107, 141, 229, 0.6);
+}
+
+.loader::after {
+  content: '';
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 1px dashed rgba(107, 141, 229, 0.7);
+  box-shadow: 
+    inset -5px -5px 25px rgba(107, 141, 229, 0.6),
+    inset 5px 5px 35px rgba(107, 141, 229, 0.6);
+}
+
+.loader span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+  background: transparent;
+  transform-origin: top left;
+  animation: radar81 2s linear infinite;
+  border-top: 1px dashed rgba(255, 255, 255);
+}
+
+.loader span::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(107, 141, 229, 0.4);
+  transform-origin: top left;
+  transform: rotate(-55deg);
+  filter: blur(30px) drop-shadow(20px 20px 20px rgba(107, 141, 229, 0.4));
+}
+
+@keyframes radar81 {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
