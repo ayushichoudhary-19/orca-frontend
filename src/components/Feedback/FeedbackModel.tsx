@@ -3,13 +3,14 @@
 import {
   Modal,
   Button,
-  Textarea,
   Group,
   Text,
   Stack,
   Badge,
   Box,
 } from "@mantine/core";
+import dynamic from "next/dynamic";
+const NoteEditor = dynamic(() => import("@/components/Feedback/NoteEditor"), { ssr: false });
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { IconSend } from "@tabler/icons-react";
@@ -102,6 +103,9 @@ export const FeedbackModal = ({
           Call Feedback
         </Text>
       }
+      style={{
+        backgroundColor: "#f9fcfe",
+      }}
       centered
       radius="md"
       overlayProps={{
@@ -115,7 +119,7 @@ export const FeedbackModal = ({
         {/* Call Outcome Section */}
         <Box>
           <Text fw={600} size="sm" mb={8}>
-            What happened on the call? <span className="text-red-500">*</span>
+            What happened on the call? <span>*</span>
           </Text>
           <div className="flex flex-wrap"
           style={{
@@ -150,7 +154,7 @@ export const FeedbackModal = ({
         {/* Lead Status Section */}
         <Box>
           <Text fw={600} size="sm" mb={8}>
-            Lead Status <span className="text-red-500">*</span>
+            Lead Status <span>*</span>
           </Text>
           <div className="flex flex-wrap"
           
@@ -183,29 +187,25 @@ export const FeedbackModal = ({
           </div>
         </Box>
 
-        {/* Notes Input */}
-        <Textarea
-          label="Notes"
-          placeholder="Type anything helpful here..."
-          value={notes}
-          onChange={(e) => setNotes(e.currentTarget.value)}
-          minRows={3}
-          autosize
-          maxRows={6}
-          className="mt-2"
-          styles={{
-            input: {
-              borderRadius: "12px",
-              padding: "12px",
-              backgroundColor: "#f9fafb",
-              fontSize: "14px",
-              border: "1px solid #e0e0e0",
-              "&:focus": {
-                borderColor: theme?.colors?.ocean?.[7] ?? "#484f62",
-              },
-            },
+        <Box>
+          <Text fw={600} size="sm" mb={8}>
+            Notes
+          </Text>
+          <div
+
+          style={{
+            backgroundColor: "white",
+            borderRadius: "10px",
+            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.13)",
           }}
-        />
+          >
+        <NoteEditor
+  content={notes}
+  onChange={(value) => setNotes(value)}
+/>
+
+          </div>
+        </Box>
 
         {/* Submit Button */}
         <Group justify="right" mt="md">

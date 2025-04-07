@@ -1,19 +1,16 @@
 "use client";
 
-import { useDispatch, useSelector } from 'react-redux';
-import { setNote } from '@/store/notesSlice';
-import { RootState } from '@/store/store';
-import { useDebouncedCallback } from 'use-debounce';
-import { toast } from '@/lib/toast';
+import { useDispatch, useSelector } from "react-redux";
+import { setNote } from "@/store/notesSlice";
+import { RootState } from "@/store/store";
+import { useDebouncedCallback } from "use-debounce";
+import { toast } from "@/lib/toast";
 import { useState, useEffect } from "react";
-import {
-  Group,
-  Text,
-  ActionIcon,
-  Stack,
-  Textarea,
-  Avatar,
-} from "@mantine/core";
+import dynamic from "next/dynamic";
+const NoteEditor = dynamic(() => import("@/components/Feedback/NoteEditor"), {
+  ssr: false,
+});
+import { Group, Text, ActionIcon, Stack, Avatar } from "@mantine/core";
 import {
   IconPhone,
   IconVolume,
@@ -48,8 +45,9 @@ export function Dialer({
   onSpeakerToggle,
 }: DialerProps) {
   const dispatch = useDispatch();
-  const savedNotes = useSelector((state: RootState) =>
-    (state.notes as { notes: { [key: string]: string } }).notes[callId] || ''
+  const savedNotes = useSelector(
+    (state: RootState) =>
+      (state.notes as { notes: { [key: string]: string } }).notes[callId] || ""
   );
 
   const [noteInput, setNoteInput] = useState(savedNotes);
@@ -66,11 +64,6 @@ export function Dialer({
       dispatch(setNote({ callId, note: value }));
     }
   }, 1000);
-
-  const handleBlur = () => {
-    setIsTextAreaFocused(false);
-    toast.success("Notes saved");
-  };
 
   const formatDuration = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
@@ -104,8 +97,8 @@ export function Dialer({
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isTextAreaFocused]);
 
   return (
@@ -121,48 +114,50 @@ export function Dialer({
     >
       {/* Contact Info */}
       <Stack align="center" gap="xs" className="w-full mb-5">
-  {name && number ? (
-    <>
-      <Avatar size={110} radius="50%" color="ocean">
-        {name[0].toUpperCase()}
-      </Avatar>
-      <CallStatusBadge status={status} />
-      <Text fw={600} size="xl" className="text-center tracking-tight">
-        {name}
-      </Text>
-      <Text
-        size="md"
-        fw={600}
-        className="text-center tracking-tight -mt-1 text-[#8b94a9]"
-      >
-        {number}
-      </Text>
-      {status !== "idle" && (
-        <Text size="sm" className="font-mono text-[#8b94a9] mb-[20px]">
-          {formatDuration(duration)}
-        </Text>
-      )}
-    </>
-  ) : (
-    <div className="flex flex-col items-center justify-center text-center px-4 py-6">
-      {/* You can replace this with any SVG you like */}
-      <IconPhone size={100} className="mb-2" color='#7d91e2' />
-      <Text fw={600} size="lg" className="text-[#7d91e2] mb-1">
-        No Active Call
-      </Text>
-      <Text size="xs" className="text-[#a0a7b8] max-w-xs">
-        Start a call to see contact details, take notes, and manage audio settings.
-      </Text>
-    </div>
-  )}
-</Stack>
-
+        {name && number ? (
+          <>
+            <Avatar size={110} radius="50%" color="ocean">
+              {name[0].toUpperCase()}
+            </Avatar>
+            <CallStatusBadge status={status} />
+            <Text fw={600} size="xl" className="text-center tracking-tight">
+              {name}
+            </Text>
+            <Text
+              size="md"
+              fw={600}
+              className="text-center tracking-tight -mt-1 text-[#8b94a9]"
+            >
+              {number}
+            </Text>
+            {status !== "idle" && (
+              <Text size="sm" className="font-mono text-[#8b94a9] mb-[20px]">
+                {formatDuration(duration)}
+              </Text>
+            )}
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center text-center px-4 py-6">
+            {/* You can replace this with any SVG you like */}
+            <IconPhone size={100} className="mb-2" color="#7d91e2" />
+            <Text fw={600} size="lg" className="text-[#7d91e2] mb-1">
+              No Active Call
+            </Text>
+            <Text size="xs" className="text-[#a0a7b8] max-w-xs">
+              Start a call to see contact details, take notes, and manage audio
+              settings.
+            </Text>
+          </div>
+        )}
+      </Stack>
 
       {/* Action Buttons */}
-      <Group justify="center" gap="xl"
-      style={{
-        marginTop: "20px",
-      }}
+      <Group
+        justify="center"
+        gap="xl"
+        style={{
+          margin: "20px",
+        }}
       >
         <ActionIcon
           variant={muted ? "filled" : "light"}
@@ -221,35 +216,24 @@ export function Dialer({
 
       {/* Notes */}
       {status !== "idle" && callId && (
-        <Textarea
-          placeholder="Take notes during the call..."
-          minRows={4}
-          my={20}
-          value={noteInput}
-          onChange={(e) => {
-            setNoteInput(e.target.value);
-            debouncedSave(e.target.value);
-          }}
-          onFocus={() => setIsTextAreaFocused(true)}
-          onBlur={handleBlur}
-          className="w-full"
-          styles={{
-            input: {
-              backgroundColor: "white",
-              border: "none",
-              height: "100px",
-              padding: "12px",
-              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.08)",
-              color: "#1a1a1a",
-              borderRadius: "12px",
-              "&:focus": {
-                border: "none",
-                outline: "none",
-                boxShadow: "none",
-              },
-            },
-          }}
-        />
+        <div className="w-full my-5"
+        style={{
+          border: "1px solid #f0f3f5",
+          borderRadius: "10px",
+        }}
+        >
+          <NoteEditor
+            content={noteInput}
+            onChange={(value) => {
+              setNoteInput(value);
+              debouncedSave(value);
+            }}
+            onBlur={() => {
+              setIsTextAreaFocused(false);
+              toast.success("Notes saved");
+            }}
+          />
+        </div>
       )}
     </motion.div>
   );

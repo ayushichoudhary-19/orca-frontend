@@ -1,0 +1,167 @@
+.tiptap :first-child {
+  margin-top: 0;
+}
+
+.tiptap ul,
+.tiptap ol {
+  padding: 0 1rem;
+  margin: 1.25rem 1rem 1.25rem 0.4rem;
+}
+
+.tiptap {
+  min-height: 120px;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  background-color: white;
+  outline: none;
+}
+
+.editorContainer {
+  background-color: white !important;
+  padding: 1rem;
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+
+.placeholder::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9ca3af;
+  pointer-events: none;
+  height: 0;
+}
+
+
+
+.tiptap ul li p,
+.tiptap ol li p {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+/* Menu bar container */
+.controlGroup {
+  display: flex;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb; /* Tailwind gray-200 */
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+/* Grouping buttons with optional separators */
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  position: relative;
+}
+
+/* Actual button styling */
+.button {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  cursor: pointer;
+  border-radius: 0.375rem;
+  position: relative;
+  color: #4b5563; /* gray-600 */
+  transition: background 0.2s ease;
+}
+
+/* Active button */
+.buttonActive {
+  background-color: #e0ecff;
+  color: #2563eb; /* blue-600 */
+}
+
+/* Hover effect */
+.button::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: -32px; /* instead of top */
+  left: 50%;
+  transform: translateX(-50%) translateY(-5px);
+  background: #111827;
+  color: white;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.375rem;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.button:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Show tooltip on hover */
+.button:hover::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.heading {
+  line-height: 1.1;
+  margin-top: 2.5rem;
+  text-wrap: pretty;
+}
+
+.headingH1 {
+  font-size: 1.4rem;
+  margin-top: 3.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.headingH2 {
+  font-size: 1.2rem;
+  margin-top: 3.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.headingH3 {
+  font-size: 1.1rem;
+}
+
+.headingH4,
+.headingH5,
+.headingH6 {
+  font-size: 1rem;
+}
+
+.code {
+  background-color: var(--purple-light);
+  border-radius: 0.4rem;
+  color: var(--black);
+  font-size: 0.85rem;
+  padding: 0.25em 0.3em;
+}
+
+.pre {
+  background: var(--black);
+  border-radius: 0.5rem;
+  color: var(--white);
+  font-family: "JetBrainsMono", monospace;
+  margin: 1.5rem 0;
+  padding: 0.75rem 1rem;
+}
+
+.blockquote {
+  border-left: 3px solid var(--gray-3);
+  margin: 1.5rem 0;
+  padding-left: 1rem;
+}
+
+.hr {
+  border: none;
+  border-top: 1px solid var(--gray-2);
+  margin: 2rem 0;
+}

@@ -14,11 +14,11 @@ import {
   Text,
   Group,
 } from "@mantine/core";
-import { UploadNumbers } from "@/components/Dialer/UploadNumbers";
-import { ContactList } from "@/components/Dialer/ContactList";
+import { UploadNumbers } from "@/components/Contacts/UploadNumbers";
+import { ContactList } from "@/components/Contacts/ContactList";
 import { useAutoDialer } from "@/hooks/useAutoDialer";
-import { ScriptReader } from "@/components/Dialer/ScriptReader";
-import { FeedbackModal } from "@/components/Dialer/FeedbackModel";
+import { ScriptReader } from "@/components/Script/ScriptReader";
+import { FeedbackModal } from "@/components/Feedback/FeedbackModel";
 import { motion } from "framer-motion";
 import { IconList, IconDialpad } from "@tabler/icons-react";
 import { forwardRef } from "react";
