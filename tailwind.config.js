@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+const config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -21,7 +21,7 @@ module.exports = {
       },
       fontFamily: {
         sans: ["var(--font-urbanist)", "sans-serif"],
-        urbanist: ["var(--font-urba nist)", "sans-serif"],
+        urbanist: ["var(--font-urbanist)", "sans-serif"],
       },
     },
   },
@@ -30,3 +30,5 @@ module.exports = {
     preflight: false,
   },
 };
+
+export default config;

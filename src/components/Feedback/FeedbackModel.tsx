@@ -56,8 +56,7 @@ export const FeedbackModal = ({
 }: FeedbackModalProps) => {
   const dispatch = useDispatch();
   const savedNotes = useSelector(
-    (state: RootState) =>
-      ((state.notes as unknown) as { notes: { [key: string]: string } }).notes[callId] || ""
+    (state: RootState) => state.notes?.notes?.[callId] || ""
   );
 
   const [callOutcome, setCallOutcome] = useState<

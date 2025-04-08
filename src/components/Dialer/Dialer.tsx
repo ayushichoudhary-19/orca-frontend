@@ -43,9 +43,8 @@ export function Dialer({
 }: DialerProps) {
   const dispatch = useDispatch();
   const savedNotes = useSelector(
-    (state: RootState) =>
-      (state.notes as { notes: { [key: string]: string } }).notes[callId] || ""
-  );
+    (state: RootState) => state.notes?.notes?.[callId] || ""
+  );  
 
   const [noteInput, setNoteInput] = useState("");
   const [muted, setMuted] = useState(false);
@@ -53,7 +52,6 @@ export function Dialer({
   const [isTextAreaFocused, setIsTextAreaFocused] = useState(false);
   const [previousCallId, setPreviousCallId] = useState("");
 
-  // Only load saved notes when callId actually changes
   useEffect(() => {
     if (callId && callId !== previousCallId) {
       setNoteInput(savedNotes || "");
@@ -61,7 +59,6 @@ export function Dialer({
     }
   }, [callId, savedNotes, previousCallId]);
 
-  // Reset notes when contact changes
   useEffect(() => {
     setNoteInput("");
   }, [contact]);
