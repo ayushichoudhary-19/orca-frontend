@@ -61,7 +61,7 @@ export const useCallManager = () => {
 
     initDevice();
     return () => device?.destroy();
-  }, []);
+  }, [device]);
 
   // Update call duration
   useEffect(() => {

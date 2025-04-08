@@ -1,4 +1,7 @@
-node_modules
-build
-dist
 .next
+dist
+build
+out
+coverage
+*.d.ts
+node_modules
