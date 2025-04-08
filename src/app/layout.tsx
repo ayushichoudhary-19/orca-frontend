@@ -1,33 +1,26 @@
-import type { Metadata } from "next";
 import '@mantine/core/styles.css';
-import "./globals.css";
-import { MantineProvider } from '@mantine/core';
-import Sidebar from "@/components/Sidebar";
+import "@/styles/globals.css";
+import { MantineProvider } from "@mantine/core";
 import { theme } from "./theme";
-import Providers from './providers';
+import Providers from "./providers";
+import { Urbanist } from 'next/font/google';
 
-export const metadata: Metadata = {
-  title: "Cold Calling App",
-  description: "A modern cold calling app",
-};
+const urbanist = Urbanist({
+    subsets: ['latin'],
+    weight: ['400', '500', '600', '700', '800'],
+    variable: '--font-urbanist',
+  });
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={urbanist.variable}>
       <body>
         <MantineProvider theme={theme}>
-          <div className="flex">
-            <Sidebar />
-            <main className="ml-[72px] flex-1 min-h-screen">
-              <Providers>
-                {children}
-              </Providers>
-            </main>
-          </div>
+          <Providers>{children}</Providers>
         </MantineProvider>
       </body>
     </html>

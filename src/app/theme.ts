@@ -1,41 +1,40 @@
-// src/theme.ts
 import { createTheme, DEFAULT_THEME } from '@mantine/core';
 
 export const theme = createTheme({
   ...DEFAULT_THEME,
 
-  primaryColor: 'ocean',
-  primaryShade: 7,
+  primaryColor: 'primary',
+  primaryShade: 5,
 
-  fontFamily: 'EuclidSquare, ui-sans-serif, system-ui, sans-serif',
+  fontFamily: "Urbanist, ui-sans-serif, system-ui, sans-serif",
   headings: {
-    fontFamily: 'EuclidSquare, ui-sans-serif, system-ui, sans-serif',
-    fontWeight: '600',
+    fontFamily: "Urbanist, ui-sans-serif, system-ui, sans-serif",
+    fontWeight: "600",
   },
 
-  /** 👇 Add custom color scales */
   colors: {
     ...DEFAULT_THEME.colors,
-    ocean: [
-      "#eaedf8",
-      '#e4ebfb', // 0 (lightest)
-      '#ccd8f7', // 1
-      '#b5c6f2', // 2
-      '#9eb4ee', // 3
-      '#87a2ea', // 4
-      '#7192E9', // 5 ← used as primaryShade,
-      '#5c7ada', // 6
-      '#4966ca', // 7
-      '#3959b0', // 8
+    primary: [
+      "#E8E4FF",
+      '#D5CFFF',
+      '#C2BFFF',
+      '#AFA4FF',
+      '#B0A4FD',
+      '#6D57FC',
+      '#5E47F7',
+      '#4F38F2',
+      '#4029EE',
+      '#261E58',
+      '#0C0A1C',
     ],
   },
 
   components: {
-    Button: {
-      defaultProps: {
-        radius: 'xl',
-      },
-    },
+    // Button: {
+    //   defaultProps: {
+    //     radius: 'xl',
+    //   },
+    // },
     Paper: {
       defaultProps: {
         radius: 'md',
