@@ -94,10 +94,7 @@ export const useCallManager = () => {
       
       connection.on('accept', async () => {
         const callSid = connection.parameters.CallSid;
-        console.log('connection params: ', connection.parameters);
         const from = process.env.TWILIO_PHONE_NUMBER;
-
-        console.log('Call accepted:', callSid)
         setCall(prev => ({
           ...prev,
           id: callSid,

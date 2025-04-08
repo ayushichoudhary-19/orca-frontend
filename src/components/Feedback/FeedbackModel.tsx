@@ -71,7 +71,7 @@ export const FeedbackModal = ({
 
   useEffect(() => {
     if (opened && callId) {
-      setNotes(savedNotes);
+      setNotes(savedNotes || "");
     }
   }, [opened, callId, savedNotes]);
 

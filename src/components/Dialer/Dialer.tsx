@@ -1,5 +1,3 @@
-"use client";
-
 import { useDispatch, useSelector } from "react-redux";
 import { setNote } from "@/store/notesSlice";
 import { RootState } from "@/store/store";
@@ -49,14 +47,30 @@ export function Dialer({
       (state.notes as { notes: { [key: string]: string } }).notes[callId] || ""
   );
 
-  const [noteInput, setNoteInput] = useState(savedNotes);
+  const [noteInput, setNoteInput] = useState("");
   const [muted, setMuted] = useState(false);
   const [speaker, setSpeaker] = useState(false);
   const [isTextAreaFocused, setIsTextAreaFocused] = useState(false);
+  const [previousCallId, setPreviousCallId] = useState("");
+
+  // Only load saved notes when callId actually changes
+  useEffect(() => {
+    if (callId && callId !== previousCallId) {
+      setNoteInput(savedNotes || "");
+      setPreviousCallId(callId);
+    }
+  }, [callId, savedNotes, previousCallId]);
+
+  // Reset notes when contact changes
+  useEffect(() => {
+    setNoteInput("");
+  }, [contact]);
 
   useEffect(() => {
-    setNoteInput(savedNotes);
-  }, [savedNotes, callId]);
+    if (status === "ended") {
+      setNoteInput("");
+    }
+  }, [status]);
 
   const debouncedSave = useDebouncedCallback((value: string) => {
     if (callId) {
@@ -100,6 +114,12 @@ export function Dialer({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isTextAreaFocused]);
 
+  // Add this useEffect to log callId changes
+  useEffect(() => {
+    console.log("CallId changed:", callId);
+    console.log("notes", savedNotes);
+  }, [callId, savedNotes]);
+
   return (
     <motion.div
       className="w-full rounded-3xl flex flex-col items-center justify-start space-y-6"
@@ -137,7 +157,6 @@ export function Dialer({
           </>
         ) : (
           <div className="flex flex-col items-center justify-center text-center px-4 py-6">
-            {/* You can replace this with any SVG you like */}
             <IconPhone size={100} className="mb-2" color="#7d91e2" />
             <Text fw={600} size="lg" className="text-[#7d91e2] mb-1">
               No Active Call
@@ -152,81 +171,82 @@ export function Dialer({
 
       {/* Action Buttons */}
       {contact && (
-          <>
-      <Group
-        justify="center"
-        gap="xl"
-        style={{
-          margin: "20px",
-        }}
-      >
-        <ActionIcon
-          variant={muted ? "filled" : "light"}
-          size={60}
-          radius="xl"
-          color={muted ? "red" : "gray"}
-          onClick={handleMuteToggle}
-          disabled={status === "idle" || status === "ended"}
-          className="transition-all duration-200 hover:shadow-lg"
-        >
-          {muted ? (
-            <IconMicrophoneOff size={18} />
-          ) : (
-            <IconMicrophone size={18} />
-          )}
-        </ActionIcon>
-
-        {status === "idle" ? (
-          <ActionIcon
-            variant="filled"
-            size={60}
-            radius="xl"
-            className="text-white shadow-lg"
-            onClick={onCallStart}
-            disabled={!contact.number}
+        <>
+          <Group
+            justify="center"
+            gap="xl"
+            style={{
+              margin: "20px",
+            }}
           >
-            <IconPhone size={18} />
-          </ActionIcon>
-        ) : (
-          status !== "ended" && (
             <ActionIcon
-              variant="filled"
+              variant={muted ? "filled" : "light"}
               size={60}
               radius="xl"
-              color="red"
-              onClick={() => onCallEnd(callId)}
+              color={muted ? "red" : "gray"}
+              onClick={handleMuteToggle}
+              disabled={status === "idle" || status === "ended"}
               className="transition-all duration-200 hover:shadow-lg"
             >
-              <IconPhone size={18} />
+              {muted ? (
+                <IconMicrophoneOff size={18} />
+              ) : (
+                <IconMicrophone size={18} />
+              )}
             </ActionIcon>
-          )
-        )}
 
-        <ActionIcon
-          variant={speaker ? "filled" : "light"}
-          size={60}
-          radius="xl"
-          color={speaker ? "primary" : "gray"}
-          onClick={handleSpeakerToggle}
-          disabled={status === "idle" || status === "ended"}
-          className="transition-all duration-200 hover:shadow-lg"
-        >
-          {speaker ? <IconVolume size={18} /> : <IconVolumeOff size={18} />}
-        </ActionIcon>
-      </Group>
-      </>
-      )
-    }
+            {status === "idle" ? (
+              <ActionIcon
+                variant="filled"
+                size={60}
+                radius="xl"
+                className="text-white shadow-lg"
+                onClick={onCallStart}
+                disabled={!contact.number}
+              >
+                <IconPhone size={18} />
+              </ActionIcon>
+            ) : (
+              status !== "ended" && (
+                <ActionIcon
+                  variant="filled"
+                  size={60}
+                  radius="xl"
+                  color="red"
+                  onClick={() => onCallEnd(callId)}
+                  className="transition-all duration-200 hover:shadow-lg"
+                >
+                  <IconPhone size={18} />
+                </ActionIcon>
+              )
+            )}
+
+            <ActionIcon
+              variant={speaker ? "filled" : "light"}
+              size={60}
+              radius="xl"
+              color={speaker ? "primary" : "gray"}
+              onClick={handleSpeakerToggle}
+              disabled={status === "idle" || status === "ended"}
+              className="transition-all duration-200 hover:shadow-lg"
+            >
+              {speaker ? <IconVolume size={18} /> : <IconVolumeOff size={18} />}
+            </ActionIcon>
+          </Group>
+        </>
+      )}
 
       {/* Notes */}
       {status !== "idle" && callId && (
-        <div className="w-full my-5"
-        style={{
-          border: "1px solid #f0f3f5",
-          borderRadius: "10px",
-        }}
+        <div
+          className="w-full my-5"
+          style={{
+            border: "1px solid #f0f3f5",
+            borderRadius: "10px",
+          }}
         >
           <NoteEditor
+            key={callId}
             content={noteInput}
             onChange={(value) => {
               setNoteInput(value);

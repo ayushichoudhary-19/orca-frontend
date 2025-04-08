@@ -7,8 +7,6 @@ import Placeholder from "@tiptap/extension-placeholder";
 import Color from "@tiptap/extension-color";
 import { useEffect, useRef } from "react";
 import styles from "@/styles/editor.module.css";
-
-// Tabler icons
 import {
   IconBold,
   IconItalic,
@@ -119,7 +117,7 @@ const extensions = [
       placeholder: "Type your notes here...",
       emptyEditorClass: styles.placeholder,
     }),
-  ];
+];
 
 export default function NoteEditor({
     content,

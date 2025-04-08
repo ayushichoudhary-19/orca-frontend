@@ -14,7 +14,6 @@ import rehypeRaw from "rehype-raw";
 import { Contact } from "../Contacts/ContactList";
 
 function replacePlaceholders(template: string, contact?: Contact) {
-  console.log("contact", contact);
   return template
     .replace(/\{\{Name\}\}/gi, contact?.name || "{{name}}")
     .replace(/\{\{Email\}\}/gi, contact?.email || "{{email}}")

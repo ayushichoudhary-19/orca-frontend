@@ -40,9 +40,7 @@ export const ContactList = ({ contacts, currentContact, onSelect }: ContactListP
   }
 
   return (
-    <Paper radius="md" p="md" mt="md"
-    className='gradient-horizontal-light-2'
-    >
+    <Paper radius="md" p="md" mt="md" className='gradient-horizontal-light-2'>
       <Title order={4} mb="md" className="text-lg font-medium tracking-tight">
         Contact Queue
       </Title>
@@ -57,50 +55,55 @@ export const ContactList = ({ contacts, currentContact, onSelect }: ContactListP
               transition={{ delay: idx * 0.05, duration: 0.3 }}
               whileHover={{ scale: 1.02 }}
             >
-             <Paper
-  p="sm"
-  m={3}
-  radius="md"
-  className={`relative cursor-pointer transition-all duration-200 mb-2 ${
-    idx === currentContact ? 'bg-white' : 'hover:bg-white'
-  }`}
-  style={{
-    backgroundColor:
-      idx === currentContact ? 'white' : theme.colors?.ocean?.[0],
-    borderLeft:
-      idx === currentContact
-        ? `4px solid ${theme.colors?.ocean?.[7]}`
-        : undefined,
-  }}
-  onClick={() => onSelect(contact)}
->
-  <Group justify="space-between">
-    <Group>
-      <Avatar 
-        radius="xl" 
-        color={idx === currentContact ? 'ocean' : 'gray'}
-      >
-        <IconUser size={20} />
-      </Avatar>
-      <div>
-        <Text size="sm" fw={500} lineClamp={1} className="text-black">
-          {contact.name}
-        </Text>
-        <Text size="xs" c="dimmed" className="flex items-center gap-1">
-          <IconPhone size={12} />
-          {contact.number}
-        </Text>
-      </div>
-    </Group>
+              <Paper
+                p="sm"
+                m={3}
+                radius="md"
+                className={`relative cursor-pointer transition-all duration-200 mb-2 ${
+                  idx === currentContact ? 'bg-white' : 'hover:bg-white'
+                }`}
+                style={{
+                  backgroundColor:
+                    idx === currentContact ? 'white' : theme.colors?.ocean?.[0],
+                  borderLeft:
+                    idx === currentContact
+                      ? `4px solid ${theme.colors?.ocean?.[7]}`
+                      : undefined,
+                }}
+                onClick={() => onSelect(contact)}
+              >
+                <Group justify="space-between" align="flex-start">
+                  <Group align="flex-start">
+                    <Avatar 
+                      radius="xl" 
+                      color={idx === currentContact ? 'ocean' : 'gray'}
+                    >
+                      <IconUser size={20} />
+                    </Avatar>
+                    <div>
+                      <Text size="sm" fw={500} lineClamp={1} className="text-black">
+                        {contact.name}
+                      </Text>
+                      <Text size="xs" c="dimmed" className="flex items-center gap-1">
+                        <IconPhone size={12} />
+                        {contact.number}
+                      </Text>
+                      <Text size="xs" c="dimmed" lineClamp={1} mt={2}>
+                        {contact.email}
+                      </Text>
+                      <Text size="xs" c="dimmed" lineClamp={1} mt={2}>
+                        {contact.address}
+                      </Text>
+                    </div>
+                  </Group>
 
-    {idx === currentContact && (
-      <Badge variant="light" size="sm" color="ocean">
-        Current
-      </Badge>
-    )}
-  </Group>
-</Paper>
-
+                  {idx === currentContact && (
+                    <Badge variant="light" size="sm" color="ocean">
+                      Current
+                    </Badge>
+                  )}
+                </Group>
+              </Paper>
             </motion.div>
           ))}
         </List>
