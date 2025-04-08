@@ -12,6 +12,7 @@ import {
 import { useState } from 'react';
 import { Tooltip, UnstyledButton, Stack } from '@mantine/core';
 import { useRouter } from 'next/navigation';
+import { useLogout } from '@/hooks/Auth/useLogout';
 
 const navItems = [
   { label: 'Dialer', icon: IconPhoneCall, path: '/dialer' },
@@ -25,6 +26,8 @@ const navItems = [
 export default function Sidebar() {
   const [active, setActive] = useState('Dialer');
   const router = useRouter();
+
+  const logout = useLogout();
 
   const handleNavigate = (item: typeof navItems[number]) => {
     setActive(item.label);
@@ -68,7 +71,7 @@ export default function Sidebar() {
       <div className="pb-4">
         <Tooltip label="Logout" position="right" withArrow>
           <UnstyledButton
-            onClick={() => console.log('logout')}
+            onClick={logout}
             className="w-full flex items-center justify-center transition-all"
           >
             <IconLogout size={22} stroke={1.5} color="#bfd7ff" />

@@ -9,6 +9,7 @@ import { IconArrowRight, IconArrowNarrowLeft } from "@tabler/icons-react";
 import { AuthHeader } from "../Auth/AuthHeader";
 import { EmailInput } from "../Auth/EmailInput";
 import { PasswordInput } from "../Auth/PasswordInput";
+import { getErrorMessage } from "@/utils/errorUtils";
 
 type Props = {
   onSubmit: (email: string, password: string) => Promise<void>;
@@ -27,8 +28,8 @@ export const AuthForm = ({ onSubmit, type, onGoogleAuth }: Props) => {
     try {
       setError("");
       await onSubmit(email, password);
-    } catch (err: any) {
-      setError(err.message || "Something went wrong.");
+    } catch (err: unknown) {
+      setError(getErrorMessage(err));
     }
   };
 
@@ -115,8 +116,8 @@ export const AuthForm = ({ onSubmit, type, onGoogleAuth }: Props) => {
                           setError("");
                           await onGoogleAuth();
                         }
-                      } catch (err: any) {
-                        setError(err.message || "Google sign-in failed.");
+                      } catch (err: unknown) {
+                        setError(getErrorMessage(err));
                       }
                     }}
                   >
@@ -147,12 +148,12 @@ export const AuthForm = ({ onSubmit, type, onGoogleAuth }: Props) => {
 
               <div className="mt-6 text-center text-sm text-gray">
                 {type === "signin" ? (
-                  <>
-                    Don't have an account?{' '}
-                    <Link href="/signup" className="text-primary hover:underline no-underline font-bold">
-                      Sign up
-                    </Link>
-                  </>
+                 <>
+                 Don&apos;t have an account?{" "}
+                 <Link href="/signup" className="text-primary hover:underline no-underline font-bold">
+                   Sign up
+                 </Link>
+               </>               
                 ) : (
                   <>
                     Already have an account?{' '}
