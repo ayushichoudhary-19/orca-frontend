@@ -3,16 +3,18 @@ import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import notesReducer from './notesSlice';
 import authReducer from './authSlice';
+import featureReducer from './featureSlice';
 
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['notes', 'auth']
+  whitelist: ['notes', 'auth', 'features']
 };
 
 const rootReducer = combineReducers({
   notes: notesReducer,
   auth: authReducer,
+  features: featureReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

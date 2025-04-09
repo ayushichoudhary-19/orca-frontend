@@ -20,6 +20,7 @@ import { useAutoDialer } from "@/hooks/useAutoDialer";
 import { ScriptReader } from "@/components/Script/ScriptReader";
 import { FeedbackModal } from "@/components/Feedback/FeedbackModel";
 import { motion } from "framer-motion";
+import { useIsFeatureAccessible } from "@/hooks/permissions/useIsFeatureAccessible";
 import { IconList, IconDialpad } from "@tabler/icons-react";
 import { forwardRef } from "react";
 import { Toaster } from "react-hot-toast";
@@ -36,8 +37,8 @@ const MotionPaper = motion(PaperWithRef);
 const MotionContainer = motion(Container);
 
 export default function CallPage() {
-  const { call, startCall, endCall, toggleMute, toggleSpeaker } =
-    useCallManager();
+  const { call, startCall, endCall, toggleMute, toggleSpeaker } = useCallManager();
+  const canUploadContacts = useIsFeatureAccessible('upload_contact_csv');
   const [number, setNumber] = useState("");
   const [showFeedback, setShowFeedback] = useState(false);
   const [autoDial, setAutoDial] = useState(true);
@@ -51,7 +52,6 @@ export default function CallPage() {
     setManualNumber,
   } = useAutoDialer(startCall, endCall);
 
-  // Add this to get the current contact object
   const currentContactData = contacts[currentContact];
 
   const hasHandledCallEndRef = useRef(false);
@@ -148,7 +148,7 @@ export default function CallPage() {
                 </Tabs.List>
 
                 <Tabs.Panel value="list">
-                  <UploadNumbers onUpload={handleUpload} />
+                  {canUploadContacts && <UploadNumbers onUpload={handleUpload} />}
                   <Paper
                     mt="md"
                     p="sm"

@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppSelector } from '@/store/hooks';
+import { useFetchPermissions } from '@/hooks/permissions/useFetchPermissions';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -10,7 +11,10 @@ interface AuthGuardProps {
 
 export default function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
+
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const roleId = useAppSelector((state) => state.auth.roleId);
+  useFetchPermissions(isAuthenticated && roleId ? roleId : "");
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -18,9 +22,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     }
   }, [isAuthenticated, router]);
 
-  if (!isAuthenticated) {
-    return null;
-  }
+  if (!isAuthenticated) return null;
 
   return <>{children}</>;
 }

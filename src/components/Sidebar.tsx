@@ -13,6 +13,8 @@ import { useState } from 'react';
 import { Tooltip, UnstyledButton, Stack } from '@mantine/core';
 import { useRouter } from 'next/navigation';
 import { useLogout } from '@/hooks/Auth/useLogout';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setRole } from '@/store/authSlice';
 
 const navItems = [
   { label: 'Dialer', icon: IconPhoneCall, path: '/dialer' },
@@ -26,8 +28,20 @@ const navItems = [
 export default function Sidebar() {
   const [active, setActive] = useState('Dialer');
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const currentRole = useAppSelector((state) => state.auth.roleId);
 
   const logout = useLogout();
+
+  const roles = [
+    { id: 'admin', label: 'Admin' },
+    { id: 'user', label: 'User' },
+    { id: 'sales_rep', label: 'Sales Rep' }
+  ];
+
+  const handleRoleChange = (roleId: string) => {
+    dispatch(setRole(roleId));
+  };
 
   const handleNavigate = (item: typeof navItems[number]) => {
     setActive(item.label);
@@ -66,6 +80,25 @@ export default function Sidebar() {
           );
         })}
       </Stack>
+
+      {/* Role Switcher */}
+      <div className="mb-4">
+        <Tooltip label="Switch Role" position="right" withArrow>
+          <div className="flex flex-col items-center gap-2">
+            {roles.map((role) => (
+              <UnstyledButton
+                key={role.id}
+                onClick={() => handleRoleChange(role.id)}
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${currentRole === role.id ? 'bg-white' : 'bg-transparent'}`}
+              >
+                <span className={`text-xs font-medium ${currentRole === role.id ? 'text-primary' : 'text-white'}`}>
+                  {role.label[0]}
+                </span>
+              </UnstyledButton>
+            ))}
+          </div>
+        </Tooltip>
+      </div>
 
       {/* Logout */}
       <div className="pb-4">
