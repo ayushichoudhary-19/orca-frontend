@@ -39,6 +39,7 @@
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
     "socket.io-client": "^4.8.1",
+    "uptut-rbac": "github:ayushichoudhary-19/uptut-rbac-frontend",
     "use-debounce": "^10.0.4"
   },
   "devDependencies": {

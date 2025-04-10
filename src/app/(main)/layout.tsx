@@ -16,13 +16,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex">
-      <AuthGuard>
-        <Sidebar />
-        <main className="ml-[72px] flex-1 min-h-screen">
-          <Providers>{children}</Providers>
-        </main>
-      </AuthGuard>
-    </div>
+     <div className="flex">
+        <AuthGuard>
+          <Sidebar />
+          <main className="ml-[72px] flex-1 min-h-screen">
+            <Providers>{children}</Providers>
+          </main>
+        </AuthGuard>
+      </div>
   );
 }

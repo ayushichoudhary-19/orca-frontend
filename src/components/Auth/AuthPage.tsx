@@ -2,7 +2,6 @@
 
 import { auth } from "@/lib/firebase-config";
 import {
-  createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
@@ -17,20 +16,13 @@ import { AuthForm } from "./AuthForm";
 import { useDispatch } from "react-redux";
 import { setAuth } from "@/store/authSlice";
 
-type Props = {
-  type: "signin" | "signup";
-};
-
-export const AuthPage = ({ type }: Props) => {
+export const AuthPage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
 
   const handleAuth = async (email: string, password: string) => {
     try {
-      const userCredential =
-        type === "signin"
-          ? await signInWithEmailAndPassword(auth, email, password)
-          : await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password)
 
       const user = userCredential.user;
       dispatch(setAuth({ email: user.email || "", uid: user.uid }));
@@ -63,7 +55,6 @@ export const AuthPage = ({ type }: Props) => {
   return (
     <AuthForm
       onSubmit={handleAuth}
-      type={type}
       onGoogleAuth={handleGoogleAuth}
     />
   );

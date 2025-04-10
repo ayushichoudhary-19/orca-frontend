@@ -13,11 +13,10 @@ import { getErrorMessage } from "@/utils/errorUtils";
 
 type Props = {
   onSubmit: (email: string, password: string) => Promise<void>;
-  type: "signin" | "signup";
   onGoogleAuth?: () => Promise<void>;
 };
 
-export const AuthForm = ({ onSubmit, type, onGoogleAuth }: Props) => {
+export const AuthForm = ({ onSubmit, onGoogleAuth }: Props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -41,22 +40,23 @@ export const AuthForm = ({ onSubmit, type, onGoogleAuth }: Props) => {
   };
 
   const goBack = () => {
-    if(step === 1) {
+    if (step === 1) {
       window.location.href = "/";
     } else {
       setStep(1);
     }
-  }
+  };
 
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center bg-cover bg-top relative"
-      style={{ 
-        backgroundColor: step === 1 ? 'white' : '#6D57FC',
-        backgroundImage: step === 1 ? `url('/bg-auth-base.png'), url('/bg-auth-0.png')` : `url('/bg-auth-1.png')`,
-        backgroundSize: step === 1 ? 'contain, contain' : 'cover',
-        backgroundRepeat: step === 1 ? 'no-repeat, no-repeat' : 'repeat',
-        backgroundBlendMode: step === 1 ? 'normal' : 'normal',
+      style={{
+        backgroundColor: step === 1 ? "white" : "#6D57FC",
+        backgroundImage:
+          step === 1 ? `url('/bg-auth-base.png'), url('/bg-auth-0.png')` : `url('/bg-auth-1.png')`,
+        backgroundSize: step === 1 ? "contain, contain" : "cover",
+        backgroundRepeat: step === 1 ? "no-repeat, no-repeat" : "repeat",
+        backgroundBlendMode: step === 1 ? "normal" : "normal",
       }}
     >
       <motion.div
@@ -72,7 +72,7 @@ export const AuthForm = ({ onSubmit, type, onGoogleAuth }: Props) => {
           margin: "0 auto",
           textAlign: "left",
           position: "relative",
-          zIndex: 1
+          zIndex: 1,
         }}
       >
         <div className="text-center mb-6">
@@ -81,13 +81,13 @@ export const AuthForm = ({ onSubmit, type, onGoogleAuth }: Props) => {
           </Title>
         </div>
 
-          <Button
-            variant="subtle"
-            onClick={goBack}
-            className="p-0 mb-2 bg-white hover:bg-gray-100 transition-colors rounded-full"
-          >
-            <IconArrowNarrowLeft size={30} color="#0C0A1C" stroke={1}/>
-          </Button>
+        <Button
+          variant="subtle"
+          onClick={goBack}
+          className="p-0 mb-2 bg-white hover:bg-gray-100 transition-colors rounded-full"
+        >
+          <IconArrowNarrowLeft size={30} color="#0C0A1C" stroke={1} />
+        </Button>
 
         <AnimatePresence mode="wait">
           {step === 1 ? (
@@ -121,7 +121,7 @@ export const AuthForm = ({ onSubmit, type, onGoogleAuth }: Props) => {
                       }
                     }}
                   >
-                    {type === "signin" ? "Login with Google" : "Signup with Google"}
+                    {"Login with Google"}
                   </Button>
 
                   <EmailInput value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -139,30 +139,12 @@ export const AuthForm = ({ onSubmit, type, onGoogleAuth }: Props) => {
                         className="bg-primary rounded-lg text-base hover:bg-darker transition-colors"
                         rightSection={<IconArrowRight size={18} />}
                       >
-                        {type === "signin" ? "Sign In" : "Sign Up"}
+                        Sign In
                       </Button>
                     </motion.div>
                   )}
                 </Stack>
               </form>
-
-              <div className="mt-6 text-center text-sm text-gray">
-                {type === "signin" ? (
-                 <>
-                 Don&apos;t have an account?{" "}
-                 <Link href="/signup" className="text-primary hover:underline no-underline font-bold">
-                   Sign up
-                 </Link>
-               </>               
-                ) : (
-                  <>
-                    Already have an account?{' '}
-                    <Link href="/signin" className="text-primary hover:underline no-underline font-bold">
-                      Sign in
-                    </Link>
-                  </>
-                )}
-              </div>
             </motion.div>
           ) : (
             <motion.div
@@ -182,9 +164,13 @@ export const AuthForm = ({ onSubmit, type, onGoogleAuth }: Props) => {
                   <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} />
 
                   <div className="text-right text-tinteddark5 text-sm">
-                  Don’t remember your password? 
-                    <Link href="/forgot-password" className="text-sm text-primary no-underline hover:underline">
-                    {" "}Click here.
+                    Don’t remember your password?
+                    <Link
+                      href="/forgot-password"
+                      className="text-sm text-primary no-underline hover:underline"
+                    >
+                      {" "}
+                      Click here.
                     </Link>
                   </div>
 
@@ -195,33 +181,17 @@ export const AuthForm = ({ onSubmit, type, onGoogleAuth }: Props) => {
                     size="lg"
                     rightSection={<IconArrowRight size={18} />}
                   >
-                    {type === "signin" ? "Sign In" : "Sign Up"}
+                    Sign In
                   </Button>
                 </Stack>
               </form>
-
-              <div className="mt-6 text-center text-sm text-gray">
-                {type === "signin" ? (
-                  <>
-                    Don’t have an account?{' '}
-                    <Link href="/signup" className="text-primary hover:underline no-underline font-bold">
-                      Sign up
-                    </Link>
-                  </>
-                ) : (
-                  <>
-                    Already have an account?{' '}
-                    <Link href="/signin" className="text-primary hover:underline no-underline font-bold">
-                      Sign in
-                    </Link>
-                  </>
-                )}
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </motion.div>
-      <div className={`absolute bottom-8 text-center text-xs ${step === 1 ? 'text-black' : 'text-white'}`}>
+      <div
+        className={`absolute bottom-8 text-center text-xs ${step === 1 ? "text-black" : "text-white"}`}
+      >
         @2025 ORCA All Right Reserved.
       </div>
     </div>

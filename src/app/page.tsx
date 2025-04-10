@@ -14,9 +14,6 @@ export default function HomePage() {
           </Text>
 
           <Group grow mt="md">
-            <Button component={Link} href="/signup" variant="filled" radius="md" w='200px'>
-              Create Account
-            </Button>
             <Button component={Link} href="/signin" variant="outline" radius="md">
               Sign In
             </Button>

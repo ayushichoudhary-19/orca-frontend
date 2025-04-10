@@ -3,7 +3,7 @@ import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import notesReducer from './notesSlice';
 import authReducer from './authSlice';
-import featureReducer from './featureSlice';
+import { featureReducer } from 'uptut-rbac'; 
 
 const persistConfig = {
   key: 'root',
