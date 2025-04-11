@@ -31,14 +31,35 @@ export const useCallManager = () => {
   const API_BASE_URL = 'http://localhost:8080/api'
   // Initialize Twilio device
   useEffect(() => {
+    let isInitialized = false;
+
     const initDevice = async () => {
+      if (isInitialized) return;
       try {
         setIsLoading(true);
         const { data } = await axios.get(`${API_BASE_URL}/twilio/token`);
-        const device = new Device(data.token);
+        const device = new Device(data.token, {
+          // Enable debug mode for better error tracking
+          // debug: true,
+          // Ensure audio output is properly initialized
+          // audioConstraints: true,
+        });
         
-        device.on('ready', () => console.log('Device ready'));
-        device.on('error', (error) => console.error('Device error:', error));
+        // Wait for user interaction before initializing audio
+        await device.register();
+        
+        device.on('ready', () => {
+          console.log('Device ready');
+          isInitialized = true;
+        });
+
+        device.on('error', (error) => {
+          console.error('Device error:', error);
+          // Handle audio initialization errors
+          if (error.code === 31000) {
+            console.error('Audio permission error:', error.message);
+          }
+        });
         
         device.on('incoming', (conn) => {
           setCall(prev => ({
@@ -54,13 +75,28 @@ export const useCallManager = () => {
         setDevice(device);
       } catch (error) {
         console.error('Failed to initialize device:', error);
+        setCall(prev => ({ ...prev, status: 'idle' }));
       } finally {
         setIsLoading(false);
       }
     };
 
-    initDevice();
-    return () => device?.destroy();
+    // Initialize device only after a user interaction
+    const handleUserInteraction = () => {
+      initDevice();
+      // Remove event listeners after initialization
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+    };
+
+    document.addEventListener('click', handleUserInteraction);
+    document.addEventListener('touchstart', handleUserInteraction);
+
+    return () => {
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+      device?.destroy();
+    };
   }, [device]);
 
   // Update call duration

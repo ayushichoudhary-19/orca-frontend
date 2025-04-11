@@ -1,20 +1,20 @@
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
-import { persistStore, persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
-import notesReducer from './notesSlice';
-import authReducer from './authSlice';
-import { featureReducer } from 'uptut-rbac'; 
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
+import notesReducer from "./notesSlice";
+import authReducer from "./authSlice";
+import { featureReducer } from "uptut-rbac";
 
 const persistConfig = {
-  key: 'root',
+  key: "root",
   storage,
-  whitelist: ['notes', 'auth', 'features']
+  whitelist: ["notes", "auth", "features"],
 };
 
 const rootReducer = combineReducers({
   notes: notesReducer,
   auth: authReducer,
-  features: featureReducer,
+  features: featureReducer,  // Add the featureReducer from uptut-rbac
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -24,7 +24,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
+        ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
       },
     }),
 });
