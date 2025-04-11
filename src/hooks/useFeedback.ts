@@ -11,7 +11,7 @@ export interface FeedbackData {
 export const useFeedback = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const API_BASE_URL = "http://localhost:8080/api";
+  const API_BASE_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/api`
 
   const submitFeedback = async (data: FeedbackData) => {
     setIsSubmitting(true);

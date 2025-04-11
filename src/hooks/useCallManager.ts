@@ -28,7 +28,7 @@ export const useCallManager = () => {
   });
   const [device, setDevice] = useState<Device | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const API_BASE_URL = 'http://localhost:8080/api'
+  const API_BASE_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/api`
   // Initialize Twilio device
   useEffect(() => {
     let isInitialized = false;
