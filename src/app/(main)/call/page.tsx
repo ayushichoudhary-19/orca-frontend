@@ -5,23 +5,20 @@ import { Dialer } from "@/components/Dialer/Dialer";
 import { NumberPad } from "@/components/Dialer/NumberPad";
 import { useCallManager } from "@/hooks/useCallManager";
 import { useFeedback, FeedbackData } from "@/hooks/useFeedback";
-import {
-  Container,
-  Tabs,
-  Paper,
-  PaperProps,
-  Switch,
-  Text,
-  Group,
-} from "@mantine/core";
+import { Container, Tabs, Paper, PaperProps, Switch, Text, Group, Button } from "@mantine/core";
 import { UploadNumbers } from "@/components/Contacts/UploadNumbers";
 import { ContactList } from "@/components/Contacts/ContactList";
 import { useAutoDialer } from "@/hooks/useAutoDialer";
 import { ScriptReader } from "@/components/Script/ScriptReader";
 import { FeedbackModal } from "@/components/Feedback/FeedbackModel";
 import { motion } from "framer-motion";
-// import { useFeatureAccess } from "uptut-rbac";
-import { IconList, IconDialpad } from "@tabler/icons-react";
+import {
+  IconList,
+  IconDialpad,
+  IconPlayerStopFilled,
+  IconPlayerPauseFilled,
+  IconPlayerPlayFilled,
+} from "@tabler/icons-react";
 import { forwardRef } from "react";
 import { Toaster } from "react-hot-toast";
 import { CountdownOverlay } from "@/components/Dialer/CountdownOverlay";
@@ -38,11 +35,10 @@ const MotionContainer = motion(Container);
 
 export default function CallPage() {
   const { call, startCall, endCall, toggleMute, toggleSpeaker } = useCallManager();
-  // const canUploadContacts = useFeatureAccess("upload_contact_csv");
   const [number, setNumber] = useState("");
   const [showFeedback, setShowFeedback] = useState(false);
   const [autoDial, setAutoDial] = useState(true);
-  const [showCountdown, setShowCountdown] = useState(false);
+  const [showCountdown, setShowCountdown] = useState(false); 
 
   const {
     contacts,
@@ -50,16 +46,26 @@ export default function CallPage() {
     handleUpload,
     goToNextContact,
     setManualNumber,
+    startAutoDialing,
+    pauseAutoDialing,
+    stopAutoDialing,
+    getAutoDialStatus,
+    incrementContactIndex,
   } = useAutoDialer(startCall, endCall);
 
-  const currentContactData = contacts[currentContact];
-
+  const currentContactData =
+  contacts[currentContact] ||
+  (number
+    ? { name: "Unknown Number", number }
+    : null);
   const hasHandledCallEndRef = useRef(false);
 
   useEffect(() => {
     if (call.status === "ended" && !hasHandledCallEndRef.current) {
       setShowFeedback(true);
       hasHandledCallEndRef.current = true;
+
+      // Delay contact index shift until after feedback is submitted
     }
 
     if (call.status !== "ended") {
@@ -69,11 +75,7 @@ export default function CallPage() {
 
   const { submitFeedback } = useFeedback();
 
-  const handleFeedbackSubmit = async (feedback: {
-    callOutcome: FeedbackData["callOutcome"];
-    leadStatus: FeedbackData["leadStatus"];
-    notes?: string;
-  }) => {
+  const handleFeedbackSubmit = async (feedback: FeedbackData) => {
     const promise = submitFeedback({
       callId: call.id,
       callOutcome: feedback.callOutcome,
@@ -91,16 +93,13 @@ export default function CallPage() {
       await promise;
       setShowFeedback(false);
 
-      if (autoDial) {
+      if (getAutoDialStatus() === "running") {
+        incrementContactIndex();
         setShowCountdown(true);
       }
     } catch (error) {
       console.error("Error submitting feedback:", error);
       setShowFeedback(false);
-
-      if (autoDial) {
-        setShowCountdown(true);
-      }
     }
   };
 
@@ -117,19 +116,11 @@ export default function CallPage() {
 
       <div
         className="flex flex-row w-full min-h-screen"
-        style={{
-          background: "linear-gradient(to right,#dbe1f2,  #dae0f2)",
-        }}
+        style={{ background: "linear-gradient(to right,#dbe1f2,  #dae0f2)" }}
       >
-        {/* Contact List column */}
-        <div
-          className="w-full md:w-1/3 min-h-screen"
-          style={{
-            position: "relative",
-            zIndex: 1,
-          }}
-        >
-          <div className="w-full p-6">
+        {/* Contacts & Controls */}
+        <div className="w-full md:w-1/3 min-h-screen" style={{ zIndex: 1 }}>
+          <div className="w-full">
             <MotionPaper
               p="xl"
               initial={{ y: 20, opacity: 0 }}
@@ -149,21 +140,53 @@ export default function CallPage() {
 
                 <Tabs.Panel value="list">
                   <UploadNumbers onUpload={handleUpload} />
-                  <Paper
-                    mt="md"
-                    p="sm"
-                    radius="md"
-                    className="gradient-horizontal-light-2 w-max"
-                  >
+                  <Paper mt="md" p="sm" radius="md" className="gradient-horizontal-light-2 w-max">
                     <Group justify="space-between">
-                      <Text size="sm" fw={500}>
-                        Auto Dial
-                      </Text>
-                      <Switch
-                        checked={autoDial}
-                        onChange={(e) => setAutoDial(e.currentTarget.checked)}
-                        size="md"
-                      />
+                      <Group>
+                        <Text size="sm" fw={500}>
+                          Auto Dial
+                        </Text>
+                        <Switch
+                          checked={autoDial}
+                          onChange={(e) => setAutoDial(e.currentTarget.checked)}
+                          size="md"
+                        />
+                      </Group>
+                      <Group>
+                        <Button
+                          onClick={() => {
+                            setAutoDial(true);
+                            startAutoDialing();
+                          }}
+                          leftSection={<IconPlayerPlayFilled size={16} />}
+                          size="xs"
+                          variant="filled"
+                        >
+                          Start
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            pauseAutoDialing();
+                            setAutoDial(false);
+                          }}
+                          size="xs"
+                          variant="filled"
+                          color="yellow"
+                        >
+                         <IconPlayerPauseFilled size={16} />
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            stopAutoDialing();
+                            setAutoDial(false);
+                          }}
+                          size="xs"
+                          variant="filled"
+                          color="red"
+                        >
+                          <IconPlayerStopFilled size={16} />
+                        </Button>
+                      </Group>
                     </Group>
                   </Paper>
                   <ContactList
@@ -179,7 +202,10 @@ export default function CallPage() {
                 <Tabs.Panel value="pad">
                   <NumberPad
                     value={number}
-                    onChange={setNumber}
+                    onChange={(num) => {
+                      setNumber(num);
+                      setManualNumber(num);
+                    }}
                     disabled={call.status !== "idle"}
                   />
                 </Tabs.Panel>
@@ -188,7 +214,7 @@ export default function CallPage() {
           </div>
         </div>
 
-        {/* Dialer column */}
+        {/* Dialer */}
         <div
           className="w-full md:w-1/3 min-h-screen flex items-center justify-center"
           style={{
@@ -199,10 +225,8 @@ export default function CallPage() {
             position: "relative",
             overflow: "hidden",
             backgroundColor: "#f9fcfe",
-            // backgroundColor: "white"
           }}
         >
-          {" "}
           {showCountdown && (
             <CountdownOverlay
               seconds={8}
@@ -220,12 +244,13 @@ export default function CallPage() {
               transition={{ delay: 0.2, duration: 0.4 }}
               p="xl"
             >
+              
               <Dialer
-                contact={currentContactData} // Update this line
+                contact={currentContactData}
                 status={call.status}
                 duration={call.duration}
                 callId={call.id}
-                onCallStart={() => startCall(currentContactData?.number || '')} // Update this line
+                onCallStart={() => startCall(currentContactData?.number || "")}
                 onCallEnd={endCall}
                 onMuteToggle={toggleMute}
                 onSpeakerToggle={toggleSpeaker}
@@ -234,9 +259,9 @@ export default function CallPage() {
           </div>
         </div>
 
-        {/* Script Reader column */}
-        <div className="w-full md:w-1/3 p-4 bg-white min-h-screen">
-          <ScriptReader contact={currentContactData} /> {/* Update this line */}
+        {/* Script Reader */}
+        <div className="w-full md:w-1/3 bg-white min-h-screen">
+          <ScriptReader contact={currentContactData} />
         </div>
       </div>
 
@@ -244,7 +269,7 @@ export default function CallPage() {
         callId={call.id}
         opened={showFeedback}
         onClose={() => setShowFeedback(false)}
-        onSubmit={handleFeedbackSubmit}
+        onSubmit={(feedback) => handleFeedbackSubmit({ ...feedback, callId: call.id })}
       />
     </MotionContainer>
   );

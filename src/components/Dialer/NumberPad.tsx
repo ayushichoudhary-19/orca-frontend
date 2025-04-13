@@ -74,7 +74,7 @@ export function NumberPad({ value, onChange, disabled }: NumberPadProps) {
       <Paper p="md" mb="md" radius="lg" className="bg-transparent">
         <Text
           size="md"
-          className="font-mono tracking-wider text-white"
+          className="font-mono tracking-wider"
           style={{ minHeight: "2rem" }}
         >
           {value || (

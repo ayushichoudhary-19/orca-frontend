@@ -21,7 +21,7 @@ import { CallStatusBadge } from "./CallStatusBadge";
 import { Contact } from "../Contacts/ContactList";
 
 interface DialerProps {
-  contact: Contact;
+  contact: Contact | { name: string; number: string } | null;
   status: "idle" | "calling" | "ringing" | "connected" | "ended";
   duration: number;
   callId: string;
@@ -130,7 +130,7 @@ export function Dialer({
     >
       {/* Contact Info */}
       <Stack align="center" gap="xs" className="w-full mb-5">
-        {contact ? (
+      {contact?.number ? (
           <>
             <Avatar size={110} radius="50%" color="ocean">
               {contact.name[0].toUpperCase()}
@@ -154,8 +154,8 @@ export function Dialer({
           </>
         ) : (
           <div className="flex flex-col items-center justify-center text-center px-4 py-6">
-            <IconPhone size={100} className="mb-2" color="#7d91e2" />
-            <Text fw={600} size="lg" className="text-[#7d91e2] mb-1">
+            <IconPhone size={100} className="mb-2" color="#6D57FC" />
+            <Text fw={600} size="lg" className="text-primary mb-1">
               No Active Call
             </Text>
             <Text size="xs" className="text-[#a0a7b8] max-w-xs">

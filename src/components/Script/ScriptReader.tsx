@@ -89,7 +89,7 @@ export function ScriptReader({ contact }: { contact?: Contact }) {
             className={`tab-item ${activeTab === "script" ? "active" : ""}`}
             onClick={() => setActiveTab("script")}
           >
-            <IconMessageCircle size={16} className="tab-icon" />
+            <IconMessageCircle size={16} className="tab-icon"/>
             <span>Script</span>
           </button>
           <button

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   IconPhoneCall,
@@ -7,55 +7,34 @@ import {
   IconLogout,
   IconSettings,
   IconMessageCircle,
-  IconAlertCircle
-} from '@tabler/icons-react';
-import { useState } from 'react';
-import { Tooltip, UnstyledButton, Stack } from '@mantine/core';
-import { useRouter } from 'next/navigation';
-import { useLogout } from '@/hooks/Auth/useLogout';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setRole } from '@/store/authSlice';
+  IconAlertCircle,
+} from "@tabler/icons-react";
+import { useState } from "react";
+import { Tooltip, UnstyledButton, Stack } from "@mantine/core";
+import { useRouter } from "next/navigation";
+import { useLogout } from "@/hooks/Auth/useLogout";
 
 const navItems = [
-  { label: 'Dialer', icon: IconPhoneCall, path: '/dialer' },
-  { label: 'Analytics', icon: IconChartBar, path: '/analytics' },
-  { label: 'Contacts', icon: IconUsers, path: '/contacts' },
-  { label: 'Messages', icon: IconMessageCircle, path: '/messages' },
-  { label: 'Settings', icon: IconSettings, path: '/settings' },
-  { label: 'Alerts', icon: IconAlertCircle, path: '/alerts' },
+  { label: "Dialer", icon: IconPhoneCall, path: "/call" },
+  { label: "Analytics", icon: IconChartBar, path: "/analytics" },
+  { label: "Contacts", icon: IconUsers, path: "/contacts" },
+  { label: "Messages", icon: IconMessageCircle, path: "/messages" },
+  { label: "Settings", icon: IconSettings, path: "/settings" },
+  { label: "Alerts", icon: IconAlertCircle, path: "/alerts" },
 ];
 
 export default function Sidebar() {
-  const [active, setActive] = useState('Dialer');
+  const [active, setActive] = useState("Dialer");
   const router = useRouter();
-  const dispatch = useAppDispatch();
-  const currentRole = useAppSelector((state) => state.auth.roleId);
-
   const logout = useLogout();
 
-  const roles = [
-    { id: 'admin', label: 'Admin' },
-    { id: 'user', label: 'User' },
-    { id: 'sales_rep', label: 'Sales Rep' }
-  ];
-
-  const handleRoleChange = (roleId: string) => {
-    dispatch(setRole(roleId));
-  };
-
-  const handleNavigate = (item: typeof navItems[number]) => {
+  const handleNavigate = (item: (typeof navItems)[number]) => {
     setActive(item.label);
     router.push(item.path);
   };
 
   return (
-    <div className="fixed left-0 top-0 h-screen w-[72px] bg-gradient-to-b from-[#7192E9] to-[#4469CA] flex flex-col items-center py-6 overflow-hidden">
-         {/* Logo */}
-      <div className="flex flex-col items-center pt-2">
-        <div className="w-10 h-10 rounded-full bg-[#8cd2ff] border-2 border-white flex items-center justify-center mb-2">
-          <div className="w-3 h-3 rounded-full bg-white" />
-        </div>
-      </div>
+    <div className="fixed left-0 top-0 h-screen w-[72px] bg-primary flex flex-col items-center py-6 overflow-hidden">
 
       {/* Nav Items */}
       <Stack justify="center" gap={32} className="flex-1 mt-4">
@@ -67,38 +46,13 @@ export default function Sidebar() {
                 onClick={() => handleNavigate(item)}
                 className="w-full flex flex-col items-center justify-center transition-all"
               >
-                <item.icon 
-                  size={22} 
-                  stroke={1.5} 
-                  color={isActive ? 'white' : '#bfd7ff'} 
-                />
-                {isActive && (
-                  <div className="w-1 h-1 bg-white rounded-full mt-1" />
-                )}
+                <item.icon size={22} stroke={1.5} color={isActive ? "white" : "#bfd7ff"} />
+                {isActive && <div className="w-1 h-1 bg-white rounded-full mt-1" />}
               </UnstyledButton>
             </Tooltip>
           );
         })}
       </Stack>
-
-      {/* Role Switcher */}
-      <div className="mb-4">
-        <Tooltip label="Switch Role" position="right" withArrow>
-          <div className="flex flex-col items-center gap-2">
-            {roles.map((role) => (
-              <UnstyledButton
-                key={role.id}
-                onClick={() => handleRoleChange(role.id)}
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${currentRole === role.id ? 'bg-white' : 'bg-transparent'}`}
-              >
-                <span className={`text-xs font-medium ${currentRole === role.id ? 'text-primary' : 'text-white'}`}>
-                  {role.label[0]}
-                </span>
-              </UnstyledButton>
-            ))}
-          </div>
-        </Tooltip>
-      </div>
 
       {/* Logout */}
       <div className="pb-4">

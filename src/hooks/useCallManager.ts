@@ -1,13 +1,13 @@
-// hooks/useCallManager.ts
-import { useState, useEffect } from 'react';
-import { Device, Call } from '@twilio/voice-sdk';
-import axios from 'axios';
+
+import { useState, useEffect } from "react";
+import { Device, Call } from "@twilio/voice-sdk";
+import axios from "axios";
 
 interface CallState {
   id: string;
   to: string;
   from: string;
-  status: 'idle' | 'calling' | 'ringing' | 'connected' | 'ended';
+  status: "idle" | "calling" | "ringing" | "connected" | "ended";
   startTime: Date | null;
   duration: number;
   connection?: Call;
@@ -17,97 +17,59 @@ interface CallState {
 
 export const useCallManager = () => {
   const [call, setCall] = useState<CallState>({
-    id: '',
-    to: '',
-    from: '',
-    status: 'idle',
+    id: "",
+    to: "",
+    from: "",
+    status: "idle",
     startTime: null,
     duration: 0,
     muted: false,
-    speaker: false
+    speaker: false,
   });
   const [device, setDevice] = useState<Device | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const API_BASE_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/api`
+  const API_BASE_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/api`;
   // Initialize Twilio device
   useEffect(() => {
-    let isInitialized = false;
+    let initialized = false;
 
     const initDevice = async () => {
-      if (isInitialized) return;
+      if (initialized) return;
+      initialized = true;
       try {
-        setIsLoading(true);
         const { data } = await axios.get(`${API_BASE_URL}/twilio/token`);
-        const device = new Device(data.token, {
-          // Enable debug mode for better error tracking
-          // debug: true,
-          // Ensure audio output is properly initialized
-          // audioConstraints: true,
-        });
-        
-        // Wait for user interaction before initializing audio
+        const device = new Device(data.token);
         await device.register();
-        
-        device.on('ready', () => {
-          console.log('Device ready');
-          isInitialized = true;
-        });
-
-        device.on('error', (error) => {
-          console.error('Device error:', error);
-          // Handle audio initialization errors
-          if (error.code === 31000) {
-            console.error('Audio permission error:', error.message);
-          }
-        });
-        
-        device.on('incoming', (conn) => {
-          setCall(prev => ({
-            ...prev,
-            id: conn.parameters.CallSid,
-            from: conn.parameters.From,
-            to: conn.parameters.To,
-            status: 'ringing',
-            connection: conn
-          }));
-        });
-
         setDevice(device);
-      } catch (error) {
-        console.error('Failed to initialize device:', error);
-        setCall(prev => ({ ...prev, status: 'idle' }));
-      } finally {
-        setIsLoading(false);
+      } catch (err) {
+        console.error("Device init failed", err);
       }
     };
 
-    // Initialize device only after a user interaction
-    const handleUserInteraction = () => {
+    const handleInteractionOnce = () => {
       initDevice();
-      // Remove event listeners after initialization
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener("click", handleInteractionOnce);
+      document.removeEventListener("touchstart", handleInteractionOnce);
     };
 
-    document.addEventListener('click', handleUserInteraction);
-    document.addEventListener('touchstart', handleUserInteraction);
+    document.addEventListener("click", handleInteractionOnce, { once: true });
+    document.addEventListener("touchstart", handleInteractionOnce, { once: true });
 
     return () => {
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('touchstart', handleUserInteraction);
-      device?.destroy();
+      document.removeEventListener("click", handleInteractionOnce);
+      document.removeEventListener("touchstart", handleInteractionOnce);
     };
-  }, [device]);
+  }, []);
 
   // Update call duration
   useEffect(() => {
     let internval: NodeJS.Timeout;
-    
-    if (call.status === 'connected' && call.startTime) {
+
+    if (call.status === "connected" && call.startTime) {
       internval = setInterval(() => {
-        setCall(prev => ({
+        setCall((prev) => ({
           ...prev,
-          duration: Math.floor((Date.now() - prev.startTime!.getTime()) / 1000)
+          duration: Math.floor((Date.now() - prev.startTime!.getTime()) / 1000),
         }));
       }, 1000);
     }
@@ -120,26 +82,30 @@ export const useCallManager = () => {
 
     try {
       setIsLoading(true);
-      setCall(prev => ({
+      setCall((prev) => ({
         ...prev,
         to,
-        status: 'calling'
+        status: "calling",
       }));
-  
+
+      if (!device) {
+        console.warn("Device not ready yet");
+        return;
+      }
       const connection = await device.connect({ params: { To: to } });
-      
-      connection.on('accept', async () => {
+
+      connection.on("accept", async () => {
         const callSid = connection.parameters.CallSid;
         const from = process.env.TWILIO_PHONE_NUMBER;
-        setCall(prev => ({
+        setCall((prev) => ({
           ...prev,
           id: callSid,
-          status: 'connected',
+          status: "connected",
           startTime: new Date(),
           duration: 0,
-          connection
+          connection,
         }));
-      
+
         // ✅ Save the call record to backend using Twilio SID
         try {
           await axios.post(`${API_BASE_URL}/calls/call`, {
@@ -148,22 +114,21 @@ export const useCallManager = () => {
             from,
           });
         } catch (error) {
-          console.error('Failed to save call:', error);
+          console.error("Failed to save call:", error);
         }
       });
-      
 
-      connection.on('disconnect', () => {
-        setCall(prev => ({
+      connection.on("disconnect", () => {
+        setCall((prev) => ({
           ...prev,
-          status: 'ended'
+          status: "ended",
         }));
       });
     } catch (error) {
-      console.error('Call failed:', error);
-      setCall(prev => ({
+      console.error("Call failed:", error);
+      setCall((prev) => ({
         ...prev,
-        status: 'ended'
+        status: "ended",
       }));
     } finally {
       setIsLoading(false);
@@ -172,32 +137,33 @@ export const useCallManager = () => {
 
   const endCall = async () => {
     if (!call.connection) return;
-    
+
     try {
       call.connection.disconnect();
-      setCall(prev => ({
+      setCall((prev) => ({
         ...prev,
-        status: 'ended'
+        status: "ended",
       }));
-      
-      if (call.id) { // Add this check
+
+      if (call.id) {
+        // Add this check
         await axios.post(`${API_BASE_URL}/calls/end`, { callId: call.id });
       }
     } catch (error) {
-      console.error('Failed to end call:', error);
+      console.error("Failed to end call:", error);
     }
   };
 
   const toggleMute = (muted: boolean) => {
     if (call.connection) {
       call.connection.mute(muted);
-      setCall(prev => ({ ...prev, muted }));
+      setCall((prev) => ({ ...prev, muted }));
     }
   };
 
   const toggleSpeaker = (speaker: boolean) => {
     // This requires additional audio routing setup
-    setCall(prev => ({ ...prev, speaker }));
+    setCall((prev) => ({ ...prev, speaker }));
   };
 
   return {
@@ -206,6 +172,6 @@ export const useCallManager = () => {
     startCall,
     endCall,
     toggleMute,
-    toggleSpeaker
+    toggleSpeaker,
   };
 };

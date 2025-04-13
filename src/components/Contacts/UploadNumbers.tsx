@@ -1,7 +1,7 @@
 "use client";
 
-import { FileInput, Text, Group, Button } from "@mantine/core";
-import { IconUpload, IconFileSpreadsheet } from "@tabler/icons-react";
+import { FileInput, Text, Group } from "@mantine/core";
+import { IconFileSpreadsheet } from "@tabler/icons-react";
 import Papa from "papaparse";
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -52,13 +52,14 @@ export const UploadNumbers = ({ onUpload }: UploadNumbersProps) => {
         <FileInput
           accept=".csv"
           placeholder="Choose CSV file"
-          leftSection={<IconFileSpreadsheet size={16} color="#484f62" />}
+          leftSection={<IconFileSpreadsheet size={16} color="#484f62"
+          />}
           onChange={handleFile}
           value={file}
           disabled={uploading}
           classNames={{
             input:
-              "bg-transparent text-[#484f62] font-semibold px-3 py-2 border-none focus:ring-0 focus:outline-none placeholder-black/80",
+              "bg-transparent text-[#484f62] font-semibold px-8 py-2 border-none focus:ring-0 focus:outline-none placeholder-black/80",
             root: "rounded-xl",
           }}
         />
@@ -70,26 +71,6 @@ export const UploadNumbers = ({ onUpload }: UploadNumbersProps) => {
           whileTap={{ scale: 0.97 }}
           className="w-full"
         >
-          <Button
-            fullWidth
-            leftSection={<IconUpload size={16} />}
-            variant="filled"
-            onClick={() =>
-              document
-                .querySelector<HTMLInputElement>('input[type="file"]')
-                ?.click()
-            }
-            loading={uploading}
-            disabled={!file}
-            size="sm"
-            radius="xl"
-          >
-            {uploading
-              ? "Processing..."
-              : file
-              ? "Upload Contacts"
-              : "Select CSV File"}
-          </Button>
         </motion.div>
       </Group>
 
