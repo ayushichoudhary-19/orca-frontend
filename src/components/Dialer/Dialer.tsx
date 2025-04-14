@@ -8,7 +8,7 @@ import dynamic from "next/dynamic";
 const NoteEditor = dynamic(() => import("@/components/Feedback/NoteEditor"), {
   ssr: false,
 });
-import { Group, Text, ActionIcon, Stack, Avatar } from "@mantine/core";
+import { Group, Text, ActionIcon, Stack, Avatar, Tooltip } from "@mantine/core";
 import {
   IconPhone,
   IconVolume,
@@ -29,6 +29,7 @@ interface DialerProps {
   onCallEnd: (callId: string) => void;
   onMuteToggle: (muted: boolean) => void;
   onSpeakerToggle: (speaker: boolean) => void;
+  isAutoDialerReady?: boolean;
 }
 
 export function Dialer({
@@ -40,12 +41,12 @@ export function Dialer({
   onCallEnd,
   onMuteToggle,
   onSpeakerToggle,
+  isAutoDialerReady,
 }: DialerProps) {
   const dispatch = useDispatch();
-  const savedNotes = useSelector(
-    (state: RootState) => state.notes?.notes?.[callId] || ""
-  );  
+  const savedNotes = useSelector((state: RootState) => state.notes?.notes?.[callId] || "");
 
+  const isManual = contact?.name === "Unknown Number";
   const [noteInput, setNoteInput] = useState("");
   const [muted, setMuted] = useState(false);
   const [speaker, setSpeaker] = useState(false);
@@ -130,7 +131,7 @@ export function Dialer({
     >
       {/* Contact Info */}
       <Stack align="center" gap="xs" className="w-full mb-5">
-      {contact?.number ? (
+        {contact?.number ? (
           <>
             <Avatar size={110} radius="50%" color="ocean">
               {contact.name[0].toUpperCase()}
@@ -139,11 +140,7 @@ export function Dialer({
             <Text fw={600} size="xl" className="text-center tracking-tight">
               {contact.name}
             </Text>
-            <Text
-              size="md"
-              fw={600}
-              className="text-center tracking-tight -mt-1 text-[#8b94a9]"
-            >
+            <Text size="md" fw={600} className="text-center tracking-tight -mt-1 text-[#8b94a9]">
               {contact.number}
             </Text>
             {status !== "idle" && (
@@ -159,8 +156,7 @@ export function Dialer({
               No Active Call
             </Text>
             <Text size="xs" className="text-[#a0a7b8] max-w-xs">
-              Start a call to see contact details, take notes, and manage audio
-              settings.
+              Start a call to see contact details, take notes, and manage audio settings.
             </Text>
           </div>
         )}
@@ -185,24 +181,35 @@ export function Dialer({
               disabled={status === "idle" || status === "ended"}
               className="transition-all duration-200 hover:shadow-lg"
             >
-              {muted ? (
-                <IconMicrophoneOff size={18} />
-              ) : (
-                <IconMicrophone size={18} />
-              )}
+              {muted ? <IconMicrophoneOff size={18} /> : <IconMicrophone size={18} />}
             </ActionIcon>
 
             {status === "idle" ? (
-              <ActionIcon
-                variant="filled"
-                size={60}
-                radius="xl"
-                className="text-white shadow-lg"
-                onClick={onCallStart}
-                disabled={!contact.number}
-              >
-                <IconPhone size={18} />
-              </ActionIcon>
+              isManual ? (
+                <ActionIcon
+                  variant="filled"
+                  size={60}
+                  radius="xl"
+                  className="text-white shadow-lg"
+                  onClick={onCallStart}
+                  disabled={!contact.number}
+                >
+                  <IconPhone size={18} />
+                </ActionIcon>
+              ) : (
+                <Tooltip label="Click on Start to begin auto-calling" position="top" withArrow>
+                  <ActionIcon
+                    variant="filled"
+                    size={60}
+                    radius="xl"
+                    className="text-white shadow-lg"
+                    onClick={onCallStart}
+                    disabled={isAutoDialerReady !== true}
+                  >
+                    <IconPhone size={18} />
+                  </ActionIcon>
+                </Tooltip>
+              )
             ) : (
               status !== "ended" && (
                 <ActionIcon

@@ -38,7 +38,7 @@ export default function CallPage() {
   const [number, setNumber] = useState("");
   const [showFeedback, setShowFeedback] = useState(false);
   const [autoDial, setAutoDial] = useState(true);
-  const [showCountdown, setShowCountdown] = useState(false); 
+  const [showCountdown, setShowCountdown] = useState(false);
 
   const {
     contacts,
@@ -50,22 +50,16 @@ export default function CallPage() {
     pauseAutoDialing,
     stopAutoDialing,
     getAutoDialStatus,
-    incrementContactIndex,
   } = useAutoDialer(startCall, endCall);
 
   const currentContactData =
-  contacts[currentContact] ||
-  (number
-    ? { name: "Unknown Number", number }
-    : null);
+    contacts[currentContact] || (number ? { name: "Unknown Number", number } : null);
   const hasHandledCallEndRef = useRef(false);
 
   useEffect(() => {
     if (call.status === "ended" && !hasHandledCallEndRef.current) {
       setShowFeedback(true);
       hasHandledCallEndRef.current = true;
-
-      // Delay contact index shift until after feedback is submitted
     }
 
     if (call.status !== "ended") {
@@ -94,7 +88,6 @@ export default function CallPage() {
       setShowFeedback(false);
 
       if (getAutoDialStatus() === "running") {
-        incrementContactIndex();
         setShowCountdown(true);
       }
     } catch (error) {
@@ -168,17 +161,19 @@ export default function CallPage() {
                           onClick={() => {
                             pauseAutoDialing();
                             setAutoDial(false);
+                            setShowCountdown(false);
                           }}
                           size="xs"
                           variant="filled"
                           color="yellow"
                         >
-                         <IconPlayerPauseFilled size={16} />
+                          <IconPlayerPauseFilled size={16} />
                         </Button>
                         <Button
                           onClick={() => {
                             stopAutoDialing();
                             setAutoDial(false);
+                            setShowCountdown(false);
                           }}
                           size="xs"
                           variant="filled"
@@ -244,7 +239,6 @@ export default function CallPage() {
               transition={{ delay: 0.2, duration: 0.4 }}
               p="xl"
             >
-              
               <Dialer
                 contact={currentContactData}
                 status={call.status}
@@ -254,6 +248,7 @@ export default function CallPage() {
                 onCallEnd={endCall}
                 onMuteToggle={toggleMute}
                 onSpeakerToggle={toggleSpeaker}
+                isAutoDialerReady={getAutoDialStatus() === "running"}
               />
             </MotionPaper>
           </div>
