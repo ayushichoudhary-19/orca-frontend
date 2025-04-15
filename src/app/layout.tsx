@@ -2,8 +2,9 @@ import '@mantine/core/styles.css';
 import "@/styles/globals.css";
 import { MantineProvider } from "@mantine/core";
 import { theme } from "./theme";
-import Providers from "./providers";
+import Providers from "../providers/providers";
 import { Urbanist } from 'next/font/google';
+import { Toaster } from "react-hot-toast";
 
 const urbanist = Urbanist({
     subsets: ['latin'],
@@ -20,6 +21,7 @@ export default function RootLayout({
     <html lang="en" className={urbanist.variable}>
       <body>
         <MantineProvider theme={theme}>
+          <Toaster position="top-center" />
           <Providers>{children}</Providers>
         </MantineProvider>
       </body>

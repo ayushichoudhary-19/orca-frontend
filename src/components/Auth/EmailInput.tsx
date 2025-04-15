@@ -1,4 +1,3 @@
-// components/Auth/EmailInput.tsx
 import CustomTextInput from "../Utils/CustomTextInput";
 
 export const EmailInput = ({

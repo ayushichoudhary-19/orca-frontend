@@ -4,17 +4,22 @@ import storage from "redux-persist/lib/storage";
 import notesReducer from "./notesSlice";
 import authReducer from "./authSlice";
 import { featureReducer } from "uptut-rbac";
+import membershipReducer from "./membershipSlice";
+import campaignReducer from "./campaignSlice";
 
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["notes", "auth", "features"],
+  whitelist: ["notes", "auth", "features", "membership", "campaign"],
+  blacklist: ['membership.loading'],
 };
 
 const rootReducer = combineReducers({
   notes: notesReducer,
   auth: authReducer,
-  features: featureReducer,  // Add the featureReducer from uptut-rbac
+  features: featureReducer,
+  membership: membershipReducer,
+  campaign: campaignReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

@@ -2,7 +2,6 @@
 
 import { EditorProvider, useCurrentEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import TextStyle from "@tiptap/extension-text-style";
 import Placeholder from "@tiptap/extension-placeholder";
 import Color from "@tiptap/extension-color";
 import { useEffect, useRef } from "react";
@@ -108,7 +107,6 @@ export const MenuBar = () => {
 
 const extensions = [
     Color,
-    TextStyle,
     StarterKit.configure({
       bulletList: { keepMarks: true },
       orderedList: { keepMarks: true },

@@ -84,3 +84,11 @@
 .markdown-content strong {
   color: #5a5b68;
 }
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

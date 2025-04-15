@@ -106,7 +106,7 @@ export const useCallManager = () => {
           connection,
         }));
 
-        // ✅ Save the call record to backend using Twilio SID
+        // Save the call record to backend
         try {
           await axios.post(`${API_BASE_URL}/calls/call`, {
             id: callSid,
@@ -146,7 +146,6 @@ export const useCallManager = () => {
       }));
 
       if (call.id) {
-        // Add this check
         await axios.post(`${API_BASE_URL}/calls/end`, { callId: call.id });
       }
     } catch (error) {
@@ -162,7 +161,6 @@ export const useCallManager = () => {
   };
 
   const toggleSpeaker = (speaker: boolean) => {
-    // This requires additional audio routing setup
     setCall((prev) => ({ ...prev, speaker }));
   };
 

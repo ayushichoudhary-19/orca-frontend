@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import "@mantine/core/styles.css";
 import "@/styles/globals.css";
 import Sidebar from "@/components/Sidebar";
-import Providers from "../providers";
+import Providers from "../../providers/providers";
 import AuthGuard from "@/components/Auth/AuthGuard";
+import { Header } from "@/components/Header";
 
 export const metadata: Metadata = {
   title: "Cold Calling App",
@@ -16,13 +17,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-     <div className="flex">
-        <AuthGuard>
-          <Sidebar />
-          <main className="ml-[72px] flex-1 min-h-screen">
+    <AuthGuard>
+      <div className="flex h-screen">
+        <Sidebar />
+        <div className="flex-1 flex flex-col">
+          <Header />
+          <main className="flex-1 overflow-auto p-6">
             <Providers>{children}</Providers>
           </main>
-        </AuthGuard>
+        </div>
       </div>
+    </AuthGuard>
   );
 }

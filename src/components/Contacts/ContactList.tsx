@@ -20,8 +20,7 @@ interface ContactListProps {
 
 export const ContactList = ({ contacts, currentContact, onSelect }: ContactListProps) => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  
-  // Add this effect to handle auto-scrolling
+
   useEffect(() => {
     const currentContactElement = scrollAreaRef.current?.querySelector(`[data-index="${currentContact}"]`);
     if (currentContactElement) {

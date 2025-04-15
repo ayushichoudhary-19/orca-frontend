@@ -15,19 +15,26 @@ import {
 import { AuthForm } from "./AuthForm";
 import { useDispatch } from "react-redux";
 import { setAuth } from "@/store/authSlice";
+import axios from "axios";
 
 export const AuthPage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
 
   const handleAuth = async (email: string, password: string) => {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password)
-
-      const user = userCredential.user;
-      dispatch(setAuth({ email: user.email || "", uid: user.uid }));
-      router.push("/call");
-    } catch (error: unknown) {
+    try{
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+  
+    await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/user/`, {
+      uid: user.uid,
+      email: user.email,
+    });
+  
+    dispatch(setAuth({ email: user.email || "", uid: user.uid }));
+    router.push("/call");
+  }
+   catch (error: unknown) {
         const message = isFirebaseError(error)
           ? getFirebaseAuthErrorMessage(error.code)
           : getErrorMessage(error);

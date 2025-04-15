@@ -4,6 +4,7 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor } from "@/store/store";
 import { RBACProvider, RBACConfig } from "uptut-rbac";
+import { MembershipProvider } from "./MembershipProvider";
 
 function RBACWrapper({ children }: { children: React.ReactNode }) {
 const rbacConfig: RBACConfig = {
@@ -32,6 +33,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
+        <MembershipProvider />
         <RBACWrapper>{children}</RBACWrapper>
       </PersistGate>
     </Provider>

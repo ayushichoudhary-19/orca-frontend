@@ -112,12 +112,6 @@ export function Dialer({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isTextAreaFocused]);
 
-  // Add this useEffect to log callId changes
-  useEffect(() => {
-    console.log("CallId changed:", callId);
-    console.log("notes", savedNotes);
-  }, [callId, savedNotes]);
-
   return (
     <motion.div
       className="w-full rounded-3xl flex flex-col items-center justify-start space-y-6"
