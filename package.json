@@ -44,7 +44,8 @@
     "remark-gfm": "^4.0.1",
     "socket.io-client": "^4.8.1",
     "uptut-rbac": "https://github.com/ayushichoudhary-19/uptut-rbac-frontend/archive/refs/heads/main.tar.gz",
-    "use-debounce": "^10.0.4"
+    "use-debounce": "^10.0.4",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

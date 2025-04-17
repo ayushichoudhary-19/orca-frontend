@@ -111,7 +111,6 @@ export default function CallPage() {
         className="flex flex-row w-full min-h-screen"
         style={{ background: "linear-gradient(to right,#dbe1f2,  #dae0f2)" }}
       >
-        {/* Contacts & Controls */}
         <div className="w-full md:w-1/3 min-h-screen" style={{ zIndex: 1 }}>
           <div className="w-full">
             <MotionPaper
@@ -208,8 +207,6 @@ export default function CallPage() {
             </MotionPaper>
           </div>
         </div>
-
-        {/* Dialer */}
         <div
           className="w-full md:w-1/3 min-h-screen flex items-center justify-center"
           style={{
@@ -254,7 +251,6 @@ export default function CallPage() {
           </div>
         </div>
 
-        {/* Script Reader */}
         <div className="w-full md:w-1/3 bg-white min-h-screen">
           <ScriptReader contact={currentContactData} />
         </div>

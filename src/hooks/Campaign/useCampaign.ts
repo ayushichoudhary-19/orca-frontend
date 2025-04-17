@@ -61,13 +61,14 @@ export const useCampaign = () => {
   const addIdealCustomerDetails = async (
     campaignId: string,
     details: {
-      revenueTarget?: { min?: number; max?: number };
-      titles?: string[];
-      companyLocation?: string[];
-      employeeLocation?: string[];
-      industry?: string[];
-      keywords?: string[];
-      allowAutoLeads?: boolean;
+      revenueTarget: { min: number; max: number };
+      titles: string[];
+      companyLocation: string[];
+      employeeLocation: string[];
+      industry: string[];
+      keywords: string[];
+      allowAutoLeads: boolean;
+      companySize: string;
     }
   ) => {
     const res = await axiosClient.post(`/api/campaign/${campaignId}/details`, details);

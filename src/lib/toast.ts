@@ -19,6 +19,14 @@ export const toast = {
     hotToast.loading(message, {
       duration: options?.duration ?? 10000,
     }),
+  
+    info: (message: string, options?: ToastOptions) =>
+      hotToast(message, {
+        duration: options?.duration ?? 3000,
+        icon: 'ℹ️',
+      }),
+    
+
 
   promise: <T>(
     promise: Promise<T>,

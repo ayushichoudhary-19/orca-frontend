@@ -27,6 +27,7 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
   h-14
   px-4
   py-3
+  text-[14px]
   text-tinteddark8
   placeholder-tintedgray
   border

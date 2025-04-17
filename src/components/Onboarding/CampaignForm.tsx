@@ -2,7 +2,7 @@
 
 import { useForm } from "@mantine/form";
 import { Button, Container, Title, Text } from "@mantine/core";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { IconArrowRight } from "@tabler/icons-react";
 import CustomTextInput from "@/components/Utils/CustomTextInput";
 import { toast } from "@/lib/toast";
@@ -10,6 +10,9 @@ import { useCampaign } from "@/hooks/Campaign/useCampaign";
 import { useUpdateOnboardingStep } from "@/hooks/Onboarding/useUpdateOnboardingStep";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { setDraftCampaignId } from "@/utils/campaignUtils";
+import { zodResolver } from '@mantine/form';
+import { campaignFormSchema, CampaignFormValues } from '@/schemas/campaignFormSchema';
 
 export default function CampaignForm() {
   const router = useRouter();
@@ -18,25 +21,35 @@ export default function CampaignForm() {
   const businessId = useSelector((state: RootState) => state.membership.businessId);
   const membershipId = useSelector((state: RootState) => state.membership.membershipId);
 
-  const form = useForm({
+  const form = useForm<CampaignFormValues>({
+    validate: zodResolver(campaignFormSchema),
     initialValues: {
       companyWebsite: "",
       campaignName: "",
     },
   });
 
+  const pathname = usePathname();
+  const isCreateFlow = pathname.includes("/campaign/create");
+
   const handleSubmit = async (values: typeof form.values) => {
     if (!membershipId || !businessId) return;
-
     try {
-      await createCampaign({
-        businessId: businessId,
-        ...values,
+      const newCampaign = await createCampaign({
+        businessId,
+        campaignName: values.campaignName,
+        companyWebsite: values.companyWebsite,
+        status: "DRAFT",
       });
 
-      await updateStep(membershipId, 2);
+      if (isCreateFlow) {
+        setDraftCampaignId(newCampaign._id);
+        router.push("/campaign/create?step=contacts");
+      } else {
+        await updateStep(membershipId, 2);
+        router.push("/onboarding/hub");
+      }
       toast.success("Campaign saved");
-      router.push("/onboarding/hub");
     } catch (err) {
       console.error(err);
       toast.error("Error saving campaign");
@@ -49,7 +62,7 @@ export default function CampaignForm() {
         Start your campaign
       </Title>
       <Text size="sm" c="dimmed" mb="xl">
-        Let’s get to know your product.
+       {"Let’s "}get to know your product.
       </Text>
       <form onSubmit={form.onSubmit(handleSubmit)} className="space-y-5">
         <div>
@@ -60,6 +73,11 @@ export default function CampaignForm() {
             required
             className="h-[50px]"
           />
+          {form.errors.companyWebsite && (
+            <Text size="xs" c="red" mt={5}>
+              {form.errors.companyWebsite}
+            </Text>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Campaign name</label>
@@ -69,17 +87,22 @@ export default function CampaignForm() {
             required
             className="h-[50px]"
           />
+          {form.errors.campaignName && (
+            <Text size="xs" c="red" mt={5}>
+              {form.errors.campaignName}
+            </Text>
+          )}
         </div>
         <div className="flex justify-between pt-6">
-          <Button
-            variant="light"
-            size="md"
-            radius="md"
-            className="text-[#555461] bg-[#E7E7E7]"
-            onClick={() => router.push("/onboarding/hub")}
-          >
-            Back
-          </Button>
+            <Button
+              variant="light"
+              size="md"
+              radius="md"
+              className="text-[#555461] bg-[#E7E7E7]"
+              onClick={() => router.push(isCreateFlow ? "/campaign/create?step=hub" : "/onboarding/hub")}
+            >
+              Back
+            </Button>
           <Button
             type="submit"
             size="md"

@@ -32,7 +32,7 @@ export const AuthPage = () => {
     });
   
     dispatch(setAuth({ email: user.email || "", uid: user.uid }));
-    router.push("/call");
+    router.push("/dashboard");
   }
    catch (error: unknown) {
         const message = isFirebaseError(error)
@@ -49,7 +49,7 @@ export const AuthPage = () => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       dispatch(setAuth({ email: user.email || "", uid: user.uid }));
-      router.push("/call");
+      router.push("/dashboard");
     } catch (error: unknown) {
         const message = isFirebaseError(error)
           ? getFirebaseAuthErrorMessage(error.code)

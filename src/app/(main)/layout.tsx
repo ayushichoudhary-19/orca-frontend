@@ -1,28 +1,20 @@
-import type { Metadata } from "next";
-import "@mantine/core/styles.css";
-import "@/styles/globals.css";
+import Providers from "@/providers/providers";
 import Sidebar from "@/components/Sidebar";
-import Providers from "../../providers/providers";
-import AuthGuard from "@/components/Auth/AuthGuard";
 import { Header } from "@/components/Header";
+import AuthGuard from "@/components/Auth/AuthGuard";
 
-export const metadata: Metadata = {
-  title: "Cold Calling App",
-  description: "A modern cold calling app",
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard>
-      <div className="flex h-screen">
+      <div className="flex h-screen overflow-hidden">
         <Sidebar />
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <main className="flex-1 overflow-auto p-6">
+
+        <div className="flex-1 flex flex-col bg-[#f9f9f9]">
+          <div className="sticky top-0 z-50">
+            <Header />
+          </div>
+
+          <main className="flex-1 overflow-y-auto p-6">
             <Providers>{children}</Providers>
           </main>
         </div>

@@ -5,12 +5,18 @@ import { theme } from "./theme";
 import Providers from "../providers/providers";
 import { Urbanist } from 'next/font/google';
 import { Toaster } from "react-hot-toast";
+import { Metadata } from 'next';
 
 const urbanist = Urbanist({
     subsets: ['latin'],
     weight: ['400', '500', '600', '700', '800'],
     variable: '--font-urbanist',
   });
+
+export const metadata: Metadata = {
+    title: "Orca",
+    description: "A modern cold calling app",
+};
 
 export default function RootLayout({
   children,

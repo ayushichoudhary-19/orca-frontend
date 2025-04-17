@@ -9,6 +9,7 @@ import { RootState } from "@/store/store";
 import { Select, Button, Container } from "@mantine/core";
 import { motion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
+import { toast } from "@/lib/toast";
 
 export const Header = () => {
   const pathname = usePathname();
@@ -19,7 +20,7 @@ export const Header = () => {
   const businessId = useSelector((state: RootState) => state.membership.businessId);
   const campaignId = useSelector((state: RootState) => state.campaign.campaignId);
 
-  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [campaigns, setCampaigns] = useState<{ label: string; value: string; status: string }[]>([]);
   const [selected, setSelected] = useState<string | null>(campaignId);
 
   const { getByBusiness } = useCampaign();
@@ -34,14 +35,23 @@ export const Header = () => {
       try {
         const all = await getByBusiness(businessId);
         const mapped = all.map((c) => ({ label: c.campaignName, value: c._id, status: c.status }));
-
+        
         if (isCampaignCreation) {
-          // Show only DRAFTS in campaign/create
-          const drafts = mapped.filter((c) => c.status === "DRAFT");
-          setCampaigns(drafts);
-        } else {
-          // Show all campaigns outside onboarding and creation
-          setCampaigns(mapped);
+          const draftId = localStorage.getItem("draftCampaign");
+          const currentDraft = mapped.find(c => c.value === draftId);
+          if (currentDraft) {
+            setSelected(currentDraft.value);
+          }
+        }
+        
+        setCampaigns([{ label: "+ Add New", value: "new", status: "NEW" }, ...mapped]);
+        
+        if (!campaignId && !isOnboarding && !isCampaignCreation) {
+          const firstLaunched = mapped.find(c => c.status === "LAUNCHED");
+          if (firstLaunched) {
+            setSelected(firstLaunched.value);
+            dispatch(setCampaignId(firstLaunched.value));
+          }
         }
       } catch (err) {
         console.error("Failed to fetch campaigns", err);
@@ -49,22 +59,27 @@ export const Header = () => {
     };
 
     if (!isOnboarding) fetchCampaigns();
-  }, [businessId, isCampaignCreation, isOnboarding]);
+  }, [businessId, isOnboarding, isCampaignCreation]);
 
   const handleChange = (value: string | null) => {
     setSelected(value);
     if (!value) return;
 
-    const selectedCampaign = campaigns.find((c) => c.value === value);
+    if (value === "new") {
+      router.push("/campaign/create");
+      return;
+    }
 
+    const selectedCampaign = campaigns.find((c) => c.value === value);
     if (!selectedCampaign) return;
 
-    if (isCampaignCreation || selectedCampaign.status === "DRAFT") {
+    if (selectedCampaign.status === "DRAFT") {
       localStorage.setItem("draftCampaign", value);
-      dispatch(setCampaignId(value));
+      toast.info("Resuming your saved draft campaign");
       router.push("/campaign/create?step=hub");
     } else {
       dispatch(setCampaignId(value));
+      router.push("/dashboard");
     }
   };
 
@@ -74,7 +89,7 @@ export const Header = () => {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4 }}
       className={`bg-white ${
-        isOnboarding
+        (isOnboarding || isCampaignCreation)
           ? "w-full"
           : "w-[90%] mx-auto left-[323px] rounded-b-[10px] px-5 py-2.5 h-[60px]"
       }`}
@@ -88,7 +103,7 @@ export const Header = () => {
         className={`flex items-center justify-between h-full ${isOnboarding ? "px-4" : "px-0"}`}
       >
         <div className="flex items-center gap-4">
-          {isOnboarding && (
+          {(isOnboarding || isCampaignCreation) && (
             <div className="text-3xl font-extrabold tracking-wide text-primary">ORCA</div>
           )}
 

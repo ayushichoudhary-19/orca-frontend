@@ -2,7 +2,7 @@
 
 import { useForm } from "@mantine/form";
 import { Button, Container, Title, Text, Checkbox, Box, Paper } from "@mantine/core";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
 import { useUpdateOnboardingStep } from "@/hooks/Onboarding/useUpdateOnboardingStep";
 import SignatureCanvas from "react-signature-canvas";
@@ -12,41 +12,57 @@ import CustomTextInput from "@/components/Utils/CustomTextInput";
 import { Campaign } from "@/types/campaign";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { clearDraftCampaignId, getDraftCampaignId } from "@/utils/campaignUtils";
+import { zodResolver } from "@mantine/form";
+import { reviewSignSchema, ReviewSignFormValues } from "@/schemas/reviewSignSchema";
 
 export default function ReviewSign() {
   const router = useRouter();
   const [existingCampaign, setExistingCampaign] = useState<Campaign | null>(null);
   const { updateStep } = useUpdateOnboardingStep();
-  const { signCampaign, getByBusiness } = useCampaign();
+  const { signCampaign, getByBusiness, getById } = useCampaign();
   const businessId = useSelector((state: RootState) => state.membership.businessId);
   const membershipId = useSelector((state: RootState) => state.membership.membershipId);
+  const pathname = usePathname();
+  const isCreateFlow = pathname.includes("/campaign/create");
+
+  useEffect(() => {
+    const fetchCampaign = async () => {
+      const campaignId = isCreateFlow ? getDraftCampaignId() : null;
+
+      if (campaignId) {
+        const campaign = await getById(campaignId);
+        setExistingCampaign(campaign);
+        form.setFieldValue("campaignName", campaign.campaignName);
+      }
+    };
+    fetchCampaign();
+  }, []);
 
   useEffect(() => {
     const fetchExistingCampaign = async () => {
       if (!membershipId || !businessId) return;
-
       try {
         const campaigns = await getByBusiness(businessId);
 
-        if (campaigns && campaigns.length > 0) {
+        if (campaigns && campaigns.length == 1) {
           setExistingCampaign(campaigns[0]);
         }
       } catch (error) {
         console.error("Error fetching existing campaign:", error);
       }
     };
-
     fetchExistingCampaign();
   }, [membershipId, businessId]);
 
   const sigRef = useRef<SignatureCanvas>(null);
 
-  const form = useForm({
+  const form = useForm<ReviewSignFormValues>({
+    validate: zodResolver(reviewSignSchema),
     initialValues: {
       companyLegalName: "",
       signatoryName: "",
       signatoryTitle: "",
-      signatureBase64: "",
       agreed: true,
     },
   });
@@ -72,7 +88,13 @@ export default function ReviewSign() {
         signatureBase64: base64Signature,
       });
 
-      await updateStep(membershipId, 4);
+      if (isCreateFlow) {
+        clearDraftCampaignId();
+        router.push("/dashboard");
+      } else {
+        await updateStep(membershipId, 4);
+        router.push("/dashboard");
+      }
       toast.success("Signed successfully 🎉");
       setTimeout(() => router.push("/dashboard"), 1500);
     } catch (err) {
@@ -91,7 +113,6 @@ export default function ReviewSign() {
       </Text>
 
       <form onSubmit={form.onSubmit(handleSubmit)} className="space-y-6">
-        {/* Company Legal Name (not submitted) */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Company Legal Name</label>
           <CustomTextInput
@@ -99,9 +120,13 @@ export default function ReviewSign() {
             className="h-[50px]"
             {...form.getInputProps("companyLegalName")}
           />
+          {form.errors.companyLegalName && (
+            <Text size="xs" c="red" mt={5}>
+              {form.errors.companyLegalName}
+            </Text>
+          )}
         </div>
 
-        {/* Purple Notice Box */}
         <Paper withBorder p="md" radius="md" className="bg-[#F8F5FF] border-[#D6CCFC]">
           <Title order={4} className="text-primary font-semibold mb-2">
             Order Form for {form.values.companyLegalName || "..."}
@@ -130,7 +155,6 @@ export default function ReviewSign() {
           </Text>
         </Paper>
 
-        {/* Hardcoded read-only fields */}
         <div className="grid gap-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -139,7 +163,10 @@ export default function ReviewSign() {
             <CustomTextInput
               value="Specified by the OPS team."
               disabled
-              className="h-[50px] bg-tindeddark1"
+              className="h-[50px]"
+              style={{
+                backgroundColor: "#e7e7e9",
+              }}
             />
           </div>
           <div>
@@ -149,7 +176,10 @@ export default function ReviewSign() {
             <CustomTextInput
               value="Specified by the OPS team."
               disabled
-              className="h-[50px] bg-tindeddark1"
+              className="h-[50px]"
+              style={{
+                backgroundColor: "#e7e7e9",
+              }}
             />
           </div>
           <div>
@@ -159,12 +189,14 @@ export default function ReviewSign() {
             <CustomTextInput
               value="Separate addendum to be shared."
               disabled
-              className="h-[50px] bg-tindeddark1"
+              className="h-[50px]"
+              style={{
+                backgroundColor: "#e7e7e9",
+              }}
             />
           </div>
         </div>
 
-        {/* Signature Inputs */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Signatory Name</label>
           <CustomTextInput
@@ -173,6 +205,11 @@ export default function ReviewSign() {
             className="h-[50px]"
             {...form.getInputProps("signatoryName")}
           />
+          {form.errors.signatoryName && (
+            <Text size="xs" c="red" mt={5}>
+              {form.errors.signatoryName}
+            </Text>
+          )}
         </div>
 
         <div>
@@ -183,6 +220,11 @@ export default function ReviewSign() {
             className="h-[50px]"
             {...form.getInputProps("signatoryTitle")}
           />
+          {form.errors.signatoryTitle && (
+            <Text size="xs" c="red" mt={5}>
+              {form.errors.signatoryTitle}
+            </Text>
+          )}
         </div>
 
         <div>
@@ -205,23 +247,35 @@ export default function ReviewSign() {
             Signing on 3/26/2025
           </Text>
         </div>
-
-        {/* Agreement Checkbox */}
-        <Checkbox
-          checked={form.values.agreed}
-          onChange={(e) => form.setFieldValue("agreed", e.currentTarget.checked)}
-          label={
-            <Text size="sm">
-              I agree and intend for my electronic signature here to be as valid as if I signed the
-              document by hand, to the full extent allowed by applicable law.
+        <div>
+          <Checkbox
+            checked={form.values.agreed}
+            onChange={(e) => form.setFieldValue("agreed", e.currentTarget.checked)}
+            label={
+              <Text size="sm">
+                I agree and intend for my electronic signature here to be as valid as if I signed
+                the document by hand, to the full extent allowed by applicable law.
+              </Text>
+            }
+            required
+          />
+          {form.errors.agreed && (
+            <Text size="xs" c="red" mt={5}>
+              {form.errors.agreed}
             </Text>
-          }
-          required
-        />
+          )}
+        </div>
 
-        {/* Action Buttons */}
         <div className="flex justify-between pt-4">
-          <Button variant="light" size="md" radius="md" className="text-gray-600 bg-gray-200">
+          <Button
+            variant="light"
+            size="md"
+            radius="md"
+            className="text-[#555461] bg-[#E7E7E7]"
+            onClick={() =>
+              router.push(isCreateFlow ? "/campaign/create?step=hub" : "/onboarding/hub")
+            }
+          >
             Back
           </Button>
           <Button type="submit" size="md" radius="md" variant="filled">

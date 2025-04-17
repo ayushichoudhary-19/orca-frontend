@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useDispatch } from "react-redux";
 import { axiosClient } from "@/lib/axiosClient";
@@ -9,7 +9,6 @@ import { Membership } from "@/types/membership";
 
 export const MembershipProvider = () => {
   const dispatch = useDispatch();
-  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     const auth = getAuth();
@@ -17,8 +16,7 @@ export const MembershipProvider = () => {
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        dispatch(clearMembership()); // set loading = false too
-        setAuthChecked(true);
+        dispatch(clearMembership());
         return;
       }
 
@@ -36,7 +34,6 @@ export const MembershipProvider = () => {
         dispatch(clearMembership());
       } finally {
         dispatch(setMembershipLoading(false));
-        setAuthChecked(true);
       }
     });
 

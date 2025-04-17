@@ -47,7 +47,6 @@ export const UploadNumbers = ({ onUpload }: UploadNumbersProps) => {
         Upload Contact List
       </Text>
 
-      {/* Gradient wrapper */}
       <div className="gradient-horizontal-light-2 p-[2px] mb-2 rounded-[8px]">
         <FileInput
           accept=".csv"

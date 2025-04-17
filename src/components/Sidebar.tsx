@@ -26,8 +26,8 @@ const navItems: NavItem[] = [
     path: "/dashboard",
     children: [
       { label: "Dashboard", path: "/dashboard" },
-      { label: "AI Call Learnings", path: "/ai-call-learnings" },
-      { label: "Analytics", path: "/analytics" },
+      { label: "AI Call Learnings", path: "/dashboard/ai-call-learnings" },
+      { label: "Analytics", path: "/dashboard/analytics" },
     ]
   },
   {
@@ -40,8 +40,8 @@ const navItems: NavItem[] = [
     icon: IconSchool,
     path: "/knowledge",
     children: [
-      { label: "Your Trainings", path: "/trainings" },
-      { label: "Dialer context", path: "/dialer-context" },
+      { label: "Your Trainings", path: "/knowledge/trainings" },
+      { label: "Dialer context", path: "/knowledge/dialer-context" },
     ]
   },
   {
