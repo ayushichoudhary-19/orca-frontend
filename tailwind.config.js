@@ -28,7 +28,7 @@ const config = {
       },
     },
   },
-  plugins: [],
+  plugins: [require("@tailwindcss/typography")],
   corePlugins: {
     preflight: false,
   },

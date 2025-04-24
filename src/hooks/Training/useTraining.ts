@@ -11,7 +11,7 @@ export const getTrainingById = async (id: string): Promise<Training> => {
   return res.data;
 };
 
-export const createTraining = async (payload: Partial<Training>) => {
+export const createTraining = async (payload: any) => {
   const res = await axiosClient.post("/api/trainings", payload);
   return res.data;
 };

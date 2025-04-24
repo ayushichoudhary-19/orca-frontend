@@ -8,6 +8,7 @@ import { auth } from "@/lib/firebase-config";
 import { toast } from "@/lib/toast";
 import styles from "@/styles/loader.module.css";
 import { signOut } from "firebase/auth";
+import Loader from "../Utils/Loader";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -52,7 +53,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
       console.warn("Authenticated user has no membership, signing out...");
       toast.error("Your session is invalid. Please log in again.");
       signOut(auth).then(() => {
-        router.replace("/login");
+        router.replace("/signin");
       });
       return;
     }
@@ -101,12 +102,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
 
   if (!authInitialized || !isAuthenticated || (membershipLoading && !membership)) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-white">
-        <div className={styles.globalloader}>
-          <label>Please wait...</label>
-          <div className={styles.globalloading}></div>
-        </div>
-      </div>
+      <Loader />
     );
   }
 

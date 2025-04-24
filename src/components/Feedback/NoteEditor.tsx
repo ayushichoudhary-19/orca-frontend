@@ -18,6 +18,7 @@ import {
   IconArrowBackUp,
   IconArrowForwardUp,
 } from "@tabler/icons-react";
+import { handleCommandNavigation } from "novel";
 
 export const MenuBar = () => {
   const { editor } = useCurrentEditor();
@@ -151,10 +152,14 @@ export default function NoteEditor({
           content={content}
           extensions={extensions}
           editorProps={{
-            attributes: {
-              class: styles.tiptap,
+            handleDOMEvents: {
+              keydown: (_view, event) => handleCommandNavigation(event),
             },
-          }}
+            attributes: {
+              class:
+                "tiptap prose prose-lg max-w-full focus:outline-none prose-headings:font-semibold min-h-[150px]",
+            },
+          }}          
           onUpdate={({ editor }) => onChange(editor.getHTML())}
           slotBefore={<MenuBar />}
         />
