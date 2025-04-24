@@ -1,7 +1,7 @@
 "use client";
 
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
-import { Container, Text, Group, Button, Modal, Stack } from "@mantine/core";
+import { Container, Text, Group, Button, Modal, Stack, Divider } from "@mantine/core";
 import {
   IconArrowRight,
   IconLayoutGrid,
@@ -48,7 +48,6 @@ export default function TrainingPage() {
       setTrainings(data);
       setOriginalTrainings(JSON.parse(JSON.stringify(data)));
       setPendingChanges(false);
-
     } catch (err) {
       console.error("Failed to fetch trainings", err);
     } finally {
@@ -62,33 +61,32 @@ export default function TrainingPage() {
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination || !trainings) return;
-  
+
     const reordered = Array.from(trainings);
     const [moved] = reordered.splice(result.source.index, 1);
     reordered.splice(result.destination.index, 0, moved);
-  
+
     setTrainings(reordered);
     setPendingChanges(true);
   };
-  
 
   const handlePublish = async () => {
     if (!trainings) return;
-  
+
     try {
       const orderPayload = trainings.map((t, i) => ({
         id: t._id,
         sortOrder: i,
       }));
-  
+
       const visibilityPayload = trainings.map((t) => ({
         id: t._id,
         isVisible: t.isVisible,
       }));
-  
+
       await axiosClient.post("/api/trainings/reorder", { order: orderPayload });
       await axiosClient.post("/api/trainings/visibility-bulk", { updates: visibilityPayload });
-  
+
       toast.success("Changes published!");
       fetchTrainings();
     } catch (err) {
@@ -96,7 +94,7 @@ export default function TrainingPage() {
       console.error(err);
     }
   };
-  
+
   const handleModalSubmit = async () => {
     if (!title.trim() || !description.trim()) {
       toast.error("Please fill out both fields");
@@ -180,58 +178,76 @@ export default function TrainingPage() {
       </Group>
 
       <DragDropContext onDragEnd={handleDragEnd}>
-      {loading ? (
-  <Loader />
-) : view === "grid" ? (
-  <TrainingGrid
-    trainings={trainings || []}
-    setTrainings={setTrainings}
-    setPendingChanges={setPendingChanges}
-  />
-) : (
-  <TrainingList
-    trainings={trainings || []}
-    setTrainings={setTrainings}
-    setPendingChanges={setPendingChanges}
-  />
-)}
-
+        {loading ? (
+          <Loader />
+        ) : view === "grid" ? (
+          <TrainingGrid
+            trainings={trainings || []}
+            setTrainings={setTrainings}
+            setPendingChanges={setPendingChanges}
+          />
+        ) : (
+          <TrainingList
+            trainings={trainings || []}
+            setTrainings={setTrainings}
+            setPendingChanges={setPendingChanges}
+          />
+        )}
       </DragDropContext>
 
       {pendingChanges && (
-  <div className="sticky bottom-0 z-30 bg-[#F4F0FF] border border-violet-200 rounded-xl shadow-sm px-6 py-4 flex items-center justify-between mt-10">
-    <Text size="sm" className="text-primary font-medium">
-      You have changes awaiting to be published
-    </Text>
-    <Button
-      variant="filled"
-      className="h-[40px] px-[20px] py-[10px] rounded-[12px] font-normal"
-      onClick={handlePublish}
-    >
-      Publish
-    </Button>
-  </div>
-)}
-
+        <div className="sticky bottom-0 z-30 bg-[#F4F0FF] border border-violet-200 rounded-xl shadow-sm px-6 py-4 flex items-center justify-between mt-10">
+          <Text size="sm" className="text-primary font-medium">
+            You have changes waiting to be published
+          </Text>
+          <Button
+            variant="filled"
+            className="h-[40px] px-[20px] py-[10px] rounded-[12px] font-normal"
+            onClick={handlePublish}
+          >
+            Publish
+          </Button>
+        </div>
+      )}
 
       <Modal
         opened={modalOpened}
         onClose={() => setModalOpened(false)}
-        title="Create New Training"
+        closeButtonProps={{
+          className: "text-[#0C0A1C] hover:text-black bg-white rounded-lg hover:bg-white",
+          style: { border: "1.5px solid #0C0A1C" },
+          size: "md",
+        }}
+        title={
+          <span className="text-3xl font-bold text-[#0C0A1C] block text-center w-full mt-8">
+            Create New Training
+          </span>
+        }
         centered
-        size="lg"
+        size="xl"
         radius="md"
-        overlayProps={{ blur: 2 }}
+        classNames={{
+          body: "pb-6 pt-2 px-8",
+          content: "rounded-2xl",
+          header: "w-full flex justify-center pb-4 border-b border-[#E7E7E9]",
+          title: "flex-1 text-center",
+        }}
+        styles={{
+          content: {
+            height: "450px",
+          },
+        }}
       >
+        <Divider color="#E7E7E9" mb={30} />
         <Stack>
-          <label className="block text-sm font-semibold text-darker">Training Title *</label>
+          <label className="block text-md font-semibold text-darker">Training Title *</label>
           <CustomTextInput
             value={title}
             onChange={(e) => setTitle(e.currentTarget.value)}
             required
             className="h-[50px]"
           />
-          <label className="block text-sm font-semibold text-darker">Training Description *</label>
+          <label className="block text-md font-semibold text-darker">Training Description *</label>
           <CustomTextInput
             value={description}
             onChange={(e) => setDescription(e.currentTarget.value)}
