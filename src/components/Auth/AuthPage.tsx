@@ -1,6 +1,6 @@
 "use client";
 
-import { auth } from "@/lib/firebase-config";
+import { auth } from "@/lib/firebase";
 import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
@@ -31,7 +31,7 @@ export const AuthPage = () => {
       email: user.email,
     });
   
-    dispatch(setAuth({ email: user.email || "", uid: user.uid }));
+    dispatch(setAuth({ email: user.email || "", uid: user.uid, name: user.displayName || "" }));
     router.push("/dashboard");
   }
    catch (error: unknown) {
@@ -48,7 +48,7 @@ export const AuthPage = () => {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      dispatch(setAuth({ email: user.email || "", uid: user.uid }));
+      dispatch(setAuth({ email: user.email || "", uid: user.uid, name: user.displayName || "" }));
       router.push("/dashboard");
     } catch (error: unknown) {
         const message = isFirebaseError(error)

@@ -2,7 +2,7 @@
 
 import { useForm } from "@mantine/form";
 import { Button, Container, Title, Text } from "@mantine/core";
-import { auth } from "@/lib/firebase-config";
+import { auth } from "@/lib/firebase";
 import { toast } from "@/lib/toast";
 import { useRouter } from "next/navigation";
 import CustomTextInput from "@/components/Utils/CustomTextInput";

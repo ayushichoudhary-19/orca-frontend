@@ -1,4 +1,4 @@
-import { auth } from "@/lib/firebase-config";
+import { auth } from "@/lib/firebase";
 import { persistor } from "@/store/store";
 import { clearAuth } from "@/store/authSlice";
 import { Dispatch } from "@reduxjs/toolkit";

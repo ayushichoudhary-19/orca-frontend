@@ -6,11 +6,12 @@ import authReducer from "./authSlice";
 import { featureReducer } from "uptut-rbac";
 import membershipReducer from "./membershipSlice";
 import campaignReducer from "./campaignSlice";
+import notificationReducer from "./notificationSlice";
 
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["notes", "auth", "features", "membership", "campaign"],
+  whitelist: ["notes", "auth", "features", "membership", "campaign", "notification"],
   blacklist: ['membership.loading'],
 };
 
@@ -20,6 +21,7 @@ const rootReducer = combineReducers({
   features: featureReducer,
   membership: membershipReducer,
   campaign: campaignReducer,
+  notification: notificationReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

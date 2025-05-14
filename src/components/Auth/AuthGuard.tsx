@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
 import { useFetchFeaturesByRole } from "uptut-rbac";
-import { auth } from "@/lib/firebase-config";
+import { auth } from "@/lib/firebase";
 import { toast } from "@/lib/toast";
 import styles from "@/styles/loader.module.css";
 import { signOut } from "firebase/auth";
@@ -101,6 +101,11 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   }, [membership, membershipLoading, pathname, router, isAuthenticated, authInitialized]);
 
   if (!authInitialized || !isAuthenticated || (membershipLoading && !membership)) {
+    console.log(authInitialized,
+      isAuthenticated,
+      membership,
+      membershipLoading,
+    )
     return (
       <Loader />
     );

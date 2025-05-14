@@ -3,13 +3,15 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setCampaignId } from "@/store/campaignSlice";
+import { markAsRead } from "@/store/notificationSlice";
 import { useCampaign } from "@/hooks/Campaign/useCampaign";
 import { useLogout } from "@/hooks/Auth/useLogout";
 import { RootState } from "@/store/store";
-import { Select, Button, Container } from "@mantine/core";
+import { Select, Button, Container, Group, ActionIcon, Menu } from "@mantine/core";
 import { motion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
+import Image from "next/image";
 
 export const Header = () => {
   const pathname = usePathname();
@@ -17,10 +19,16 @@ export const Header = () => {
   const dispatch = useDispatch();
   const logout = useLogout();
 
+  const notifications = useSelector((state: RootState) => state.notification.list);
+  const hasUnreadPosts = notifications.some((n) => n.type === "post" && !n.read);
+  const hasUnreadMessages = notifications.some((n) => n.type === "message" && !n.read);
+
   const businessId = useSelector((state: RootState) => state.membership.businessId);
   const campaignId = useSelector((state: RootState) => state.campaign.campaignId);
 
-  const [campaigns, setCampaigns] = useState<{ label: string; value: string; status: string }[]>([]);
+  const [campaigns, setCampaigns] = useState<{ label: string; value: string; status: string }[]>(
+    []
+  );
   const [selected, setSelected] = useState<string | null>(campaignId);
 
   const { getByBusiness } = useCampaign();
@@ -28,26 +36,29 @@ export const Header = () => {
   const isOnboarding = pathname.includes("onboarding");
   const isCampaignCreation = pathname.includes("/campaign/create");
 
+  const isActive = (path: string) => pathname?.startsWith(path);
+
   useEffect(() => {
     const fetchCampaigns = async () => {
       if (!businessId) return;
-
       try {
         const all = await getByBusiness(businessId);
-        const mapped = all.map((c) => ({ label: c.campaignName, value: c._id, status: c.status }));
-        
+        const mapped = all.map((c) => ({
+          label: c.campaignName,
+          value: c._id,
+          status: c.status,
+        }));
+
         if (isCampaignCreation) {
           const draftId = localStorage.getItem("draftCampaign");
-          const currentDraft = mapped.find(c => c.value === draftId);
-          if (currentDraft) {
-            setSelected(currentDraft.value);
-          }
+          const currentDraft = mapped.find((c) => c.value === draftId);
+          if (currentDraft) setSelected(currentDraft.value);
         }
-        
+
         setCampaigns([{ label: "+ Add New", value: "new", status: "NEW" }, ...mapped]);
-        
+
         if (!campaignId && !isOnboarding && !isCampaignCreation) {
-          const firstLaunched = mapped.find(c => c.status === "LAUNCHED");
+          const firstLaunched = mapped.find((c) => c.status === "LAUNCHED");
           if (firstLaunched) {
             setSelected(firstLaunched.value);
             dispatch(setCampaignId(firstLaunched.value));
@@ -89,8 +100,8 @@ export const Header = () => {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4 }}
       className={`bg-white ${
-        (isOnboarding || isCampaignCreation)
-          ? "w-full"
+        isOnboarding || isCampaignCreation
+          ? "w-full px-5 py-2.5"
           : "w-[90%] mx-auto left-[323px] rounded-b-[10px] px-5 py-2.5 h-[60px]"
       }`}
       style={{
@@ -120,15 +131,103 @@ export const Header = () => {
           )}
         </div>
 
-        <Button
-          variant="filled"
-          radius="md"
-          size="md"
-          style={{ boxShadow: "0px 3px 12px #4A3AFF2E" }}
-          onClick={logout}
-        >
-          Logout
-        </Button>
+        {isOnboarding || isCampaignCreation ? (
+          <Button
+            variant="filled"
+            radius="md"
+            size="md"
+            style={{ boxShadow: "0px 3px 12px #4A3AFF2E" }}
+            onClick={logout}
+          >
+            Logout
+          </Button>
+        ) : (
+          <Group>
+            <ActionIcon
+              className={`relative ${
+                isActive("/sales-floor")
+                  ? "bg-primary text-white"
+                  : "bg-white border-tinteddark1 text-tinteddark7 hover:bg-lighter"
+              } rounded-md`}
+              onClick={() => {
+                if (hasUnreadPosts) dispatch(markAsRead("post"));
+                router.push("/sales-floor");
+              }}
+              size={40}
+            >
+              <Image
+                src={isActive("/sales-floor") ? "/icons/globewhite.svg" : "/icons/globeblack.svg"}
+                height={20}
+                width={20}
+                alt="sales-floor"
+              />
+              {hasUnreadPosts && (
+                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500" />
+              )}
+            </ActionIcon>
+
+            <ActionIcon
+              className={`relative ${
+                isActive("/messages")
+                  ? "bg-primary text-white"
+                  : "bg-white border-tinteddark1 text-tinteddark7 hover:bg-lighter"
+              } rounded-md`}
+              onClick={() => {
+                if (hasUnreadMessages) dispatch(markAsRead("message"));
+                router.push("/messages");
+              }}
+              size={40}
+            >
+              <Image
+                src={isActive("/messages") ? "/icons/msgwhite.svg" : "/icons/msgblack.svg"}
+                height={20}
+                width={20}
+                alt="messages"
+              />
+              {hasUnreadMessages && (
+                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500" />
+              )}
+            </ActionIcon>
+
+            <ActionIcon
+              className={`${
+                isActive("/settings")
+                  ? "bg-primary text-white"
+                  : "bg-white border-tinteddark1 text-tinteddark7 hover:bg-lighter"
+              } rounded-md`}
+              onClick={() => router.push("/settings")}
+              size={40}
+            >
+              <Image
+                src={isActive("/settings") ? "/icons/settingwhite.svg" : "/icons/settingblack.svg"}
+                height={20}
+                width={20}
+                alt="settings"
+              />
+            </ActionIcon>
+
+            <Menu position="bottom-end" shadow="md" width={200}>
+              <Menu.Target>
+                <ActionIcon
+                  className={`${
+                    isActive("/profile")
+                      ? "bg-primary text-white"
+                      : "bg-white border-tinteddark1 text-tinteddark7 hover:bg-lighter"
+                  } rounded-md`}
+                  size={40}
+                >
+                  P
+                </ActionIcon>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Item onClick={() => router.push("/profile")}>Profile</Menu.Item>
+                <Menu.Item onClick={logout} color="red">
+                  Logout
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          </Group>
+        )}
       </Container>
     </motion.div>
   );
