@@ -13,7 +13,7 @@ interface Props {
   onChange: (content: any) => void;
 }
 
-export default function TrainingEditor({ content, onSave, handleUpload, onChange }: Props) {
+export default function TrainingEditor({ content, handleUpload, onChange }: Props) {
   const editor = useCreateBlockNote({
     initialContent: content,
     uploadFile: handleUpload,

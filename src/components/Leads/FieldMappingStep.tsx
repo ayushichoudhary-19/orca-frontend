@@ -6,6 +6,7 @@ import { axiosClient } from "@/lib/axiosClient";
 import { toast } from "react-hot-toast";
 import { IconBuildings, IconMail, IconPhone, IconUsers, IconWallet } from "@tabler/icons-react";
 import CustomBadge from "./CustomBadge";
+import { useRouter } from "next/navigation";
 
 const orcaFields = [
   "Prospect First Name",
@@ -38,6 +39,7 @@ export default function FieldMappingStep({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const csvHeaders = Object.keys(csvRows[0] || {});
+  const router = useRouter();
 
   const updateMap = (field: string, source: string) => {
     setMapping((prev) => ({ ...prev, [field]: source }));
@@ -55,7 +57,9 @@ export default function FieldMappingStep({
     try {
       await axiosClient.post("/api/leads/upload", formData);
       toast.success("Leads uploaded successfully!");
+      router.push('/leads/ingestions');
     } catch (error) {
+      console.log(error);
       toast.error("Upload failed");
     } finally {
       setIsSubmitting(false);
@@ -181,7 +185,12 @@ export default function FieldMappingStep({
                 This is how your lead information will be displayed to cold callers.
               </Text>
               <Group justify="right" mt="xl">
-                <Button variant="outline" size="md" radius="12px" onClick={() => window.location.reload()}>
+                <Button
+                  variant="outline"
+                  size="md"
+                  radius="12px"
+                  onClick={() => window.location.reload()}
+                >
                   Start over
                 </Button>
                 <Button size="md" radius="12px" loading={isSubmitting} onClick={openConfirmModal}>
@@ -192,10 +201,10 @@ export default function FieldMappingStep({
               <Modal
                 opened={confirmModalOpen}
                 closeButtonProps={{
-                    className: "text-[#0C0A1C] hover:text-black bg-white rounded-lg hover:bg-white",
-                    style: { border: "1px solid #0C0A1C" },
-                    size: "sm"
-                  }}
+                  className: "text-[#0C0A1C] hover:text-black bg-white rounded-lg hover:bg-white",
+                  style: { border: "1px solid #0C0A1C" },
+                  size: "sm",
+                }}
                 onClose={() => setConfirmModalOpen(false)}
                 title={
                   <Text size="lg" fw={600} c="#1C1D22">
@@ -203,23 +212,29 @@ export default function FieldMappingStep({
                   </Text>
                 }
                 classNames={{
-                    body: "pb-5 text-[#555461] text-sm",
-                    content: "rounded-2xl",
-                    header: "w-full flex border-b border-[#E7E7E9]",
-                    title: "flex-1",
-                  }}
+                  body: "pb-5 text-[#555461] text-sm",
+                  content: "rounded-2xl",
+                  header: "w-full flex border-b border-[#E7E7E9]",
+                  title: "flex-1",
+                }}
                 centered
                 padding="lg"
               >
                 <Text size="sm" mb="lg">
-                  Please double check your mappings as you will need to start over if you would like to make any changes
+                  Please double check your mappings as you will need to start over if you would like
+                  to make any changes
                 </Text>
 
                 <Group justify="left" gap="md">
-                  <Button variant="outline" radius="12px" fw={400} onClick={() => window.location.reload()}>
+                  <Button
+                    variant="outline"
+                    radius="12px"
+                    fw={400}
+                    onClick={() => setConfirmModalOpen(false)}
+                  >
                     View mappings
                   </Button>
-                  <Button  onClick={handleSubmit} radius="12px" fw={400}>
+                  <Button onClick={handleSubmit} radius="12px" fw={400}>
                     Yes, they are correct
                   </Button>
                 </Group>
@@ -228,7 +243,6 @@ export default function FieldMappingStep({
           </div>
         </div>
       </Stack>
-
     </>
   );
 }

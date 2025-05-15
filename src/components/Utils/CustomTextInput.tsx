@@ -9,6 +9,8 @@ type CustomTextInputProps = {
   className?: string;
   multiline?: boolean;
   rows?: number;
+  leftSection?: React.ReactNode;
+  rightSection?: React.ReactNode;
 } & React.InputHTMLAttributes<HTMLInputElement> &
   React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 
@@ -21,6 +23,8 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
   className = "",
   multiline = false,
   rows = 4,
+  leftSection,
+  rightSection,
   ...props
 }) => {
   const validTypes = ["text", "email", "password", "number", "search", "tel", "url"];
@@ -50,7 +54,7 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
 
   const combinedClassName = `${baseStyles} ${className}`;
 
-  return multiline ? (
+  const inputContent = multiline ? (
     <textarea
       value={value}
       onChange={onChange}
@@ -70,6 +74,22 @@ const CustomTextInput: React.FC<CustomTextInputProps> = ({
       className={combinedClassName}
       {...props}
     />
+  );
+
+  return (
+    <div className="relative w-full">
+      {leftSection && (
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
+          {leftSection}
+        </div>
+      )}
+      {inputContent}
+      {rightSection && (
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10">
+          {rightSection}
+        </div>
+      )}
+    </div>
   );
 };
 

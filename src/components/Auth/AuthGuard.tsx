@@ -6,7 +6,6 @@ import { useAppSelector } from "@/store/hooks";
 import { useFetchFeaturesByRole } from "uptut-rbac";
 import { auth } from "@/lib/firebase";
 import { toast } from "@/lib/toast";
-import styles from "@/styles/loader.module.css";
 import { signOut } from "firebase/auth";
 import Loader from "../Utils/Loader";
 

@@ -29,7 +29,6 @@ export default function TrainingPage() {
   const [trainings, setTrainings] = useState<Training[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [modalOpened, setModalOpened] = useState(false);
-  const [originalTrainings, setOriginalTrainings] = useState<Training[] | null>(null);
   const [pendingChanges, setPendingChanges] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -46,7 +45,6 @@ export default function TrainingPage() {
     try {
       const data = await getTrainingsByCampaign(campaignId);
       setTrainings(data);
-      setOriginalTrainings(JSON.parse(JSON.stringify(data)));
       setPendingChanges(false);
     } catch (err) {
       console.error("Failed to fetch trainings", err);
@@ -125,26 +123,26 @@ export default function TrainingPage() {
     }
   };
 
-  const handleSave = async ({ content }: { content: any }) => {
-    if (!campaignId) {
-      toast.error("Please select a campaign");
-      return;
-    }
-    try {
-      const res = await createTraining({
-        title,
-        description,
-        content,
-        campaignId,
-        lastEditedBy: userId,
-      });
-      toast.success("Training created!");
-      router.push(`/knowledge/trainings/${res._id}`);
-    } catch (err) {
-      toast.error("Failed to create training");
-      console.error(err);
-    }
-  };
+  // const handleSave = async ({ content }: { content: any }) => {
+  //   if (!campaignId) {
+  //     toast.error("Please select a campaign");
+  //     return;
+  //   }
+  //   try {
+  //     const res = await createTraining({
+  //       title,
+  //       description,
+  //       content,
+  //       campaignId,
+  //       lastEditedBy: userId,
+  //     });
+  //     toast.success("Training created!");
+  //     router.push(`/knowledge/trainings/${res._id}`);
+  //   } catch (err) {
+  //     toast.error("Failed to create training");
+  //     console.error(err);
+  //   }
+  // };
 
   return (
     <Container size="xl" className="pt-3 pb-[30px]">

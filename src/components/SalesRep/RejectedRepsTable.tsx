@@ -26,7 +26,7 @@ interface Rep {
   createdAt: string;
 }
 
-export default function PendingRepsTable({ reps: initialReps }: { reps: Rep[] }) {
+export default function RejectedRepsTable({ reps: initialReps }: { reps: Rep[] }) {
   const [drawerOpened, setDrawerOpened] = useState(false);
   const [selectedRep, setSelectedRep] = useState<Rep | null>(null);
   const [reps, setReps] = useState(initialReps);

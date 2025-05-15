@@ -28,7 +28,7 @@ const navItems: NavItem[] = [
       { label: "Dashboard", path: "/dashboard" },
       { label: "AI Call Learnings", path: "/dashboard/ai-call-learnings" },
       { label: "Analytics", path: "/dashboard/analytics" },
-    ]
+    ],
   },
   {
     label: "Meetings",
@@ -42,7 +42,7 @@ const navItems: NavItem[] = [
     children: [
       { label: "Your Trainings", path: "/knowledge/trainings" },
       { label: "Dialer context", path: "/knowledge/dialer-context" },
-    ]
+    ],
   },
   {
     label: "Sales Representative",
@@ -52,7 +52,7 @@ const navItems: NavItem[] = [
       { label: "Active Representative", path: "/sales-rep/active" },
       { label: "Pending Representative", path: "/sales-rep/pending" },
       { label: "Blocked Representative", path: "/sales-rep/blocked" },
-    ]
+    ],
   },
   {
     label: "Leads",
@@ -61,7 +61,7 @@ const navItems: NavItem[] = [
     children: [
       { label: "Leads & Ingestions", path: "/leads/ingestions" },
       { label: "Suppression lists", path: "/leads/suppression-lists" },
-    ]
+    ],
   },
 ];
 
@@ -72,12 +72,10 @@ export default function Sidebar() {
 
   useEffect(() => {
     const path = window.location.pathname;
-    const parentItem = navItems.find(item => 
-      item.children?.some(child => child.path === path)
-    );
+    const parentItem = navItems.find((item) => item.children?.some((child) => child.path === path));
     if (parentItem) {
       setExpandedItems([parentItem.label]);
-      const currentChild = parentItem.children?.find(child => child.path === path);
+      const currentChild = parentItem.children?.find((child) => child.path === path);
       if (currentChild) {
         setActiveItem(currentChild.label);
       }
@@ -90,20 +88,18 @@ export default function Sidebar() {
   };
 
   const toggleExpand = (label: string) => {
-    setExpandedItems(prev => 
-      prev.includes(label) 
-        ? prev.filter(item => item !== label) 
-        : [...prev, label]
+    setExpandedItems((prev) =>
+      prev.includes(label) ? prev.filter((item) => item !== label) : [...prev, label]
     );
   };
 
   return (
-    <motion.aside 
+    <motion.aside
       initial={{ x: -280 }}
       animate={{ x: 0 }}
       className="w-[280px] h-screen bg-white border-r border-none shadow-[4px_0_34px_rgba(0,0,0,0.05)] flex flex-col"
     >
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="bg-lighter h-[60px] text-primary font-bold text-[28px] px-6 py-4 tracking-wide flex items-center"
@@ -112,7 +108,7 @@ export default function Sidebar() {
       </motion.div>
 
       <div className="flex-1 overflow-y-auto">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="text-xs text-tinteddark5 tracking-wide px-6 mt-7 my-4 font-semibold"
@@ -137,17 +133,14 @@ export default function Sidebar() {
                     }
                   }}
                   className={`flex items-center bg-white p-5 justify-between w-full text-sm font-medium transition-all ${
-                    isActive || isExpanded 
-                      ? "text-primary border-l-2 border-l-primary border-y-0 border-r-0" 
+                    isActive || isExpanded
+                      ? "text-primary border-l-2 border-l-primary border-y-0 border-r-0"
                       : "text-tinteddark7 border-none hover:cursor-pointer"
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     {item.icon && (
-                      <motion.div
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                      >
+                      <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                         <item.icon size={18} stroke={1.5} />
                       </motion.div>
                     )}
@@ -173,7 +166,7 @@ export default function Sidebar() {
                     >
                       {item.children?.map((child) => {
                         const isChildActive = activeItem === child.label;
-                        
+
                         return (
                           <motion.button
                             key={child.label}
@@ -183,7 +176,9 @@ export default function Sidebar() {
                             whileTap={{ scale: 0.98 }}
                             onClick={() => handleNavigate(child.path, child.label)}
                             className={`w-full text-left pr-5 py-2 pl-12 my-2 text-sm border-none font-semibold ${
-                              isChildActive ? "bg-lighter text-primary" : "text-tinteddark7 bg-white hover:cursor-pointer transition-all"
+                              isChildActive
+                                ? "bg-lighter text-primary"
+                                : "text-tinteddark7 bg-white hover:cursor-pointer transition-all"
                             }`}
                           >
                             {child.label}

@@ -13,6 +13,8 @@ export default function LeadUploadOptions({ onNext }: LeadUploadOptionsProps) {
   const [selectedOption, setSelectedOption] = useState<"csv" | "crm">("csv")
   const [file, setFile] = useState<File | null>(null)
 
+  console.log("selectedOption", selectedOption)
+
   const handleFileSelect = (selectedFile: File | null) => {
     if (!selectedFile) return
     setFile(selectedFile)

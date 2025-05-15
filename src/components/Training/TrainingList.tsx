@@ -5,8 +5,8 @@ import { Card, Group, Text, Button } from "@mantine/core";
 import { IconEye, IconEyeOff, IconGripVertical } from "@tabler/icons-react";
 import Image from "next/image";
 import { Training } from "@/types/training";
-import { axiosClient } from "@/lib/axiosClient";
 import { useRouter } from "next/navigation";
+import { JSX } from "react";
 
 interface TrainingListProps {
   trainings: Training[];
@@ -18,7 +18,7 @@ export const TrainingList = ({
   trainings,
   setTrainings,
   setPendingChanges,
-}: TrainingListProps) => {
+}: TrainingListProps): JSX.Element => {
   const router = useRouter();
   const toggleVisibility = (id: string) => {
     const updated = trainings.map((t) =>

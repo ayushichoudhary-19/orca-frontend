@@ -1,12 +1,17 @@
 "use client";
 
-import { Modal, Button, Text, Divider } from "@mantine/core";
-import { useState } from "react";
-import CustomTextInput from "../Utils/CustomTextInput";
+import { useEffect, useState } from "react";
+import {
+  Modal,
+  Button,
+  Text,
+  Divider,
+} from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
-import { axiosClient } from "@/lib/axiosClient";
+import CustomTextInput from "../Utils/CustomTextInput";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import { axiosClient } from "@/lib/axiosClient";
 import { toast } from "@/lib/toast";
 
 export default function AuditionSetupModal({
@@ -16,37 +21,56 @@ export default function AuditionSetupModal({
   opened: boolean;
   onClose: () => void;
 }) {
-  const [questions, setQuestions] = useState<string[]>([""]);
   const campaignId = useSelector((state: RootState) => state.campaign.campaignId);
+  const [questions, setQuestions] = useState<string[]>([]);
+
+  // Fetch existing questions when modal opens
+  useEffect(() => {
+    if (!opened || !campaignId) return;
+
+    const fetchQuestions = async () => {
+      try {
+        const res = await axiosClient.get(`/api/auditions/${campaignId}/questions`);
+        if (res.data?.length > 0) {
+          setQuestions(res.data.map((q: any) => q.question));
+        } else {
+          setQuestions([""]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch questions", err);
+        toast.error("Could not load existing audition questions.");
+        setQuestions([""]);
+      } 
+    };
+
+    fetchQuestions();
+  }, [opened, campaignId]);
 
   const handleQuestionChange = (index: number, value: string) => {
-    const newQuestions = [...questions];
-    newQuestions[index] = value;
-    setQuestions(newQuestions);
+    const newQs = [...questions];
+    newQs[index] = value;
+    setQuestions(newQs);
   };
 
-  const addQuestion = () => {
-    setQuestions([...questions, ""]);
-  };
+  const addQuestion = () => setQuestions([...questions, ""]);
 
   const removeQuestion = (index: number) => {
     if (questions.length > 1) {
-      const newQuestions = questions.filter((_, i) => i !== index);
-      setQuestions(newQuestions);
+      const newQs = questions.filter((_, i) => i !== index);
+      setQuestions(newQs);
     }
   };
 
   const handleSave = async () => {
     try {
       await axiosClient.post(`/api/auditions/${campaignId}/questions`, {
-        campaignId,
         questions,
       });
       toast.success("Audition questions saved successfully.");
       onClose();
     } catch (err) {
+      console.error("Error saving questions", err);
       toast.error("Failed to save audition questions.");
-      console.error(err);
     }
   };
 
@@ -54,35 +78,30 @@ export default function AuditionSetupModal({
     <Modal
       opened={opened}
       onClose={onClose}
-      closeButtonProps={{
-        className: "text-[#0C0A1C] hover:text-black bg-white rounded-lg hover:bg-white",
-        style: { border: "1.5px solid #0C0A1C" },
-        size: "md",
-      }}
+      centered
+      size="xl"
+      radius="md"
       title={
         <span className="text-3xl font-bold text-[#0C0A1C] block text-center w-full mt-8">
           Objection Handling Caller Interview Questions
         </span>
       }
-      centered
-      size="xl"
-      radius="md"
+      closeButtonProps={{
+        className: "text-[#0C0A1C] hover:text-black bg-white rounded-lg hover:bg-white",
+        style: { border: "1.5px solid #0C0A1C" },
+        size: "md",
+      }}
       classNames={{
         body: "pb-0 pt-2 px-8",
         content: "rounded-2xl",
         header: "w-full flex justify-center pb-4 border-b border-[#E7E7E9]",
         title: "flex-1 text-center",
       }}
-      styles={{
-        content: {
-          height: "650px",
-        },
-      }}
+      styles={{ content: { height: "650px" } }}
     >
       <div className="flex flex-col h-full">
         <Text className="text-tinteddark5 text-[16px] mb-4 text-center">
-          Specify the objections you want potential callers for your campaign to answer. Their
-          responses to the objections will be recorded (audio only) to be reviewed by you.
+          Specify the objections you want potential callers to answer. Their audio responses will be reviewed by you.
         </Text>
         <Divider color="#E7E7E9" />
 
@@ -114,12 +133,7 @@ export default function AuditionSetupModal({
               </div>
             </div>
           ))}
-          <Button
-            size="md"
-            radius="md"
-            className="my-6 font-normal w-fit"
-            onClick={addQuestion}
-          >
+          <Button size="md" radius="md" className="my-6 font-normal w-fit" onClick={addQuestion}>
             Add audition question
           </Button>
         </div>

@@ -172,7 +172,7 @@ export default function SalesFloorUI() {
                 For questions about specific meetings or leads, please communicate in 1:1 messages with company campaign managers via email or our messaging functionality to keep the clutter and noise down
                 </li>
                 <li>
-                For technical support issues, don't post here - reach out to the ORCA technical support team via the chat button in the bottom corner of your screen
+                For technical support issues, do not post here reach out to the ORCA technical support team via the chat button in the bottom corner of your screen
                 </li>
                 <li>Keep the language and tone professional :)</li>
               </ul>
@@ -326,7 +326,7 @@ export default function SalesFloorUI() {
             >
               <Image src="/icons/message.svg" height={20} width={20} alt="chat-icon" />
               <Text size="sm" className="text-tinteddark6">
-                No posts found for "{searchQuery}" in {campaignName}
+                No posts found for {searchQuery} in {campaignName}
               </Text>
             </Card>
           )}

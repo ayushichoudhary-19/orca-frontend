@@ -20,7 +20,7 @@ export default function PendingRepsPage() {
   useEffect(() => {
     const fetchReps = async () => {
       try {
-        const res = await axiosClient.get(`/api/auditions/${campaignId}/reps`);
+        const res = await axiosClient.get(`/api/auditions/${campaignId}/reps?status=pending`);
         setReps(res.data);
       } catch (err) {
         console.error("Error fetching pending reps", err);

@@ -15,22 +15,19 @@ export default function TrainingEditorPage() {
   const { trainingId } = useParams();
   const [trainingData, setTrainingData] = useState({
     title: "Untitled Training",
-    content: null,
-    savedAt: null,
+    content: null as any[] | null,
+    savedAt: null as string | null,
   });
   const [loading, setLoading] = useState(true);
   const [hasChanges, setHasChanges] = useState(false);
   const [currentContent, setCurrentContent] = useState(null);
   const router = useRouter();
 
-  // Image upload handler
-  const handleUpload = useCallback(async (file) => {
+  const handleUpload = useCallback(async (file: File) => {
     try {
-      // Create FormData
       const formData = new FormData();
       formData.append('file', file);
       
-      // Upload the image to your server
       const response = await axiosClient.post('/api/uploads', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
