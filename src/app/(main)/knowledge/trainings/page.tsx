@@ -123,27 +123,6 @@ export default function TrainingPage() {
     }
   };
 
-  // const handleSave = async ({ content }: { content: any }) => {
-  //   if (!campaignId) {
-  //     toast.error("Please select a campaign");
-  //     return;
-  //   }
-  //   try {
-  //     const res = await createTraining({
-  //       title,
-  //       description,
-  //       content,
-  //       campaignId,
-  //       lastEditedBy: userId,
-  //     });
-  //     toast.success("Training created!");
-  //     router.push(`/knowledge/trainings/${res._id}`);
-  //   } catch (err) {
-  //     toast.error("Failed to create training");
-  //     console.error(err);
-  //   }
-  // };
-
   return (
     <Container size="xl" className="pt-3 pb-[30px]">
       <TrainingHero />

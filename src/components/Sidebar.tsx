@@ -7,10 +7,19 @@ import {
   IconUserSearch,
   IconUsers,
   IconChevronDown,
+  IconPhone,
+  IconHistory,
+  IconBriefcase,
+  IconChevronRight,
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "@/store/store";
+import { Menu, Button } from "@mantine/core";
+import { setCampaignId } from "@/store/campaignSlice";
+import { useCampaign } from "@/hooks/Campaign/useCampaign";
 
 type NavItem = {
   label: string;
@@ -19,7 +28,7 @@ type NavItem = {
   children?: NavItem[];
 };
 
-const navItems: NavItem[] = [
+const adminNavItems: NavItem[] = [
   {
     label: "Dashboard",
     icon: IconLayoutDashboard,
@@ -65,10 +74,43 @@ const navItems: NavItem[] = [
   },
 ];
 
+const sdrNavItems: NavItem[] = [
+  {
+    label: "Dashboard",
+    icon: IconLayoutDashboard,
+    path: "/dashboard",
+  },
+  {
+    label: "Meetings",
+    icon: IconCalendar,
+    path: "/meetings",
+  },
+  {
+    label: "Campaigns",
+    icon: IconBriefcase,
+    path: "/campaigns",
+  },
+  {
+    label: "Call History",
+    icon: IconHistory,
+    path: "/call-history",
+  },
+];
+
 export default function Sidebar() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [activeItem, setActiveItem] = useState<string>("Dashboard");
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [campaignsMenuOpen, setCampaignsMenuOpen] = useState(false);
+  const [campaigns, setCampaigns] = useState<{ label: string; value: string; status: string }[]>([]);
+  
+  const membership = useSelector((state: RootState) => state.membership.data);
+  const businessId = useSelector((state: RootState) => state.membership.businessId);
+  const isSdr = membership?.roleId.name.toLowerCase() === 'sdr';
+  const navItems = isSdr ? sdrNavItems : adminNavItems;
+  
+  const { getByBusiness } = useCampaign();
 
   useEffect(() => {
     const path = window.location.pathname;
@@ -79,8 +121,33 @@ export default function Sidebar() {
       if (currentChild) {
         setActiveItem(currentChild.label);
       }
+    } else {
+      const exactMatch = navItems.find(item => item.path === path);
+      if (exactMatch) {
+        setActiveItem(exactMatch.label);
+      }
     }
-  }, []);
+  }, [navItems]);
+
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      if (!businessId) return;
+      try {
+        const all = await getByBusiness(businessId);
+        const mapped = all.map((c) => ({
+          label: c.campaignName,
+          value: c._id,
+          status: c.status,
+        }));
+
+        setCampaigns([{ label: "+ Add New", value: "new", status: "NEW" }, ...mapped]);
+      } catch (err) {
+        console.error("Failed to fetch campaigns", err);
+      }
+    };
+
+    if (isSdr) fetchCampaigns();
+  }, [businessId, isSdr, getByBusiness]);
 
   const handleNavigate = (path: string, label: string) => {
     setActiveItem(label);
@@ -91,6 +158,16 @@ export default function Sidebar() {
     setExpandedItems((prev) =>
       prev.includes(label) ? prev.filter((item) => item !== label) : [...prev, label]
     );
+  };
+
+  const handleCampaignSelect = (campaignId: string) => {
+    if (campaignId === "new") {
+      router.push("/campaign/create");
+    } else {
+      dispatch(setCampaignId(campaignId));
+      router.push("/dashboard");
+    }
+    setCampaignsMenuOpen(false);
   };
 
   return (
@@ -108,13 +185,48 @@ export default function Sidebar() {
       </motion.div>
 
       <div className="flex-1 overflow-y-auto">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-xs text-tinteddark5 tracking-wide px-6 mt-7 my-4 font-semibold"
-        >
-          MAIN MENU
-        </motion.div>
+        {isSdr ? (
+          <div className="px-6 mt-7 mb-4">
+            <Menu
+              opened={campaignsMenuOpen}
+              onChange={setCampaignsMenuOpen}
+              position="bottom-start"
+              width={250}
+              shadow="md"
+            >
+              <Menu.Target>
+                <Button
+                  className="w-full bg-[#37A063] h-[50px] text-[16px] text-white font-bold flex items-center justify-between"
+                  radius="md"
+                >
+                  <div className="flex items-center gap-2 mr-10">
+                    <IconPhone size={20} />
+                    <span>Start Calling</span>
+                  </div>
+                  <IconChevronRight size={18} stroke={1.5}/>
+                </Button>
+              </Menu.Target>
+              <Menu.Dropdown>
+                {campaigns.map((campaign) => (
+                  <Menu.Item
+                    key={campaign.value}
+                    onClick={() => handleCampaignSelect(campaign.value)}
+                  >
+                    {campaign.label}
+                  </Menu.Item>
+                ))}
+              </Menu.Dropdown>
+            </Menu>
+          </div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-xs text-tinteddark5 tracking-wide px-6 mt-7 my-4 font-semibold"
+          >
+            MAIN MENU
+          </motion.div>
+        )}
         <div className="flex flex-col mb-4">
           {navItems.map((item) => {
             const isActive = activeItem === item.label;

@@ -1,30 +1,25 @@
 "use client";
 
+import { useSelector } from "react-redux";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-import { store, persistor } from "@/store/store";
+import { store, persistor, RootState } from "@/store/store";
 import { RBACProvider, RBACConfig } from "uptut-rbac";
 import { MembershipProvider } from "./MembershipProvider";
 
 function RBACWrapper({ children }: { children: React.ReactNode }) {
-const rbacConfig: RBACConfig = {
-  endpoints: {
-    getFeatures: (r) => `/api/features?role=${r}`,
-    getRoles: () => "/api/roles",
-    createRole: "/api/roles",
-    createFeature: "/api/features/create",
-    uploadFeatureJson: "/api/features/bulk",
-    addFeaturesToRole: "/api/features/bulk-add",
-    removeFeaturesFromRole: "/api/features/bulk-remove",
-    removeRole: "/api/roles",
-    getFeaturesByCategory: (category) => `/api/features/category?name=${category}`,
-    getAllCategories: () => "/api/categories",
-  },
-  requestHeaders: () => ({
-    Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
-  }),
-};
+  const businessId = useSelector((state: RootState) => state.membership.businessId);
 
+  const rbacConfig: RBACConfig = {
+    baseUrl: process.env.NEXT_PUBLIC_BASE_URL,
+    endpoints: {
+      getRoles: () => `${process.env.NEXT_PUBLIC_BASE_URL}/api/roles/business/${businessId}`,
+      createRole: `${process.env.NEXT_PUBLIC_BASE_URL}/api/roles/business/${businessId}`,
+    },
+    requestHeaders: () => ({
+      Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+    }),
+  };
 
   return <RBACProvider config={rbacConfig}>{children}</RBACProvider>;
 }

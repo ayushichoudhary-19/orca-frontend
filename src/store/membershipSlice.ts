@@ -21,7 +21,7 @@ export const membershipSlice = createSlice({
   reducers: {
     setMembership: (state, action: PayloadAction<Membership>) => {
       state.data = action.payload;
-      state.businessId = action.payload.businessId._id;
+      state.businessId = action.payload.businessId?._id ?? null;
       state.membershipId = action.payload._id;
       state.loading = false;
     },

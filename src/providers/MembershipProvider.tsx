@@ -4,7 +4,11 @@ import { useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useDispatch } from "react-redux";
 import { axiosClient } from "@/lib/axiosClient";
-import { clearMembership, setMembership, setMembershipLoading } from "@/store/membershipSlice";
+import {
+  clearMembership,
+  setMembership,
+  setMembershipLoading,
+} from "@/store/membershipSlice";
 import { Membership } from "@/types/membership";
 
 export const MembershipProvider = () => {
@@ -13,10 +17,11 @@ export const MembershipProvider = () => {
   useEffect(() => {
     const auth = getAuth();
     dispatch(setMembershipLoading(true));
-
+    
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
         dispatch(clearMembership());
+        dispatch(setMembershipLoading(false));
         return;
       }
 
@@ -29,9 +34,13 @@ export const MembershipProvider = () => {
         } else {
           dispatch(clearMembership());
         }
-      } catch (err) {
-        console.error("Membership fetch failed", err);
-        dispatch(clearMembership());
+      } catch (err: any) {
+        if (err?.response?.status === 404) {
+          dispatch(clearMembership());
+        } else {
+          console.error("Membership fetch failed", err);
+          dispatch(clearMembership());
+        }
       } finally {
         dispatch(setMembershipLoading(false));
       }

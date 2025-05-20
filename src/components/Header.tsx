@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
 import Image from "next/image";
+import { IconUser } from "@tabler/icons-react";
 
 export const Header = () => {
   const pathname = usePathname();
@@ -23,8 +24,10 @@ export const Header = () => {
   const hasUnreadPosts = notifications.some((n) => n.type === "post" && !n.read);
   const hasUnreadMessages = notifications.some((n) => n.type === "message" && !n.read);
 
+  const membership = useSelector((state: RootState) => state.membership.data);
   const businessId = useSelector((state: RootState) => state.membership.businessId);
   const campaignId = useSelector((state: RootState) => state.campaign.campaignId);
+  const isSdr = membership && !membership.businessId;
 
   const [campaigns, setCampaigns] = useState<{ label: string; value: string; status: string }[]>(
     []
@@ -69,7 +72,7 @@ export const Header = () => {
       }
     };
 
-    if (!isOnboarding) fetchCampaigns();
+    if (!isSdr && !isOnboarding) fetchCampaigns();
   }, [businessId, isOnboarding, isCampaignCreation]);
 
   const handleChange = (value: string | null) => {
@@ -118,7 +121,7 @@ export const Header = () => {
             <div className="text-3xl font-extrabold tracking-wide text-primary">ORCA</div>
           )}
 
-          {!isOnboarding && (
+          {!isOnboarding && !isSdr && (
             <Select
               placeholder={isCampaignCreation ? "Select Draft Campaign" : "Select Campaign"}
               data={campaigns}
@@ -141,6 +144,75 @@ export const Header = () => {
           >
             Logout
           </Button>
+        ) : isSdr ? (
+          <Group>
+            <ActionIcon
+              className={`relative ${
+                isActive("/sales-floor")
+                  ? "bg-primary text-white"
+                  : "bg-white border-tinteddark1 text-tinteddark7 hover:bg-lighter"
+              } rounded-md`}
+              onClick={() => {
+                if (hasUnreadPosts) dispatch(markAsRead("post"));
+                router.push("/sales-floor");
+              }}
+              size={40}
+            >
+              <Image
+                src={isActive("/sales-floor") ? "/icons/globewhite.svg" : "/icons/globeblack.svg"}
+                height={20}
+                width={20}
+                alt="sales-floor"
+              />
+              {hasUnreadPosts && (
+                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500" />
+              )}
+            </ActionIcon>
+
+            <ActionIcon
+              className={`relative ${
+                isActive("/messages")
+                  ? "bg-primary text-white"
+                  : "bg-white border-tinteddark1 text-tinteddark7 hover:bg-lighter"
+              } rounded-md`}
+              onClick={() => {
+                if (hasUnreadMessages) dispatch(markAsRead("message"));
+                router.push("/messages");
+              }}
+              size={40}
+            >
+              <Image
+                src={isActive("/messages") ? "/icons/msgwhite.svg" : "/icons/msgblack.svg"}
+                height={20}
+                width={20}
+                alt="messages"
+              />
+              {hasUnreadMessages && (
+                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500" />
+              )}
+            </ActionIcon>
+
+            <Menu position="bottom-end" shadow="md" width={200}>
+              <Menu.Target>
+                <ActionIcon
+                  className={`${
+                    isActive("/profile")
+                      ? "bg-primary text-white"
+                      : "bg-white border-tinteddark1 text-tinteddark7 hover:bg-lighter"
+                  } rounded-md`}
+                  size={40}
+                >
+                   <IconUser size={20} stroke={1.5} />
+                </ActionIcon>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <Menu.Item onClick={() => router.push("/profile")}>Profile</Menu.Item>
+                <Menu.Item onClick={logout} color="red">
+                  Logout
+                </Menu.Item>
+              </Menu.Dropdown>
+            </Menu>
+          </Group>
         ) : (
           <Group>
             <ActionIcon
@@ -216,7 +288,7 @@ export const Header = () => {
                   } rounded-md`}
                   size={40}
                 >
-                  P
+                <IconUser size={20} stroke={1.5} />
                 </ActionIcon>
               </Menu.Target>
               <Menu.Dropdown>

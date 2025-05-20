@@ -17,7 +17,7 @@ export const TrainingGrid = ({
   trainings,
   setTrainings,
   setPendingChanges,
-}: TrainingGridProps) => {
+}: TrainingGridProps): React.ReactNode => {
   const router = useRouter();
   const toggleVisibility = (id: string) => {
     const updated = trainings.map((t) =>

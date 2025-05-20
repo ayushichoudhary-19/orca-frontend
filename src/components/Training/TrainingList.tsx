@@ -1,12 +1,11 @@
 "use client";
 
-import { Droppable, Draggable } from "react-beautiful-dnd";
+import { Droppable, Draggable } from "@hello-pangea/dnd";
 import { Card, Group, Text, Button } from "@mantine/core";
 import { IconEye, IconEyeOff, IconGripVertical } from "@tabler/icons-react";
 import Image from "next/image";
 import { Training } from "@/types/training";
 import { useRouter } from "next/navigation";
-import { JSX } from "react";
 
 interface TrainingListProps {
   trainings: Training[];
@@ -18,7 +17,7 @@ export const TrainingList = ({
   trainings,
   setTrainings,
   setPendingChanges,
-}: TrainingListProps): JSX.Element => {
+}: TrainingListProps) => {
   const router = useRouter();
   const toggleVisibility = (id: string) => {
     const updated = trainings.map((t) =>
@@ -28,11 +27,14 @@ export const TrainingList = ({
     setPendingChanges(true);
   };  
 
-
   return (
     <Droppable droppableId="trainings" isDropDisabled = {false} isCombineEnabled={false} ignoreContainerClipping={true}>
       {(provided) => (
-        <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4 mt-6">
+        <div 
+          {...provided.droppableProps} 
+          ref={provided.innerRef} 
+          className="space-y-4 mt-6"
+        >
           {trainings.map((training, index) => (
             <Draggable key={training._id} draggableId={training._id} index={index}>
               {(provided) => (

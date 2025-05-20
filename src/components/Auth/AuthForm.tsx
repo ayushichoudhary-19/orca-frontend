@@ -4,12 +4,11 @@ import { useState } from "react";
 import { Button, Stack, Title } from "@mantine/core";
 import { ErrorAlert } from "@/components/Utils/ErrorAlert";
 import { motion, AnimatePresence } from "framer-motion";
-import Link from "next/link";
-import { IconArrowRight, IconArrowNarrowLeft } from "@tabler/icons-react";
+import { IconArrowRight, IconArrowNarrowLeft, IconEye, IconEyeOff } from "@tabler/icons-react";
 import { AuthHeader } from "../Auth/AuthHeader";
-import { EmailInput } from "../Auth/EmailInput";
-import { PasswordInput } from "../Auth/PasswordInput";
 import { getErrorMessage } from "@/utils/errorUtils";
+import Link from "next/link";
+import CustomTextInput from "../Utils/CustomTextInput";
 
 type Props = {
   onSubmit: (email: string, password: string) => Promise<void>;
@@ -102,7 +101,6 @@ export const AuthForm = ({ onSubmit, onGoogleAuth }: Props) => {
               <form onSubmit={handleContinue}>
                 <Stack>
                   <ErrorAlert message={error} />
-
                   <Button
                     variant="unstyled"
                     fullWidth
@@ -193,6 +191,72 @@ export const AuthForm = ({ onSubmit, onGoogleAuth }: Props) => {
         className={`absolute bottom-8 text-center text-xs ${step === 1 ? "text-black" : "text-white"}`}
       >
         @2025 ORCA All Right Reserved.
+      </div>
+    </div>
+  );
+};
+
+const EmailInput = ({
+  value,
+  onChange,
+  label = "Email",
+}: {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  label?: string;
+}) => (
+  <div className="mt-4">
+    <label className="block text-sm font-semibold text-darker mb-1">{label}</label>
+    <CustomTextInput
+      type="email"
+      value={value}
+      onChange={onChange}
+      placeholder="your.email@example.com"
+    />
+  </div>
+);
+
+const PasswordInput = ({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) => {
+  const [visible, setVisible] = useState(false);
+
+  return (
+    <div>
+      <label className="block text-sm font-semibold text-darker mb-1">Password</label>
+      <div className="relative">
+        <CustomTextInput
+          type={visible ? "text" : "password"}
+          value={value}
+          onChange={onChange}
+          placeholder="Input your password"
+          required
+          className="pr-12"
+        />
+        <button
+          type="button"
+          onClick={() => setVisible(!visible)}
+          className="absolute top-0 right-0 h-full w-10 flex items-center justify-center bg-white rounded-r-md border
+  border-softgray
+  border-solid
+  rounded-md
+  border-l-0
+  rounded-tl-none
+  rounded-bl-none
+  hover:cursor-pointer
+  appearance-none
+  shadow-none"
+        >
+          {visible ? (
+            <IconEyeOff size={25} color="#292D32" />
+          ) : (
+            <IconEye size={25} color="#292D32" />
+          )}
+        </button>
       </div>
     </div>
   );

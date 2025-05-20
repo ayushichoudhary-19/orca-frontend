@@ -1,7 +1,7 @@
 export interface Membership {
   _id: string;
   userId: string;
-  businessId: {
+  businessId?: {
     _id: string;
     name: string;
     companyWebsite: string;
