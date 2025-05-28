@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
-import { useFetchFeaturesByRole } from "uptut-rbac";
 import { auth } from "@/lib/firebase";
 import { toast } from "@/lib/toast";
 import { signOut } from "firebase/auth";
@@ -19,14 +18,11 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   const [authInitialized, setAuthInitialized] = useState(false);
 
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
-  const roleId = useAppSelector((state) => state.auth.roleId);
   const membership = useAppSelector((state) => state.membership.data);
   const membershipLoading = useAppSelector((state) => state.membership.loading);
 
-  useFetchFeaturesByRole(isAuthenticated && roleId ? roleId : "");
-
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(() => {
       setAuthInitialized(true);
     });
     return () => unsubscribe();

@@ -4,7 +4,6 @@ import {
   IconMicrophone,
   IconPlayerStop,
   IconTrash,
-  IconCheck,
   IconAlertCircle,
 } from "@tabler/icons-react";
 import { motion, AnimatePresence } from "framer-motion";

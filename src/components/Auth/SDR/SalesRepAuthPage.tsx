@@ -3,20 +3,12 @@
 import { useState } from "react";
 import { AuthForm } from "@/components/Auth/AuthForm";
 import { SDRRegistrationForm } from "./SDRRegistrationForm";
-import {
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-} from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import axios from "axios";
 import { useDispatch } from "react-redux";
 import { setAuth } from "@/store/authSlice";
 import { useRouter } from "next/navigation";
-import {
-  isFirebaseError,
-  getFirebaseAuthErrorMessage,
-  getErrorMessage,
-} from "@/utils/errorUtils";
+import { isFirebaseError, getFirebaseAuthErrorMessage, getErrorMessage } from "@/utils/errorUtils";
 import { axiosClient } from "@/lib/axiosClient";
 
 export default function SalesRepAuthPage() {
@@ -29,29 +21,24 @@ export default function SalesRepAuthPage() {
     email,
     password,
     phoneNumber,
-    resume,
     languages,
   }: {
     fullName: string;
     email: string;
     password: string;
     phoneNumber: string;
-    resume: File | null;
     languages: { language: string; proficiency: string }[];
   }) => {
     try {
-      // Firebase sign up
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Prepare form data
       const formData = new FormData();
       formData.append("uid", user.uid);
       formData.append("email", email);
       formData.append("fullName", fullName);
       formData.append("phoneNumber", phoneNumber);
       formData.append("languages", JSON.stringify(languages));
-      // if (resume) formData.append("resume", resume);
 
       await axiosClient.post(
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/register-sales-rep`,
@@ -59,10 +46,8 @@ export default function SalesRepAuthPage() {
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      // Set auth state in Redux
       dispatch(setAuth({ email, uid: user.uid, name: fullName }));
 
-      // Redirect to dashboard
       router.push("/dashboard");
     } catch (error: unknown) {
       const message = isFirebaseError(error)
@@ -77,7 +62,6 @@ export default function SalesRepAuthPage() {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Ensure user is tracked in backend
       await axiosClient.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/user/`, {
         uid: user.uid,
         email: user.email,

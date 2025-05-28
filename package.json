@@ -57,7 +57,6 @@
     "slate": "^0.112.0",
     "slate-react": "^0.112.1",
     "socket.io-client": "^4.8.1",
-    "uptut-rbac": "file:../uptut-rbac",
     "use-debounce": "^10.0.4",
     "uuid": "^11.1.0",
     "zod": "^3.24.2"

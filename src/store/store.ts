@@ -3,7 +3,6 @@ import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import notesReducer from "./notesSlice";
 import authReducer from "./authSlice";
-import { featureReducer } from "uptut-rbac";
 import membershipReducer from "./membershipSlice";
 import campaignReducer from "./campaignSlice";
 import notificationReducer from "./notificationSlice";
@@ -18,12 +17,12 @@ const persistConfig = {
 const rootReducer = combineReducers({
   notes: notesReducer,
   auth: authReducer,
-  features: featureReducer,
   membership: membershipReducer,
   campaign: campaignReducer,
   notification: notificationReducer,
 });
 
+export type RootState = ReturnType<typeof rootReducer>;
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
@@ -38,5 +37,4 @@ export const store = configureStore({
 
 export const persistor = persistStore(store);
 
-export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

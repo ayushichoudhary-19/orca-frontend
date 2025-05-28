@@ -10,7 +10,6 @@ import {
   IconBrandLinkedin,
   IconMapPin,
   IconLanguage,
-  IconLink,
 } from "@tabler/icons-react";
 
 type Language = {

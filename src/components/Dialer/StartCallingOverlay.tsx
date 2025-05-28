@@ -10,7 +10,7 @@ interface StartCallingOverlayProps {
   onManualCallClick: () => void;
 }
 
-export function StartCallingOverlay({ onStart, onManualCallClick }: StartCallingOverlayProps) {
+export function StartCallingOverlay({ onStart }: StartCallingOverlayProps) {
   const [visible, setVisible] = useState(true);
 
   if (!visible) return null;

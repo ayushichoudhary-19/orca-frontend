@@ -47,8 +47,7 @@ const CalendlyLinkInput = () => {
     <div className="bg-white p-6 rounded-lg shadow-md border mb-6">
       <h2 className="text-xl font-semibold mb-2">Connect Your Calendly</h2>
       <p className="text-gray-600 mb-4">
-        You haven't connected Calendly yet. Click below to authorize and let reps schedule meetings
-        through your link.
+       {"You haven't connected Calendly yet. Click below to authorize and let reps schedule meetings through your link."}
       </p>
       <Button
         onClick={handleConnectCalendly}

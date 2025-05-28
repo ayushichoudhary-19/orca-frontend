@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Device, Call, TwilioError } from "@twilio/voice-sdk";
+import { Device, Call } from "@twilio/voice-sdk";
 import { axiosClient } from "@/lib/axiosClient";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";

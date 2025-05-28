@@ -18,14 +18,13 @@ interface CampaignDetail {
   companyLocation: string[];
   businessName: string;
   campaignTag: string;
-  // Additional fields that might be in the detailed view
   description?: string;
   requirements?: string[];
   idealPersonas?: string[];
   benefits?: string[];
 }
 
-export default function CampaignDetail({ params }: { params: { id: string } }) {
+export default function CampaignDetail() {
   const campaignId = usePathname().split("/").pop();
   const [campaign, setCampaign] = useState<CampaignDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,7 +68,7 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
     };
 
     fetchCampaignDetail();
-  }, [params.id]);
+  }, [campaignId]);
 
   if (isLoading) {
     return (
@@ -129,7 +128,7 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
           </div>
 
           <div className="text-sm text-gray-500 mb-6">
-            This post was created on behalf of one of Orca's clients
+            {"This post was created on behalf of one of Orca's clients"}
           </div>
 
           <div className="space-y-8">
@@ -144,7 +143,7 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
               </p>
               <p className="text-gray-700 mb-4">
                 As a fractional Sales Development Representative (SDR), you will play a critical
-                role in generating top-of-funnel opportunities for a growing sales team. You'll be
+                role in generating top-of-funnel opportunities for a growing sales team. {"You'll"} be
                 reaching out to decision makers and influencers within e-commerce brands, helping
                 them discover how this platform can solve their operational pain points and
                 accelerate their growth.
@@ -155,7 +154,7 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
             </div>
 
             <div>
-              <h2 className="text-xl font-bold mb-4">What you'll need to succeed:</h2>
+              <h2 className="text-xl font-bold mb-4">{"What you'll need to succeed:"}</h2>
               <ul className="list-disc pl-5 space-y-2">
                 {campaign.requirements?.map((req, index) => (
                   <li key={index} className="text-gray-700">
@@ -166,7 +165,7 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
             </div>
 
             <div>
-              <h2 className="text-xl font-bold mb-4">Ideal personas you'll be targeting:</h2>
+              <h2 className="text-xl font-bold mb-4">{"Ideal personas you'll be targeting"}:</h2>
               <ul className="list-disc pl-5 space-y-2">
                 {campaign.idealPersonas?.map((persona, index) => (
                   <li key={index} className="text-gray-700">
@@ -186,13 +185,12 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
                 ))}
               </ul>
               <p className="text-gray-700 mt-4">
-                If you're passionate about sales and want to help e-commerce brands scale smarter,
-                we'd love to hear from you!
+                {"If you're passionate about sales and want to help e-commerce brands scale smarter, we'd love to hear from you!"}
               </p>
             </div>
 
             <div>
-              <h2 className="text-xl font-bold mb-4">What you'll do:</h2>
+              <h2 className="text-xl font-bold mb-4">{"What you'll do:"}</h2>
               <ul className="list-disc pl-5 space-y-2">
                 <li className="text-gray-700">
                   Grow top of sales funnel through cold outbound campaigns
@@ -214,7 +212,7 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
             </div>
 
             <div>
-              <h2 className="text-xl font-bold mb-4">You'll receive access to:</h2>
+              <h2 className="text-xl font-bold mb-4">{"You'll receive access to:"}</h2>
               <ul className="list-disc pl-5 space-y-2">
                 <li className="text-gray-700">
                   An deep pool of highly targeted, mobile enriched leads
@@ -234,11 +232,10 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
               <h2 className="text-xl font-bold mb-4">You should check out this role if:</h2>
               <ul className="list-disc pl-5 space-y-2">
                 <li className="text-gray-700">
-                  You're excited to work as a freelance SDR, and have the autonomy to work flexible
-                  hours
+                  {"You're excited to work as a freelance SDR, and have the autonomy to work flexible hours"}
                 </li>
                 <li className="text-gray-700">
-                  You're based in the US and desire to work remotely
+                  {"You're based in the US and desire to work remotely"}
                 </li>
                 <li className="text-gray-700">
                   You have a laptop or desktop computer and stable internet connection
@@ -261,13 +258,13 @@ export default function CampaignDetail({ params }: { params: { id: string } }) {
 
               <div className="mt-6">
                 <h3 className="text-lg font-bold mb-2">
-                  Why can't I see the name of this specific company?
+                 {" Why can't I see the name of this specific company?"}
                 </h3>
                 <p className="text-gray-700 mb-4">
                   ORCA works with a variety of companies specifically seeking to grow their sales
                   teams, but we also prioritize privacy, safety, and trust for everyone in our
                   network, and data security is important to us. Once you join our community using
-                  the "Apply now" button, you will be shown all available job opportunities that
+                  the {`"Apply now"`}button, you will be shown all available job opportunities that
                   match your profile.
                 </p>
               </div>

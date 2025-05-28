@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { IconLayoutGrid, IconLayoutList, IconArrowRight } from "@tabler/icons-react";
 import Link from "next/link";
 import { axiosClient } from "@/lib/axiosClient";
@@ -33,10 +32,8 @@ export default function CampaignMarketplace() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [campaignView, setCampaignView] = useState<"my" | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [showFilters, setShowFilters] = useState(false);
   const [priceFilter, setPriceFilter] = useState<number | null>(null);
   const [businessFilter, setBusinessFilter] = useState<string | null>(null);
-  const [uniqueBusinesses, setUniqueBusinesses] = useState<string[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("ongoing");
 
   const router = useRouter();
@@ -59,12 +56,6 @@ export default function CampaignMarketplace() {
 
       setCampaigns(response.data);
       setFilteredCampaigns(response.data);
-
-      const businesses = [
-        ...new Set(response.data.map((c: Campaign) => c.businessName).filter(Boolean)),
-      ];
-      setUniqueBusinesses(businesses);
-
       setIsLoading(false);
     } catch (error) {
       console.error("Failed to fetch campaigns:", error);
@@ -203,55 +194,6 @@ export default function CampaignMarketplace() {
       </div>
 
       <Divider />
-
-      {/* Filters panel */}
-      {showFilters && (
-        <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: "auto", opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="px-6 pb-4"
-        >
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <div className="flex flex-wrap gap-4">
-              <div className="flex flex-col">
-                <label className="text-sm font-medium mb-1">Business</label>
-                <select
-                  className="p-2 border border-gray-200 rounded-md min-w-[200px]"
-                  value={businessFilter || ""}
-                  onChange={(e) => setBusinessFilter(e.target.value || null)}
-                >
-                  <option value="">All Businesses</option>
-                  {uniqueBusinesses.map((business) => (
-                    <option key={business} value={business}>
-                      {business}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col">
-                <label className="text-sm font-medium mb-1">Max Price</label>
-                <select
-                  className="p-2 border border-gray-200 rounded-md min-w-[200px]"
-                  value={priceFilter || ""}
-                  onChange={(e) => setPriceFilter(Number(e.target.value) || null)}
-                >
-                  <option value="">Any Price</option>
-                  <option value="200">Up to $200</option>
-                  <option value="300">Up to $300</option>
-                  <option value="400">Up to $400</option>
-                  <option value="500">Up to $500</option>
-                </select>
-              </div>
-              <div className="flex items-end">
-                <Button onClick={resetFilters}>Reset Filters</Button>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
       <div className="border-t border-gray-200 mb-6"></div>
 
       {isLoading && (

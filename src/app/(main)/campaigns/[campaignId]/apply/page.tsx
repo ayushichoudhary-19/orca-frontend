@@ -84,6 +84,9 @@ export default function ApplyPage() {
   const isEditable = ["not_started", "in_progress", "retry"].includes(auditionStatus || "");
   const canEditInputs = auditionStatus === "in_progress";
   const isRetry = auditionStatus === "retry";
+  const getPreviousAudioUrl = (response: Blob | string | null | undefined): string | undefined => {
+    return typeof response === "string" ? response : undefined;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -175,8 +178,9 @@ export default function ApplyPage() {
 
       {!isEditable && (
         <div className="mb-4 p-4 bg-yellow-50 border border-yellow-300 text-sm text-yellow-800 rounded">
-          You have already submitted your audition. You cannot re-submit unless marked as 'retry' by
-          an admin.
+          {
+            "You have already submitted your audition. You cannot re-submit unless marked as 'retry' by an admin."
+          }
         </div>
       )}
 
@@ -323,8 +327,8 @@ export default function ApplyPage() {
               journey!
             </p>
             <p className="text-sm text-gray-600 mb-2">
-              😄 <span className="font-medium">Example:</span> "Hi there! I'm Alex, from
-              ZoomInfo..."
+              😄 <span className="font-medium">Example:</span>
+              {`"Hi there! I'm Alex, from ZoomInfo..."`}
             </p>
           </div>
 
@@ -340,10 +344,10 @@ export default function ApplyPage() {
               </Text>
               <div className=" bg-yellow-100 p-2 rounded border border-yellow-200">
                 <Text fw={600} size="md" className="mb-1 text-darker mt-4">
-                  Admin's Feedback
+                  {"Admin's Feedback"}
                 </Text>
                 <Text size="sm" className="text-darker">
-                  " {feedbackNotes} "
+                  {feedbackNotes}
                 </Text>
               </div>
             </Paper>
@@ -359,12 +363,10 @@ export default function ApplyPage() {
                   questionId={q._id}
                   onAudioRecorded={handleAudioRecorded}
                   initialAudioBlob={
-                    typeof audioResponses[q._id] === "object" ? audioResponses[q._id] : null
+                    audioResponses[q._id] instanceof Blob ? audioResponses[q._id] : null
                   }
                   isLocked={!isEditable}
-                  previousAudioUrl={
-                    typeof audioResponses[q._id] === "string" ? audioResponses[q._id] : undefined
-                  }
+                  previousAudioUrl={getPreviousAudioUrl(audioResponses[q._id])}
                 />
 
                 {audioResponses[q._id] && (

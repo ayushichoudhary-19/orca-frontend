@@ -122,7 +122,12 @@ export const AuthForm = ({ onSubmit, onGoogleAuth }: Props) => {
                     {"Login with Google"}
                   </Button>
 
-                  <EmailInput value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <EmailInput
+                    value={email}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+                      setEmail(e.target.value)
+                    }
+                  />
 
                   {email.trim() !== "" && (
                     <motion.div
@@ -157,7 +162,10 @@ export const AuthForm = ({ onSubmit, onGoogleAuth }: Props) => {
                 <Stack>
                   <ErrorAlert message={error} />
 
-                  <EmailInput value={email} onChange={() => {}} />
+                  <EmailInput
+                    value={email}
+                    onChange={(e) => setEmail((e.target as HTMLInputElement).value)}
+                  />
 
                   <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} />
 
@@ -202,7 +210,7 @@ const EmailInput = ({
   label = "Email",
 }: {
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   label?: string;
 }) => (
   <div className="mt-4">
@@ -221,7 +229,7 @@ const PasswordInput = ({
   onChange,
 }: {
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }) => {
   const [visible, setVisible] = useState(false);
 
@@ -240,16 +248,7 @@ const PasswordInput = ({
         <button
           type="button"
           onClick={() => setVisible(!visible)}
-          className="absolute top-0 right-0 h-full w-10 flex items-center justify-center bg-white rounded-r-md border
-  border-softgray
-  border-solid
-  rounded-md
-  border-l-0
-  rounded-tl-none
-  rounded-bl-none
-  hover:cursor-pointer
-  appearance-none
-  shadow-none"
+          className="absolute top-0 right-0 h-full w-10 flex items-center justify-center bg-white rounded-r-md border border-softgray border-solid rounded-md border-l-0 rounded-tl-none rounded-bl-none hover:cursor-pointer appearance-none shadow-none"
         >
           {visible ? (
             <IconEyeOff size={25} color="#292D32" />

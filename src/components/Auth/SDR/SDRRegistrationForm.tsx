@@ -19,7 +19,6 @@ import { getErrorMessage } from "@/utils/errorUtils";
 import Link from "next/link";
 import CustomTextInput from "@/components/Utils/CustomTextInput";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 
 type Language = {
   language: string;
@@ -65,7 +64,6 @@ export const SDRRegistrationForm = ({ onSubmit, onBack }: SDRRegistrationFormPro
   const [error, setError] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
