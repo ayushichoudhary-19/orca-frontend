@@ -2,7 +2,6 @@
 
 import { EditorProvider, useCurrentEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import TextStyle from "@tiptap/extension-text-style";
 import Placeholder from "@tiptap/extension-placeholder";
 import Color from "@tiptap/extension-color";
 import { useEffect, useRef } from "react";
@@ -19,6 +18,7 @@ import {
   IconArrowBackUp,
   IconArrowForwardUp,
 } from "@tabler/icons-react";
+import { handleCommandNavigation } from "novel";
 
 export const MenuBar = () => {
   const { editor } = useCurrentEditor();
@@ -86,7 +86,6 @@ export const MenuBar = () => {
       action: () => editor.chain().focus().redo().run(),
     },
   ];
-  
 
   return (
     <div className={styles.controlGroup}>
@@ -103,64 +102,69 @@ export const MenuBar = () => {
         ))}
       </div>
     </div>
-  );  
+  );
 };
 
 const extensions = [
-    Color,
-    TextStyle,
-    StarterKit.configure({
-      bulletList: { keepMarks: true },
-      orderedList: { keepMarks: true },
-    }),
-    Placeholder.configure({
-      placeholder: "Type your notes here...",
-      emptyEditorClass: styles.placeholder,
-    }),
+  Color,
+  StarterKit.configure({
+    bulletList: { keepMarks: true },
+    orderedList: { keepMarks: true },
+  }),
+  Placeholder.configure({
+    placeholder: "Type your notes here...",
+    emptyEditorClass: styles.placeholder,
+  }),
 ];
 
 export default function NoteEditor({
-    content,
-    onChange,
-    onBlur,
-  }: {
-    content: string;
-    onChange: (value: string) => void;
-    onBlur?: () => void;
-  }) {
-    const wrapperRef = useRef<HTMLDivElement>(null);
-  
-    useEffect(() => {
-      const handleBlur = (e: FocusEvent) => {
-        if (
-          wrapperRef.current &&
-          !wrapperRef.current.contains(e.relatedTarget as Node)
-        ) {
-          onBlur?.();
-        }
-      };
-  
-      const node = wrapperRef.current;
-      if (node) node.addEventListener("focusout", handleBlur);
-      return () => {
-        if (node) node.removeEventListener("focusout", handleBlur);
-      };
-    }, [onBlur]);
-  
-    return (
-      <div ref={wrapperRef} className={styles.editorContainer}>
-        <EditorProvider
-          content={content}
-          extensions={extensions}
-          editorProps={{
-            attributes: {
-              class: styles.tiptap,
-            },
-          }}
-          onUpdate={({ editor }) => onChange(editor.getHTML())}
-          slotBefore={<MenuBar />}
-        />
-      </div>
-    );
+  content,
+  onChange,
+  onBlur,
+  theme,
+}: {
+  content: string;
+  onChange: (value: string) => void;
+  onBlur?: () => void;
+  theme?: "dialer" | "default";
+}) {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleBlur = (e: FocusEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.relatedTarget as Node)) {
+        onBlur?.();
+      }
+    };
+
+    const node = wrapperRef.current;
+    if (node) node.addEventListener("focusout", handleBlur);
+    return () => {
+      if (node) node.removeEventListener("focusout", handleBlur);
+    };
+  }, [onBlur]);
+
+  const editorWrapperClasses = [styles.editorContainer];
+  if (theme === "dialer") {
+    editorWrapperClasses.push(styles.dialerThemeWrapper);
   }
-  
+
+  return (
+    <div ref={wrapperRef} className={editorWrapperClasses.join(" ")}>
+      <EditorProvider
+        content={content}
+        extensions={extensions}
+        editorProps={{
+          handleDOMEvents: {
+            keydown: (_view, event) => handleCommandNavigation(event),
+          },
+          attributes: {
+            class: `tiptap prose prose-lg max-w-full focus:outline-none prose-headings:font-semibold min-h-[150px] ${theme === "dialer" ? styles.dialerTiptapContent : ""}`,
+          },
+        }}
+        onUpdate={({ editor }) => onChange(editor.getHTML())}
+        slotBefore={<MenuBar />}
+      />
+    </div>
+  );
+}

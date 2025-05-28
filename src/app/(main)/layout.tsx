@@ -1,28 +1,56 @@
-import type { Metadata } from "next";
-import "@mantine/core/styles.css";
-import "@/styles/globals.css";
+"use client";
+
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import { registerFcmToken } from "@/lib/registerFcmToken";
 import Sidebar from "@/components/Sidebar";
-import Providers from "../providers";
+import { Header } from "@/components/Header";
 import AuthGuard from "@/components/Auth/AuthGuard";
+import { useFcmNotifications } from "@/hooks/useFcmNotifications";
+import Providers from "@/providers/providers";
+import { usePathname } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Cold Calling App",
-  description: "A modern cold calling app",
-};
+export default function MainLayout({ children }: { children: React.ReactNode }) {
+  const uid = useSelector((state: RootState) => state.auth.user?.uid);
+  const isDialerPage = usePathname().split("/").pop() === "call";
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+  useFcmNotifications();
+
+  useEffect(() => {
+    if (uid) {
+      registerFcmToken(uid);
+    }
+  }, [uid]);
+
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/firebase-messaging-sw.js")
+        .then((registration) => {
+          console.log("FCM Service Worker registered", registration);
+        })
+        .catch((err) => {
+          console.error("Service Worker registration failed", err);
+        });
+    }
+  }, []);
+
   return (
-     <div className="flex">
-        <AuthGuard>
-          <Sidebar />
-          <main className="ml-[72px] flex-1 min-h-screen">
+    <AuthGuard>
+      <div className="flex h-screen overflow-hidden">
+        {!isDialerPage && <Sidebar />}
+        <div className="flex-1 flex flex-col bg-[#f9f9f9]">
+          {!isDialerPage && (
+            <div className="sticky top-0 z-50">
+              <Header />
+            </div>
+          )}
+          <main className={`flex-1 ${isDialerPage ? "p-0" : "p-6 overflow-y-auto"}`}>
             <Providers>{children}</Providers>
           </main>
-        </AuthGuard>
+        </div>
       </div>
+    </AuthGuard>
   );
 }

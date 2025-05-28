@@ -1,6 +1,6 @@
 "use client";
 
-import { auth } from "@/lib/firebase-config";
+import { auth } from "@/lib/firebase";
 import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
@@ -15,19 +15,26 @@ import {
 import { AuthForm } from "./AuthForm";
 import { useDispatch } from "react-redux";
 import { setAuth } from "@/store/authSlice";
+import { axiosClient } from "@/lib/axiosClient";
 
 export const AuthPage = () => {
   const router = useRouter();
   const dispatch = useDispatch();
 
   const handleAuth = async (email: string, password: string) => {
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password)
-
-      const user = userCredential.user;
-      dispatch(setAuth({ email: user.email || "", uid: user.uid }));
-      router.push("/call");
-    } catch (error: unknown) {
+    try{
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+  
+    await axiosClient.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/user/`, {
+      uid: user.uid,
+      email: user.email,
+    });
+  
+    dispatch(setAuth({ email: user.email || "", uid: user.uid, name: user.displayName || "" }));
+    router.push("/dashboard");
+  }
+   catch (error: unknown) {
         const message = isFirebaseError(error)
           ? getFirebaseAuthErrorMessage(error.code)
           : getErrorMessage(error);
@@ -41,8 +48,8 @@ export const AuthPage = () => {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      dispatch(setAuth({ email: user.email || "", uid: user.uid }));
-      router.push("/call");
+      dispatch(setAuth({ email: user.email || "", uid: user.uid, name: user.displayName || "" }));
+      router.push("/dashboard");
     } catch (error: unknown) {
         const message = isFirebaseError(error)
           ? getFirebaseAuthErrorMessage(error.code)

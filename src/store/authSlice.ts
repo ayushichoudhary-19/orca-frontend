@@ -5,6 +5,7 @@ interface AuthState {
   user: {
     email: string;
     uid: string;
+    name: string;
   } | null;
   roleId: string;
 }
@@ -12,14 +13,14 @@ interface AuthState {
 const initialState: AuthState = {
   isAuthenticated: false,
   user: null,
-  roleId: 'user',
+  roleId: 'user', 
 };
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    setAuth: (state, action: PayloadAction<{ email: string; uid: string }>) => {
+    setAuth: (state, action: PayloadAction<{ email: string; uid: string, name:string }>) => {
       state.isAuthenticated = true;
       state.user = action.payload;
       state.roleId = 'user';

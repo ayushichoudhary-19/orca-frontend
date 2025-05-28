@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { allRoles, featuresMap, Role } from "@/lib/rbacStore";
 
-// POST /api/roles → Create a new role
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const { id, name } = body;
@@ -24,7 +23,6 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ success: true, role: newRole });
 }
 
-// ✅ GET /api/roles → Fetch all roles
 export async function GET() {
   return NextResponse.json({ roles: allRoles });
 }

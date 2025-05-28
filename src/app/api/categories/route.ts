@@ -17,7 +17,6 @@ const getAllCategories = () => {
 };
 
 export async function GET() {
-  // Get all unique categories from the features
   const categories = getAllCategories();
 
   if (categories.length === 0) {

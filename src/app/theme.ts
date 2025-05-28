@@ -28,17 +28,4 @@ export const theme = createTheme({
       '#0C0A1C',
     ],
   },
-
-  components: {
-    // Button: {
-    //   defaultProps: {
-    //     radius: 'xl',
-    //   },
-    // },
-    Paper: {
-      defaultProps: {
-        radius: 'md',
-      },
-    },
-  },
 });

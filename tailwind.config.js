@@ -1,3 +1,5 @@
+import typography from "@tailwindcss/typography";
+
 /** @type {import('tailwindcss').Config} */
 const config = {
   content: [
@@ -16,7 +18,11 @@ const config = {
         gray: "#757575",
         softgray: "#E7E7E7",
         tintedgray: "#9E9DA4",
+        tinteddark1: "#E7E7E9",
+        tinteddark4: "#9E9DA4",
         tinteddark5: "#86858E",
+        tinteddark6: "#6D6C77",
+        tinteddark7: "#555461",
         tinteddark8: "#3D3B49",
       },
       fontFamily: {
@@ -25,7 +31,7 @@ const config = {
       },
     },
   },
-  plugins: [],
+  plugins: [typography],
   corePlugins: {
     preflight: false,
   },

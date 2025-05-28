@@ -14,39 +14,29 @@ const NoteEditor = dynamic(() => import("@/components/Feedback/NoteEditor"), { s
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { IconSend } from "@tabler/icons-react";
-import { FeedbackData } from "@/hooks/useFeedback";
 import { useDispatch, useSelector } from "react-redux";
 import { removeNote } from "@/store/notesSlice";
 import { RootState } from "@/store/store";
-import { theme } from "@/app/theme";
 
 interface FeedbackModalProps {
   opened: boolean;
   onClose: () => void;
   callId: string;
   onSubmit: (feedback: {
-    callOutcome: FeedbackData["callOutcome"];
-    leadStatus: FeedbackData["leadStatus"];
+    feedbackReason: FeedbackReason;
     notes?: string;
-  }) => void;
+  }) => void;  
 }
 
-const callOutcomes: { value: FeedbackData["callOutcome"]; label: string }[] = [
-  { value: "ANSWERED", label: "Answered" },
-  { value: "WENT_TO_VOICEMAIL", label: "Went to Voicemail" },
-  { value: "NO_ANSWER", label: "No Answer" },
-  { value: "CALL_DROPPED", label: "Call Dropped" },
-  { value: "TECHNICAL_ISSUE", label: "Technical Issue" },
-  { value: "WRONG_NUMBER", label: "Wrong Number" },
-];
+const feedbackOptions = [
+  { value: "tentative_interest", label: "Tentative Interest ✅", color: "green" },
+  { value: "no_pickup", label: "No Pick Up ☎️", color: "gray" },
+  { value: "not_interested", label: "Not Interested ❌", color: "red" },
+  { value: "not_qualified", label: "Not Qualified 🚫", color: "red" },
+  { value: "bad_data", label: "Bad Data / Do Not Call 🚫", color: "red" },
+] as const;
 
-const leadStatuses: { value: FeedbackData["leadStatus"]; label: string }[] = [
-  { value: "HIGH_POTENTIAL", label: "High Potential 🔥" },
-  { value: "WARM_LEAD", label: "Warm Lead 👍" },
-  { value: "COLD_LEAD", label: "Cold Lead ❄️" },
-  { value: "NOT_A_FIT", label: "Not a Fit 🚫" },
-  { value: "USING_COMPETITOR", label: "Using Competitor" },
-];
+type FeedbackReason = typeof feedbackOptions[number]["value"];
 
 export const FeedbackModal = ({
   opened,
@@ -59,12 +49,7 @@ export const FeedbackModal = ({
     (state: RootState) => state.notes?.notes?.[callId] || ""
   );
 
-  const [callOutcome, setCallOutcome] = useState<
-    FeedbackData["callOutcome"] | ""
-  >("");
-  const [leadStatus, setLeadStatus] = useState<FeedbackData["leadStatus"] | "">(
-    ""
-  );
+  const [feedbackReason, setFeedbackReason] = useState<FeedbackReason | "">("");
   const [notes, setNotes] = useState(savedNotes);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -75,23 +60,21 @@ export const FeedbackModal = ({
   }, [opened, callId, savedNotes]);
 
   const handleSubmit = async () => {
-    if (!callOutcome || !leadStatus) return;
-
+    if (!feedbackReason) return;
     setIsSubmitting(true);
     try {
       await onSubmit({
-        callOutcome,
-        leadStatus,
+        feedbackReason,
         notes: notes || undefined,
       });
       dispatch(removeNote(callId));
     } finally {
       setIsSubmitting(false);
-      setCallOutcome("");
-      setLeadStatus("");
+      setFeedbackReason("");
       setNotes("");
     }
   };
+  
 
   return (
     <Modal
@@ -115,77 +98,31 @@ export const FeedbackModal = ({
       withCloseButton={false}
     >
       <Stack gap="md">
-        {/* Call Outcome Section */}
-        <Box>
-          <Text fw={600} size="sm" mb={8}>
-            What happened on the call? <span>*</span>
-          </Text>
-          <div className="flex flex-wrap"
-          style={{
-            gap: "10px",
-          }}
-          >
-            {callOutcomes.map((option) => (
-              <Badge
-                key={option.value}
-                radius="md"
-                variant={callOutcome === option.value ? "filled" : "light"}
-                color={
-                  callOutcome === option.value
-                    ? theme?.colors?.ocean?.[7] ?? ""
-                    : "gray.6"
-                }
-                onClick={() => setCallOutcome(option.value)}
-                style={{
-                  cursor: "pointer",
-                  padding: "15px",
-                  fontSize: "14px",
-                  textTransform: "none",
-                  fontWeight: 500,
-                }}
-              >
-                {option.label}
-              </Badge>
-            ))}
-          </div>
-        </Box>
-
-        {/* Lead Status Section */}
-        <Box>
-          <Text fw={600} size="sm" mb={8}>
-            Lead Status <span>*</span>
-          </Text>
-          <div className="flex flex-wrap"
-          
-          style={{
-            gap: "10px",
-          }}
-          >
-            {leadStatuses.map((status) => (
-              <Badge
-                key={status.value}
-                radius="md"
-                variant={leadStatus === status.value ? "filled" : "light"}
-                color={
-                  leadStatus === status.value
-                    ? theme?.colors?.ocean?.[7] ?? ""
-                    : "gray.6"
-                }
-                onClick={() => setLeadStatus(status.value)}
-                style={{
-                  cursor: "pointer",
-                  padding: "15px",
-                  fontSize: "14px",
-                  textTransform: "none",
-                  fontWeight: 500,
-                }}
-              >
-                {status.label}
-              </Badge>
-            ))}
-          </div>
-        </Box>
-
+      <Box>
+  <Text fw={600} size="sm" mb={8}>
+    What happened on the call? <span>*</span>
+  </Text>
+  <div className="flex flex-wrap" style={{ gap: "10px" }}>
+    {feedbackOptions.map((option) => (
+      <Badge
+        key={option.value}
+        radius="md"
+        variant={feedbackReason === option.value ? "filled" : "light"}
+        color={feedbackReason === option.value ? option.color : "gray.6"}
+        onClick={() => setFeedbackReason(option.value)}
+        style={{
+          cursor: "pointer",
+          padding: "15px",
+          fontSize: "14px",
+          textTransform: "none",
+          fontWeight: 500,
+        }}
+      >
+        {option.label}
+      </Badge>
+    ))}
+  </div>
+</Box>
         <Box>
           <Text fw={600} size="sm" mb={8}>
             Notes
@@ -211,7 +148,7 @@ export const FeedbackModal = ({
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
               onClick={handleSubmit}
-              disabled={!callOutcome || !leadStatus}
+              disabled={!feedbackReason || isSubmitting}
               loading={isSubmitting}
               leftSection={<IconSend size={16} />}
               className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white px-6 py-2 rounded-lg"

@@ -1,10 +1,16 @@
 import { useState } from "react";
-import axios from "axios";
+import { axiosClient } from "@/lib/axiosClient";
+
+export type FeedbackReason =
+  | "tentative_interest"
+  | "no_pickup"
+  | "not_interested"
+  | "not_qualified"
+  | "bad_data";
 
 export interface FeedbackData {
   callId: string;
-  callOutcome: "ANSWERED" | "WENT_TO_VOICEMAIL" | "NO_ANSWER" | "CALL_DROPPED" | "TECHNICAL_ISSUE" | "WRONG_NUMBER";
-  leadStatus: "HIGH_POTENTIAL" | "WARM_LEAD" | "COLD_LEAD" | "NOT_A_FIT" | "USING_COMPETITOR";
+  feedbackReason: FeedbackReason;
   notes?: string;
 }
 
@@ -18,7 +24,7 @@ export const useFeedback = () => {
     setError(null);
 
     try {
-      await axios.post(`${API_BASE_URL}/calls/feedback`, data);
+      await axiosClient.post(`${API_BASE_URL}/calls/feedback`, data);
     } catch (err) {
       setError("Failed to submit feedback. Please try again.");
       throw err;

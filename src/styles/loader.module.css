@@ -4,7 +4,7 @@
   height: 150px;
   background: transparent;
   border-radius: 50%;
-  border: 1px solid rgba(199, 210, 254, 0.3);
+  border: 1px solid rgba(232, 199, 254, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,27 +12,27 @@
 }
 
 .loader::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 20px;
   background: transparent;
-  border: 1px dashed rgba(107, 141, 229, 0.8);
+  border: 1px dashed rgba(225, 180, 255, 0.8);
   border-radius: 50%;
-  box-shadow: 
-    inset -5px -5px 25px rgba(107, 141, 229, 0.6), 
-    inset 5px 5px 35px rgba(107, 141, 229, 0.6);
+  box-shadow:
+    inset -5px -5px 25px rgba(227, 189, 255, 0.6),
+    inset 5px 5px 35px rgba(210, 191, 255, 0.6);
 }
 
 .loader::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  border: 1px dashed rgba(107, 141, 229, 0.7);
-  box-shadow: 
-    inset -5px -5px 25px rgba(107, 141, 229, 0.6),
-    inset 5px 5px 35px rgba(107, 141, 229, 0.6);
+  border: 1px dashed rgba(203, 218, 255, 0.7);
+  box-shadow:
+    inset -5px -5px 25px rgba(209, 222, 255, 0.6),
+    inset 5px 5px 35px rgba(219, 229, 255, 0.6);
 }
 
 .loader span {
@@ -48,16 +48,16 @@
 }
 
 .loader span::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(107, 141, 229, 0.4);
+  background: rgba(209, 222, 255, 0.4);
   transform-origin: top left;
   transform: rotate(-55deg);
-  filter: blur(30px) drop-shadow(20px 20px 20px rgba(107, 141, 229, 0.4));
+  filter: blur(30px) drop-shadow(20px 20px 20px rgba(211, 223, 255, 0.4));
 }
 
 @keyframes radar81 {
@@ -66,5 +66,63 @@
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+.globalloader {
+  width: 350px;
+  height: 180px;
+  border-radius: 10px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 30px;
+}
+.globalloading {
+  width: 100%;
+  height: 6px;
+  background: rgb(226, 226, 226);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.globalloading::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 6px;
+  background: #6d57fc;
+  border-radius: 10px;
+  z-index: 1;
+  animation: loading 0.6s alternate infinite;
+}
+.globallabel {
+  color: #002;
+  font-size: 18px;
+  animation: bit 0.6s alternate infinite;
+}
+
+@keyframes bit {
+  from {
+    opacity: 0.3;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes loading {
+  0% {
+    left: -25%;
+  }
+  100% {
+    left: 70%;
+  }
+  0% {
+    left: -25%;
   }
 }
