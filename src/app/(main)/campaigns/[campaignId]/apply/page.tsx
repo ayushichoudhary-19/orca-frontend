@@ -1,17 +1,26 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { IconArrowLeft, IconArrowRight, IconCheck } from "@tabler/icons-react";
+import { IconArrowLeft, IconArrowRight, IconCheck, IconLock } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { axiosClient } from "@/lib/axiosClient";
-import { Button, Divider } from "@mantine/core";
+import { Button, Divider, Paper, Text } from "@mantine/core";
 import CustomTextInput from "@/components/Utils/CustomTextInput";
 import AudioRecorderForQuestion from "@/components/ApplyPage/AudioRecorderForQuestion";
 import { toast } from "@/lib/toast";
 import Image from "next/image";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+
+type AuditionStatus =
+  | "not_started"
+  | "in_progress"
+  | "submitted"
+  | "retry"
+  | "approved"
+  | "rejected";
 
 export default function ApplyPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -23,6 +32,8 @@ export default function ApplyPage() {
   const [linkedin, setLinkedin] = useState("");
   const [questions, setQuestions] = useState<any[]>([]);
   const [audioResponses, setAudioResponses] = useState<Record<string, Blob | null>>({});
+  const [auditionStatus, setAuditionStatus] = useState<AuditionStatus | null>(null);
+  const [feedbackNotes, setFeedbackNotes] = useState<string | null>(null);
 
   const campaignId = usePathname().split("/")[2];
   const salesRepId = useSelector((state: RootState) => state.auth.user?.uid);
@@ -31,35 +42,38 @@ export default function ApplyPage() {
     const fetchDetails = async () => {
       setIsLoading(true);
       try {
-        const questionRes = await axiosClient.get(`/api/auditions/${campaignId}/questions`);
+        const [questionRes, statusRes] = await Promise.all([
+          axiosClient.get(`/api/auditions/${campaignId}/questions`),
+          axiosClient.get(`/api/auditions/${campaignId}/status/${salesRepId}`),
+        ]);
+
         setQuestions(questionRes.data || []);
+        setAuditionStatus(statusRes.data?.auditionStatus);
+        setFeedbackNotes(statusRes.data?.retryReason || null);
         const initialAudioResponses: Record<string, Blob | null> = {};
-        (questionRes.data || []).forEach((q: any) => {
-          initialAudioResponses[q._id] = null;
+
+        (statusRes.data.auditionResponses || []).forEach((res: any) => {
+          initialAudioResponses[res.questionId] = res.audioUrl;
         });
+
         setAudioResponses(initialAudioResponses);
       } catch (err) {
-        console.error("Failed to fetch campaign/question details:", err);
+        console.error("Failed to fetch details:", err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    if (campaignId) {
+    if (campaignId && salesRepId) {
       fetchDetails();
-    } else {
-      setIsLoading(false);
-      console.warn("Campaign ID is missing from the path.");
     }
-  }, [campaignId]);
+  }, [campaignId, salesRepId]);
 
-  const handleResumeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+  const handleResumeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
       setResumeFile(file);
-      const tempUrl = URL.createObjectURL(file);
-      setResumeUrl(tempUrl);
-      console.log("Resume selected, temporary URL:", tempUrl);
+      setResumeUrl(URL.createObjectURL(file));
     }
   };
 
@@ -67,53 +81,79 @@ export default function ApplyPage() {
     setAudioResponses((prev) => ({ ...prev, [questionId]: blob }));
   };
 
+  const isEditable = ["not_started", "in_progress", "retry"].includes(auditionStatus || "");
+  const canEditInputs = auditionStatus === "in_progress";
+  const isRetry = auditionStatus === "retry";
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
-    const allQuestionsAnswered = questions.every((q) => !!audioResponses[q._id]);
-  
-    if (!experience || !country || !linkedin || !allQuestionsAnswered || !resumeFile) {
-      toast.error("Please complete all fields and record all audio answers.");
+
+    if (!isEditable) {
+      toast.error("You cannot submit again unless your status is set to 'retry'.");
       return;
     }
-  
+    if (canEditInputs) {
+      if (
+        !experience ||
+        !country ||
+        !linkedin ||
+        !questions.every((q) => !!audioResponses[q._id]) ||
+        !resumeFile
+      ) {
+        toast.error("Please complete all fields and record all audio answers.");
+        return;
+      }
+    } else {
+      const allQuestionsAnswered = questions.every((q) => !!audioResponses[q._id]);
+      if (!allQuestionsAnswered) {
+        toast.error("Please record all audio answers.");
+        return;
+      }
+    }
+
     try {
       setIsSubmitting(true);
-  
-      // 1. Upload resume
-      const resumeForm = new FormData();
-      resumeForm.append("file", resumeFile);
-      resumeForm.append("folder", "resumes");
-      const resumeUploadRes = await axiosClient.post("/api/uploads/upload", resumeForm);
-      const resumeS3Key = resumeUploadRes.data.key;
-  
-      // 2. Upload each audio
+
+      let resumeS3Key = resumeUrl;
+      if (canEditInputs && resumeFile) {
+        const resumeForm = new FormData();
+        resumeForm.append("file", resumeFile);
+        resumeForm.append("folder", "resumes");
+        const resumeUploadRes = await axiosClient.post("/api/uploads/upload", resumeForm);
+        resumeS3Key = resumeUploadRes.data.key;
+      }
+
       const uploadedAudioUrls: { questionId: string; audioUrl: string }[] = [];
-  
+
       for (const q of questions) {
         const blob = audioResponses[q._id];
         if (blob) {
           const formData = new FormData();
           formData.append("file", blob, `audio-${q._id}.webm`);
           formData.append("folder", "auditions");
-  
           const audioRes = await axiosClient.post("/api/uploads/upload", formData);
           uploadedAudioUrls.push({ questionId: q._id, audioUrl: audioRes.data.key });
         }
       }
-      console.log("Uploaded audio URLs:", uploadedAudioUrls);
-      // 3. Submit audition data
-      const payload = {
-        salesRepId,
-        responses: uploadedAudioUrls,
-        resumeUrl: resumeS3Key,
-        experienceYears: experience,
-        country,
-        linkedInUrl: linkedin,
-      };
-      
+
+      const payload = canEditInputs
+        ? {
+            salesRepId,
+            responses: uploadedAudioUrls,
+            resumeUrl: resumeS3Key,
+            experienceYears: experience,
+            country,
+            linkedInUrl: linkedin,
+          }
+        : {
+            salesRepId,
+            responses: uploadedAudioUrls,
+          };
+
       await axiosClient.post(`/api/auditions/${campaignId}/submit`, payload);
-      toast.success("Application submitted successfully!");
+      toast.success(
+        isRetry ? "Audition resubmitted successfully!" : "Application submitted successfully!"
+      );
     } catch (err) {
       console.error("Submission failed:", err);
       toast.error("Submission failed. Check console and try again.");
@@ -121,26 +161,24 @@ export default function ApplyPage() {
       setIsSubmitting(false);
     }
   };
-  
 
-  if (isLoading)
-    return <div className="flex justify-center items-center h-screen">Loading questions...</div>;
+  if (isLoading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <Link
         href={`/campaigns/${campaignId}/training`}
         className="inline-flex items-center gap-2 text-gray-600 mb-6"
-        style={{
-          fontWeight: "500",
-          color: "gray",
-          textDecoration: "none",
-          transition: "color 0.3s",
-          cursor: "pointer",
-        }}
       >
         <IconArrowLeft size={18} /> Back to trainings
       </Link>
+
+      {!isEditable && (
+        <div className="mb-4 p-4 bg-yellow-50 border border-yellow-300 text-sm text-yellow-800 rounded">
+          You have already submitted your audition. You cannot re-submit unless marked as 'retry' by
+          an admin.
+        </div>
+      )}
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -149,15 +187,23 @@ export default function ApplyPage() {
       >
         <form onSubmit={handleSubmit} className="bg-white shadow-xl rounded-lg p-6 md:p-8">
           <h1 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800">
-            Submit Your Application
+            {isRetry ? "Resubmit Your Audition" : "Submit Your Application"}
           </h1>
           <Divider className="mb-6" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 relative">
+            {!canEditInputs && (
+              <div className="absolute inset-0 bg-gray-200 bg-opacity-40 rounded-lg z-10 flex items-center justify-center">
+                <div className="bg-white p-3 rounded-full shadow-md">
+                  <IconLock size={32} className="text-gray-500" />
+                </div>
+              </div>
+            )}
+
             <div>
               <label
                 htmlFor="resumeInput"
-                className="block text-sm font-semibold mb-2 text-gray-700"
+                className={`block text-sm font-semibold mb-2 ${!canEditInputs ? "text-gray-400" : "text-gray-700"}`}
               >
                 Resume/CV*
               </label>
@@ -168,21 +214,24 @@ export default function ApplyPage() {
                   onChange={handleResumeUpload}
                   accept=".pdf,.doc,.docx"
                   className="hidden"
+                  disabled={!canEditInputs}
                   style={{
-                    height: "46px"
+                    height: "46px",
                   }}
                 />
                 <label
                   htmlFor="resume"
-                  className="flex items-center text-tinteddark4 justify-between w-full px-4 py-2 rounded-md cursor-pointer hover:bg-gray-50 transition-colors"
+                  className={`flex items-center justify-between w-full px-4 py-2 rounded-md cursor-pointer transition-colors ${!canEditInputs ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "text-tinteddark4 hover:bg-gray-50"}`}
                   style={{
                     border: "1px solid #E7E7E7",
                     height: "46px",
                   }}
                 >
-                <span className="text-gray-500 text-sm truncate">
-                {resumeFile ? resumeFile.name : "Upload Resume"}
-                </span>
+                  <span
+                    className={`text-sm truncate ${!canEditInputs ? "text-gray-400" : "text-gray-500"}`}
+                  >
+                    {resumeFile ? resumeFile.name : "Upload Resume"}
+                  </span>
 
                   <Image src="/icons/upload.svg" width={20} height={20} alt="upload icon" />
                 </label>
@@ -194,65 +243,78 @@ export default function ApplyPage() {
             <div>
               <label
                 htmlFor="experienceSelect"
-                className="block text-sm font-semibold mb-2 text-gray-700"
+                className={`block text-sm font-semibold mb-2 ${!canEditInputs ? "text-gray-400" : "text-gray-700"}`}
               >
                 Years of sales experience*
               </label>
-              <select
-                id="experienceSelect"
-                value={experience}
-                onChange={(e) => setExperience(e.target.value)}
-                required
-                className="w-full bg-white h-12 px-4 py-3 text-sm text-gray-800 placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none shadow-sm transition-colors"
-                style={{
-                  border: "1px solid #e5e7eb",
-                }}
-              >
-                <option value="" disabled>
-                  Select experience
-                </option>
-                <option value="0-1">0-1 year</option>
-                <option value="1-3">1-3 years</option>
-                <option value="3-5">3-5 years</option>
-                <option value="5+">5+ years</option>
-              </select>
+              <div className="relative">
+                <select
+                  id="experienceSelect"
+                  value={experience}
+                  onChange={(e) => setExperience(e.target.value)}
+                  required={canEditInputs}
+                  disabled={!canEditInputs}
+                  className={`w-full bg-white h-12 px-4 py-3 text-sm placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none shadow-sm transition-colors ${!canEditInputs ? "bg-gray-100 text-gray-400" : "text-gray-800"}`}
+                  style={{
+                    border: "1px solid #e5e7eb",
+                  }}
+                >
+                  <option value="" disabled>
+                    Select experience
+                  </option>
+                  <option value="0-1">0-1 year</option>
+                  <option value="1-3">1-3 years</option>
+                  <option value="3-5">3-5 years</option>
+                  <option value="5+">5+ years</option>
+                </select>
+              </div>
             </div>
             <div>
               <label
                 htmlFor="countryInput"
-                className="block text-sm font-semibold mb-2 text-gray-700"
+                className={`block text-sm font-semibold mb-2 ${!canEditInputs ? "text-gray-400" : "text-gray-700"}`}
               >
                 Country*
               </label>
-              <CustomTextInput
-                id="countryInput"
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                required
-                placeholder="e.g., United States"
-                className="h-[46px]"
-              />
+              <div className="relative">
+                <CustomTextInput
+                  id="countryInput"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  required={canEditInputs}
+                  disabled={!canEditInputs}
+                  placeholder="e.g., United States"
+                  className={`h-[46px] ${!canEditInputs ? "bg-gray-100 text-gray-400" : ""}`}
+                />
+              </div>
             </div>
             <div>
               <label
                 htmlFor="linkedinInput"
-                className="block text-sm font-semibold mb-2 text-gray-700"
+                className={`block text-sm font-semibold mb-2 ${!canEditInputs ? "text-gray-400" : "text-gray-700"}`}
               >
                 LinkedIn Profile URL*
               </label>
-              <CustomTextInput
-                id="linkedinInput"
-                type="url"
-                value={linkedin}
-                onChange={(e) => setLinkedin(e.target.value)}
-                required
-                placeholder="https://linkedin.com/in/yourprofile"
-                className="h-[46px]"
-              />
+              <div className="relative">
+                <CustomTextInput
+                  id="linkedinInput"
+                  type="url"
+                  value={linkedin}
+                  onChange={(e) => setLinkedin(e.target.value)}
+                  required={canEditInputs}
+                  disabled={!canEditInputs}
+                  placeholder="https://linkedin.com/in/yourprofile"
+                  className={`h-[46px] ${!canEditInputs ? "bg-gray-100 text-gray-400" : ""}`}
+                />
+              </div>
             </div>
           </div>
-
-          <div className="mb-8 p-4 bg-indigo-50 rounded-lg">
+          <div
+            className="mb-8 p-4 rounded-lg"
+            style={{
+              backgroundColor: "#f0f3f4",
+            }}
+          >
             <h2 className="text-lg font-semibold text-gray-800 mb-2">
               Audio Audition Instructions
             </h2>
@@ -261,11 +323,31 @@ export default function ApplyPage() {
               journey!
             </p>
             <p className="text-sm text-gray-600 mb-2">
-              😄 <span className="font-medium">Example:</span> "Hi there! I'm Alex, from ZoomInfo. I
-              boosted meetings by 30% with a new outreach strategy, even landing Cisco!"
+              😄 <span className="font-medium">Example:</span> "Hi there! I'm Alex, from
+              ZoomInfo..."
             </p>
           </div>
 
+          {isRetry && feedbackNotes && (
+            <Paper p="md" radius="md" withBorder className="mb-4 bg-yellow-50 border-yellow-300">
+              <Text
+                size="sm"
+                className="mt-3 text-gray-700 bg-yellow-100 p-2 rounded border border-yellow-200"
+              >
+                <strong>Note:</strong> You only need to resubmit the audio responses that require
+                changes. Your profile information (resume, experience, country, and LinkedIn) will
+                remain unchanged.
+              </Text>
+              <div className=" bg-yellow-100 p-2 rounded border border-yellow-200">
+                <Text fw={600} size="md" className="mb-1 text-darker mt-4">
+                  Admin's Feedback
+                </Text>
+                <Text size="sm" className="text-darker">
+                  " {feedbackNotes} "
+                </Text>
+              </div>
+            </Paper>
+          )}
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Audition Questions</h2>
           {questions.length > 0 ? (
             questions.map((q, index) => (
@@ -276,9 +358,15 @@ export default function ApplyPage() {
                 <AudioRecorderForQuestion
                   questionId={q._id}
                   onAudioRecorded={handleAudioRecorded}
-                  initialAudioBlob={audioResponses[q._id] || null}
+                  initialAudioBlob={
+                    typeof audioResponses[q._id] === "object" ? audioResponses[q._id] : null
+                  }
+                  isLocked={!isEditable}
+                  previousAudioUrl={
+                    typeof audioResponses[q._id] === "string" ? audioResponses[q._id] : undefined
+                  }
                 />
-                {/* Show checkmark if audio is recorded for this question */}
+
                 {audioResponses[q._id] && (
                   <div className="mt-2 text-xs text-green-600 flex items-center">
                     <IconCheck size={16} className="mr-1" /> Answer provided.
@@ -293,8 +381,10 @@ export default function ApplyPage() {
           <div className="mt-10 text-center">
             <Button
               type="submit"
-              disabled={isSubmitting || isLoading || questions.some((q) => !audioResponses[q._id])}
-              className="w-full md:w-auto rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed"
+              disabled={
+                !isEditable || isSubmitting || questions.some((q) => !audioResponses[q._id])
+              }
+              className="w-full md:w-auto rounded-md"
             >
               {isSubmitting ? "Submitting..." : "Submit Application"}
               {!isSubmitting && <IconArrowRight size={18} className="inline ml-2" />}

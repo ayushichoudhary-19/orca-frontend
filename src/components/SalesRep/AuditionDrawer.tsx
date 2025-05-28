@@ -63,7 +63,9 @@ export default function AuditionReviewDrawer({
           questionsRes.data.map((q: any) => [q._id, q.question])
         );
 
-        const statusRes = await axiosClient.get(`/api/auditions/${campaignId}/status/${rep?.salesRepId?._id}`);
+        const statusRes = await axiosClient.get(
+          `/api/auditions/${campaignId}/status/${rep?.salesRepId?._id}`
+        );
         const parsed = statusRes.data?.auditionResponses?.map((r: any) => ({
           ...r,
           questionText: questionMap[r.questionId] || "Question not found",
@@ -97,7 +99,6 @@ export default function AuditionReviewDrawer({
           <Title className="font-bold text-darker m-2 p-2">
             {rep?.salesRepId.salesRepProfile?.fullName}
           </Title>
-          {/* Contact Info Section */}
           <Paper p="md" radius="md" withBorder className="mb-4">
             <Text fw={600} size="md" className="mb-3">
               Contact Information
@@ -171,7 +172,17 @@ export default function AuditionReviewDrawer({
 
           <Divider my="md" />
 
-          {/* Audio */}
+          {rep.auditionStatus === "retry" && rep.retryReason && (
+            <Paper p="md" radius="md" withBorder className="mb-4 bg-yellow-50 border-yellow-300">
+              <Text fw={600} size="md" className="mb-2 text-yellow-800">
+                Your Last Feedback
+              </Text>
+              <Text size="sm" className="text-yellow-700">
+                {rep.retryReason}
+              </Text>
+            </Paper>
+          )}
+
           <Text fw={600} size="lg" className="mb-3">
             Audio Responses
           </Text>
@@ -179,7 +190,6 @@ export default function AuditionReviewDrawer({
 
           <Divider my="md" />
 
-          {/* Approve/Reject Form */}
           <AuditionReviewForm
             campaignId={campaignId}
             repId={rep.salesRepId._id}

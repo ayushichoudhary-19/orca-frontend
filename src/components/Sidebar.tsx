@@ -103,14 +103,44 @@ export default function Sidebar() {
   const [activeItem, setActiveItem] = useState<string>("Dashboard");
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [campaignsMenuOpen, setCampaignsMenuOpen] = useState(false);
-  const [campaigns, setCampaigns] = useState<{ label: string; value: string; status: string }[]>([]);
-  
+  const [campaigns, setCampaigns] = useState<{ label: string; value: string; status: string }[]>(
+    []
+  );
+
   const membership = useSelector((state: RootState) => state.membership.data);
   const businessId = useSelector((state: RootState) => state.membership.businessId);
-  const isSdr = membership?.roleId?.name.toLowerCase() === 'sdr';
+  const isSdr = membership?.roleId?.name.toLowerCase() === "sdr";
   const navItems = isSdr ? sdrNavItems : adminNavItems;
-  
-  const { getByBusiness } = useCampaign();
+
+  const { getByBusiness, getApprovedActiveCampaignsForSdr } = useCampaign();
+
+  useEffect(() => {
+    const fetchCampaigns = async () => {
+      try {
+        if (isSdr) {
+          const sdrCampaigns = await getApprovedActiveCampaignsForSdr();
+          const mapped = sdrCampaigns.map((c) => ({
+            label: c.campaignName,
+            value: c._id,
+            status: c.status,
+          }));
+          setCampaigns(mapped);
+        } else if (businessId) {
+          const adminCampaigns = await getByBusiness(businessId);
+          const mapped = adminCampaigns.map((c) => ({
+            label: c.campaignName,
+            value: c._id,
+            status: c.status,
+          }));
+          setCampaigns([{ label: "+ Add New", value: "new", status: "NEW" }, ...mapped]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch campaigns", err);
+      }
+    };
+
+    fetchCampaigns();
+  }, [businessId, isSdr, getByBusiness, getApprovedActiveCampaignsForSdr]);
 
   useEffect(() => {
     const path = window.location.pathname;
@@ -122,32 +152,12 @@ export default function Sidebar() {
         setActiveItem(currentChild.label);
       }
     } else {
-      const exactMatch = navItems.find(item => item.path === path);
+      const exactMatch = navItems.find((item) => item.path === path);
       if (exactMatch) {
         setActiveItem(exactMatch.label);
       }
     }
   }, [navItems]);
-
-  useEffect(() => {
-    const fetchCampaigns = async () => {
-      if (!businessId) return;
-      try {
-        const all = await getByBusiness(businessId);
-        const mapped = all.map((c) => ({
-          label: c.campaignName,
-          value: c._id,
-          status: c.status,
-        }));
-
-        setCampaigns([{ label: "+ Add New", value: "new", status: "NEW" }, ...mapped]);
-      } catch (err) {
-        console.error("Failed to fetch campaigns", err);
-      }
-    };
-
-    if (isSdr) fetchCampaigns();
-  }, [businessId, isSdr, getByBusiness]);
 
   const handleNavigate = (path: string, label: string) => {
     setActiveItem(label);
@@ -165,10 +175,11 @@ export default function Sidebar() {
       router.push("/campaign/create");
     } else {
       dispatch(setCampaignId(campaignId));
-      router.push("/dashboard");
+      const destination = isSdr ? `/campaigns/${campaignId}/call` : "/dashboard";
+      router.push(destination);
     }
     setCampaignsMenuOpen(false);
-  };
+  };  
 
   return (
     <motion.aside
@@ -203,7 +214,7 @@ export default function Sidebar() {
                     <IconPhone size={20} />
                     <span>Start Calling</span>
                   </div>
-                  <IconChevronRight size={18} stroke={1.5}/>
+                  <IconChevronRight size={18} stroke={1.5} />
                 </Button>
               </Menu.Target>
               <Menu.Dropdown>

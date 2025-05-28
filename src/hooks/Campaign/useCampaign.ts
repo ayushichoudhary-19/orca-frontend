@@ -134,6 +134,17 @@ export const useCampaign = () => {
     }
   };
 
+  const getApprovedActiveCampaignsForSdr = async () => {
+    try {
+      const res = await axiosClient.get(`/api/campaign/sales-rep-campaigns/${user}?type=approved`);
+      return (res.data as Campaign[]).filter((c) => c.status === "ACTIVE");
+    } catch (err) {
+      console.error("Failed to fetch SDR campaigns", err);
+      throw err;
+    }
+  };
+  
+
   return {
     createCampaign,
     getById,
@@ -143,6 +154,7 @@ export const useCampaign = () => {
     addContactsToCampaign,
     addIdealCustomerDetails,
     getCampaignStatus,
+    getApprovedActiveCampaignsForSdr,
     loading,
   };
 };

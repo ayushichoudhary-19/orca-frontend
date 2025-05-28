@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { IconLayoutGrid, IconLayoutList, IconArrowRight } from "@tabler/icons-react";
 import Link from "next/link";
 import { axiosClient } from "@/lib/axiosClient";
-import { Button, Divider, Group, TextInput } from "@mantine/core";
+import { Button, Divider, Group, TextInput, Select } from "@mantine/core";
 import Image from "next/image";
 import { ViewToggleButton } from "@/components/Training/ViewToggleButton";
 import CustomBadge from "@/components/Leads/CustomBadge";
@@ -21,8 +21,9 @@ interface Campaign {
   industry: string[];
   logoImageUrl: string;
   companyLocation: string[];
-  businessName: string;
+  businessName?: string;
   campaignTag: string;
+  status?: string;
 }
 
 export default function CampaignMarketplace() {
@@ -36,13 +37,14 @@ export default function CampaignMarketplace() {
   const [priceFilter, setPriceFilter] = useState<number | null>(null);
   const [businessFilter, setBusinessFilter] = useState<string | null>(null);
   const [uniqueBusinesses, setUniqueBusinesses] = useState<string[]>([]);
+  const [statusFilter, setStatusFilter] = useState<string>("ongoing");
 
   const router = useRouter();
   const salesRepId = useSelector((state: RootState) => state.auth.user?.uid);
 
   useEffect(() => {
     fetchCampaigns();
-  }, [campaignView, salesRepId]);
+  }, [campaignView, salesRepId, statusFilter]);
 
   const fetchCampaigns = async () => {
     try {
@@ -50,9 +52,7 @@ export default function CampaignMarketplace() {
       let response;
 
       if (campaignView === "my" && salesRepId) {
-        response = await axiosClient.post("/api/campaign/my-campaigns", {
-          salesRepId,
-        });
+        response = await axiosClient.get(`/api/campaign/sales-rep-campaigns/${salesRepId}?type=${statusFilter}`);
       } else {
         response = await axiosClient.get("/api/campaign/public");
       }
@@ -60,7 +60,9 @@ export default function CampaignMarketplace() {
       setCampaigns(response.data);
       setFilteredCampaigns(response.data);
 
-      const businesses = [...new Set(response.data.map((c: Campaign) => c.businessName))];
+      const businesses = [
+        ...new Set(response.data.map((c: Campaign) => c.businessName).filter(Boolean)),
+      ];
       setUniqueBusinesses(businesses);
 
       setIsLoading(false);
@@ -78,7 +80,7 @@ export default function CampaignMarketplace() {
       result = result.filter(
         (campaign) =>
           campaign.campaignName.toLowerCase().includes(query) ||
-          campaign.businessName.toLowerCase().includes(query) ||
+          campaign.businessName?.toLowerCase().includes(query) ||
           campaign.elevatorPitch.toLowerCase().includes(query) ||
           campaign.industry.some((ind) => ind.toLowerCase().includes(query))
       );
@@ -103,12 +105,10 @@ export default function CampaignMarketplace() {
 
   return (
     <div className="min-h-screen">
-      <div className="p-6">
+      <div className="p-6 flex flex-wrap gap-4 items-center justify-between">
         <div
           className="inline-flex rounded-md overflow-hidden h-[40px] justify-between items-center bg-white"
-          style={{
-            border: "1px solid #E4E4E7",
-          }}
+          style={{ border: "1px solid #E4E4E7" }}
         >
           <button
             className={`px-6 py-3 border-none ${campaignView === "my" ? "bg-[#6D57FC] text-white" : "text-gray-700 hover:bg-gray-50 bg-white"}`}
@@ -123,8 +123,27 @@ export default function CampaignMarketplace() {
             All Campaigns
           </button>
         </div>
-      </div>
 
+        {campaignView === "my" && (
+          <Select
+            placeholder="Select Stage"
+            value={statusFilter}
+            onChange={(value) => {
+              if (value && value !== statusFilter) {
+                setStatusFilter(value);
+              }
+            }}
+            data={[
+              { value: "ongoing", label: "Ongoing Training" },
+              { value: "auditioning", label: "Auditioning" },
+              { value: "approved", label: "Approved" },
+              { value: "rejected", label: "Rejected" },
+            ]}
+            className="w-60 h-50"
+            allowDeselect={false} // Prevent deselection
+          />
+        )}
+      </div>
       <div className="px-6 pb-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <h1 className="text-2xl font-bold mb-4 md:mb-0 text-darker">
@@ -226,9 +245,7 @@ export default function CampaignMarketplace() {
                 </select>
               </div>
               <div className="flex items-end">
-                <Button onClick={resetFilters}>
-                  Reset Filters
-                </Button>
+                <Button onClick={resetFilters}>Reset Filters</Button>
               </div>
             </div>
           </div>
@@ -364,9 +381,7 @@ export default function CampaignMarketplace() {
       {!isLoading && filteredCampaigns.length === 0 && (
         <div className="flex flex-col items-center justify-center h-64">
           <p className="text-xl text-gray-500 mb-4">No campaigns found</p>
-          <Button onClick={resetFilters}>
-                  Reset Filters
-                </Button>
+          <Button onClick={resetFilters}>Reset Filters</Button>
         </div>
       )}
     </div>
