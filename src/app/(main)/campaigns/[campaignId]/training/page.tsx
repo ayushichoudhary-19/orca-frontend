@@ -65,24 +65,40 @@ export default function TrainingPage() {
         setIsLoading(true);
 
         const trainingsResponse = await axiosClient.get(`/api/trainings/${campaignId}/sdr`);
-        const progressResponse = await axiosClient.get(
-          `/api/trainings/progress/${campaignId}/${salesRepId}`
-        );
-
         const fetchedTrainings = trainingsResponse.data;
+
+        let fetchedProgress: TrainingProgress = {
+          progress: 0,
+          completedTrainingIds: [],
+        };
+
+        try {
+          const progressResponse = await axiosClient.get(
+            `/api/trainings/progress/${campaignId}/${salesRepId}`
+          );
+          fetchedProgress = progressResponse.data;
+        } catch (err: any) {
+          if (err.response?.status === 404 || err.response?.status === 500) {
+            console.warn("No progress record found, using empty state.");
+          } else {
+            throw err;
+          }
+        }
+
         const trainingsWithIcons = fetchedTrainings.map((training: Training) => ({
           ...training,
           icon: trainingIcons[training.type || "custom"],
         }));
 
         setTrainings(trainingsWithIcons);
-        setProgress(progressResponse.data);
-        setIsLoading(false);
+        setProgress(fetchedProgress);
       } catch (error) {
         console.error("Failed to fetch trainings or progress:", error);
+      } finally {
         setIsLoading(false);
       }
     };
+
     fetchTrainings();
   }, [campaignId, salesRepId]);
 
@@ -143,7 +159,7 @@ export default function TrainingPage() {
                 >
                   <div className="flex justify-between">
                     <div className="flex gap-6 items-center">
-                      <div className="flex-shrink-0">{training.icon}</div>
+                      {/* <div className="flex-shrink-0">{training.icon}</div> */}
                       <div>
                         <h3 className="text-lg font-bold mb-1 m-0">{training.title}</h3>
                         <p className="text-gray-600 m-0">{training.description}</p>
@@ -151,22 +167,22 @@ export default function TrainingPage() {
                     </div>
                     <div className="flex items-center">
                       {progress.completedTrainingIds.includes(training._id) ? (
-                         <Link href={`/campaigns/${campaignId}/training/${training._id}`}
-                           className="no-underline"
-                         >
-                        <Button
-                          className="px-4 py-2 bg-gray-100 text-gray-800 rounded-md flex items-center gap-2"
+                        <Link
+                          href={`/campaigns/${campaignId}/training/${training._id}`}
+                          className="no-underline"
                         >
-                          <IconCheck size={18} className="text-white mr-2"/>
-                          Review
-                        </Button>
+                          <Button className="px-4 py-2 bg-gray-100 text-gray-800 rounded-md flex items-center gap-2">
+                            <IconCheck size={18} className="text-white mr-2" />
+                            Review
+                          </Button>
                         </Link>
                       ) : (
-                        <Link href={`/campaigns/${campaignId}/training/${training._id}`}
-                          className="no-underline" 
+                        <Link
+                          href={`/campaigns/${campaignId}/training/${training._id}`}
+                          className="no-underline"
                         >
                           <Button className="px-4 py-2 rounded-md">
-                            <IconPlayerPlay size={18} className="text-white mr-2"/>
+                            <IconPlayerPlay size={18} className="text-white mr-2" />
                             Start
                           </Button>
                         </Link>
@@ -179,9 +195,7 @@ export default function TrainingPage() {
 
             {progress.completedTrainingIds.length === trainings.length && (
               <div className="mt-8 flex justify-center">
-                <Link href={`/campaigns/${campaignId}/apply`}
-                  className="no-underline"
-                >
+                <Link href={`/campaigns/${campaignId}/apply`} className="no-underline">
                   <Button size="md" className="">
                     Submit Application
                   </Button>

@@ -31,11 +31,10 @@ export function CountdownOverlay({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="absolute inset-0 h-full flex items-center justify-center"
+      className="absolute inset-0 h-full flex items-center justify-center bg-gradient-to-r from-[#3a3873] to-[#8061d7]"
       style={{
         zIndex: 1000,
         width: "100%",
-        backgroundColor: "#f9fcfe",
       }}
     >
       <motion.div
@@ -44,15 +43,15 @@ export function CountdownOverlay({
         animate={{ y: 0 }}
         transition={{ type: "spring", damping: 15 }}
       >
-       <div className={styles.loader}>
-    <span></span>
-</div>
+        <div className={styles.loader}>
+          <span></span>
+        </div>
 
         <motion.h3
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           style={{
-            color: "#000000",
+            color: "white",
             fontWeight: "600",
             marginBottom: "2px",
             lineHeight: "24px",
@@ -61,10 +60,10 @@ export function CountdownOverlay({
         >
           Finding your next best lead
         </motion.h3>
-        
+
         <motion.p
           style={{
-            color: "gray",
+            color: "white",
             fontWeight: "400",
             marginTop: "2px",
             fontSize: "14px",

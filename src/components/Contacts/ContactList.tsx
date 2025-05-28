@@ -6,10 +6,27 @@ import { motion } from 'framer-motion';
 import { useEffect, useRef } from 'react';
 
 export interface Contact {
+  _id: string;
   name: string;
-  number: string;
+  email: string;
+  phone: string;
+  title: string;
   address: string;
-  email: string; 
+  industry: string;
+  company: string;
+  location: string;
+  status: string;
+  enriched: boolean;
+  suppressed: boolean;
+  uploadedFromFile: string;
+  mobileNumber: string;
+  linkedinUrl: string;
+  website: string;
+  city: string;
+  employeeCount: string;
+  revenue: string;
+  accountExecutiveEmail: string;
+  createdAt: string;
 }
 
 interface ContactListProps {
@@ -85,7 +102,7 @@ export const ContactList = ({ contacts, currentContact, onSelect }: ContactListP
                       </Text>
                       <Text size="xs" c="dimmed" className="flex items-center gap-1">
                         <IconPhone size={12} />
-                        {contact.number}
+                        {contact.phone}
                       </Text>
                       <Text size="xs" c="dimmed" lineClamp={1} mt={2}>
                         {contact.email}

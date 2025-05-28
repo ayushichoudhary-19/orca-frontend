@@ -27,6 +27,8 @@ export default function SalesRepAuditionForm() {
   const [responses, setResponses] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const salesRepId = useSelector((state: RootState) => state.auth.user?.uid);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -66,7 +68,9 @@ export default function SalesRepAuditionForm() {
 
     setSubmitting(true);
     try {
-      await axiosClient.post(`/api/auditions/${campaignId}/submit`, { responses: formatted });
+      await axiosClient.post(`/api/auditions/${campaignId}/submit`, { 
+        salesRepId,
+        responses: formatted });
       toast.success("Audition submitted successfully!");
     } catch (err) {
         console.log(err);

@@ -16,7 +16,10 @@ interface Props {
 export default function TrainingEditor({ content, handleUpload, onChange }: Props) {
   const editor = useCreateBlockNote({
     initialContent: content,
-    uploadFile: handleUpload,
+    uploadFile: async (file: File) => {
+      const result = await handleUpload(file);
+      return result ?? '';
+    },
   });
 
   useEffect(() => {

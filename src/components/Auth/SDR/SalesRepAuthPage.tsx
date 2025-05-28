@@ -17,6 +17,7 @@ import {
   getFirebaseAuthErrorMessage,
   getErrorMessage,
 } from "@/utils/errorUtils";
+import { axiosClient } from "@/lib/axiosClient";
 
 export default function SalesRepAuthPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signup");
@@ -52,7 +53,7 @@ export default function SalesRepAuthPage() {
       formData.append("languages", JSON.stringify(languages));
       // if (resume) formData.append("resume", resume);
 
-      await axios.post(
+      await axiosClient.post(
         `${process.env.NEXT_PUBLIC_BASE_URL}/api/user/register-sales-rep`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
@@ -62,7 +63,7 @@ export default function SalesRepAuthPage() {
       dispatch(setAuth({ email, uid: user.uid, name: fullName }));
 
       // Redirect to dashboard
-      // router.push("/dashboard");
+      router.push("/dashboard");
     } catch (error: unknown) {
       const message = isFirebaseError(error)
         ? getFirebaseAuthErrorMessage(error.code)
@@ -77,7 +78,7 @@ export default function SalesRepAuthPage() {
       const user = userCredential.user;
 
       // Ensure user is tracked in backend
-      await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/user/`, {
+      await axiosClient.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/user/`, {
         uid: user.uid,
         email: user.email,
         name: user.displayName ?? "",

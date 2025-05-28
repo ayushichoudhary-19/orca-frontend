@@ -36,7 +36,6 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     if (!authInitialized || !isAuthenticated || membershipLoading) return;
 
     if (!membership || !membership.roleId) {
-      // Only logout if roleId is also missing (totally corrupted membership)
       toast.error("Your session is invalid. Please log in again.");
       signOut(auth).then(() => {
         router.replace("/signin");

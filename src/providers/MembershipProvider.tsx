@@ -28,6 +28,7 @@ export const MembershipProvider = () => {
       try {
         const res = await axiosClient.get(`/api/memberships/by-user/${user.uid}`);
         const memberships: Membership[] = res.data;
+        console.log("memberships", memberships);
 
         if (memberships.length > 0) {
           dispatch(setMembership(memberships[0]));

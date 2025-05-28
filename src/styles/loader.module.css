@@ -4,7 +4,7 @@
   height: 150px;
   background: transparent;
   border-radius: 50%;
-  border: 1px solid rgba(199, 210, 254, 0.3);
+  border: 1px solid rgba(232, 199, 254, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,11 +16,11 @@
   position: absolute;
   inset: 20px;
   background: transparent;
-  border: 1px dashed rgba(107, 141, 229, 0.8);
+  border: 1px dashed rgba(225, 180, 255, 0.8);
   border-radius: 50%;
   box-shadow:
-    inset -5px -5px 25px rgba(107, 141, 229, 0.6),
-    inset 5px 5px 35px rgba(107, 141, 229, 0.6);
+    inset -5px -5px 25px rgba(227, 189, 255, 0.6),
+    inset 5px 5px 35px rgba(210, 191, 255, 0.6);
 }
 
 .loader::after {
@@ -29,10 +29,10 @@
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  border: 1px dashed rgba(107, 141, 229, 0.7);
+  border: 1px dashed rgba(203, 218, 255, 0.7);
   box-shadow:
-    inset -5px -5px 25px rgba(107, 141, 229, 0.6),
-    inset 5px 5px 35px rgba(107, 141, 229, 0.6);
+    inset -5px -5px 25px rgba(209, 222, 255, 0.6),
+    inset 5px 5px 35px rgba(219, 229, 255, 0.6);
 }
 
 .loader span {
@@ -54,10 +54,10 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(107, 141, 229, 0.4);
+  background: rgba(209, 222, 255, 0.4);
   transform-origin: top left;
   transform: rotate(-55deg);
-  filter: blur(30px) drop-shadow(20px 20px 20px rgba(107, 141, 229, 0.4));
+  filter: blur(30px) drop-shadow(20px 20px 20px rgba(211, 223, 255, 0.4));
 }
 
 @keyframes radar81 {

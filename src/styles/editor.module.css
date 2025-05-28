@@ -42,7 +42,6 @@
   margin-bottom: 1rem;
 }
 
-/* Grouping buttons with optional separators */
 .buttonGroup {
   display: flex;
   align-items: center;
@@ -50,7 +49,6 @@
   position: relative;
 }
 
-/* Actual button styling */
 .button {
   all: unset;
   display: inline-flex;
@@ -92,7 +90,6 @@
   transform: translateX(-50%) translateY(0);
 }
 
-/* Show tooltip on hover */
 .button:hover::after {
   opacity: 1;
   transform: translateY(0);
@@ -172,4 +169,91 @@
   height: 0;
   pointer-events: none;
   font-style: normal;
+}
+
+.editorContainer {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+.editorContainer .tiptap {
+  padding: 10px;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.editorContainer .placeholder:before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.editorContainer .controlGroup {
+  padding: 4px 8px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+}
+
+.editorContainer .button {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  margin: 2px;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #495057;
+}
+
+.editorContainer .button:hover {
+  background-color: #e9ecef;
+}
+
+.editorContainer .buttonActive {
+  background-color: #dee2e6;
+  color: #000000;
+}
+
+.dialerThemeWrapper {
+  background: transparent !important;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.144) !important;
+}
+
+.dialerThemeWrapper .tiptap {
+  background-color: #f3e8ff !important;
+  color: white;
+}
+
+.dialerThemeWrapper .tiptap .placeholder:before {
+  color: #6D57FC !important;
+}
+
+.dialerThemeWrapper .controlGroup {
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.144) !important;
+}
+
+.dialerThemeWrapper .button {
+  color: white;
+}
+.dialerThemeWrapper .button:hover {
+  background-color: #b0a4fd58;
+}
+
+.dialerThemeWrapper .buttonActive {
+  background-color: #b0a4fd97;
+  color: white;
+}
+
+.dialerThemeWrapper .tiptap.prose :where(p):not(:where([class~="not-prose"] *)) {
+  color: white;
+}
+.dialerThemeWrapper
+  .tiptap.prose
+  :where(h1, h2, h3, h4, h5, h6):not(:where([class~="not-prose"] *)) {
+  color: white;
 }

@@ -2,26 +2,40 @@ import { useDispatch, useSelector } from "react-redux";
 import { setNote } from "@/store/notesSlice";
 import { RootState } from "@/store/store";
 import { useDebouncedCallback } from "use-debounce";
-import { toast } from "@/lib/toast";
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-const NoteEditor = dynamic(() => import("@/components/Feedback/NoteEditor"), {
-  ssr: false,
-});
-import { Group, Text, ActionIcon, Stack, Avatar, Tooltip } from "@mantine/core";
+import { Group, Text, ActionIcon, Stack, Button, Divider, Drawer, Paper, Box } from "@mantine/core";
 import {
   IconPhone,
   IconVolume,
   IconVolumeOff,
   IconMicrophone,
   IconMicrophoneOff,
+  IconUsers,
+  IconBuildings,
+  IconWallet,
+  IconMail,
+  IconCalendarEvent,
 } from "@tabler/icons-react";
 import { motion } from "framer-motion";
-import { CallStatusBadge } from "./CallStatusBadge";
-import { Contact } from "../Contacts/ContactList";
+import { Lead } from "@/hooks/useAutoDialer";
+import { toast } from "@/lib/toast";
+import CustomBadge from "../Leads/CustomBadge";
+import { useCalendly } from "@/hooks/useCalendly";
 
-interface DialerProps {
-  contact: Contact | { name: string; number: string } | null;
+const NoteEditor = dynamic(() => import("@/components/Feedback/NoteEditor"), { ssr: false });
+
+export function Dialer({
+  contact,
+  status,
+  duration,
+  callId,
+  onCallEnd,
+  onMuteToggle,
+  onSpeakerToggle,
+  isAutoDialerReady,
+}: {
+  contact: Lead | null;
   status: "idle" | "calling" | "ringing" | "connected" | "ended";
   duration: number;
   callId: string;
@@ -30,62 +44,38 @@ interface DialerProps {
   onMuteToggle: (muted: boolean) => void;
   onSpeakerToggle: (speaker: boolean) => void;
   isAutoDialerReady?: boolean;
-}
-
-export function Dialer({
-  contact,
-  status,
-  duration,
-  callId,
-  onCallStart,
-  onCallEnd,
-  onMuteToggle,
-  onSpeakerToggle,
-  isAutoDialerReady,
-}: DialerProps) {
+}) {
   const dispatch = useDispatch();
   const savedNotes = useSelector((state: RootState) => state.notes?.notes?.[callId] || "");
-
-  const isManual = contact?.name === "Unknown Number";
   const [noteInput, setNoteInput] = useState("");
   const [muted, setMuted] = useState(false);
   const [speaker, setSpeaker] = useState(false);
-  const [isTextAreaFocused, setIsTextAreaFocused] = useState(false);
-  const [previousCallId, setPreviousCallId] = useState("");
+  const [drawerOpened, setDrawerOpened] = useState(false);
+  const { calendlyLink, loading: calendlyLoading } = useCalendly();
+  const campaignId = useSelector((state: RootState) => state.campaign.campaignId);
+
+  const calendlyWithParams =
+    calendlyLink && contact?.email
+      ? `${calendlyLink}?email=${encodeURIComponent(contact.email)}&name=${encodeURIComponent(
+          contact.fullName || contact.name || ""
+        )}&utm_campaign=${campaignId}`
+      : null;
+
+  const debouncedSave = useDebouncedCallback((value: string) => {
+    if (callId) dispatch(setNote({ callId, note: value }));
+  }, 1000);
 
   useEffect(() => {
-    if (callId && callId !== previousCallId) {
+    if (callId) {
       setNoteInput(savedNotes || "");
-      setPreviousCallId(callId);
+    } else {
+      setNoteInput("");
     }
-  }, [callId, savedNotes, previousCallId]);
-
-  useEffect(() => {
-    setNoteInput("");
-  }, [contact]);
+  }, [callId, savedNotes]);
 
   useEffect(() => {
     if (status === "ended") {
       setNoteInput("");
-    }
-  }, [status]);
-
-  const debouncedSave = useDebouncedCallback((value: string) => {
-    if (callId) {
-      dispatch(setNote({ callId, note: value }));
-    }
-  }, 1000);
-
-  const formatDuration = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
-  };
-
-  useEffect(() => {
-    if (status === "ended") {
-      setMuted(false);
-      setSpeaker(false);
     }
   }, [status]);
 
@@ -101,162 +91,193 @@ export function Dialer({
     onSpeakerToggle(newSpeaker);
   };
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (isTextAreaFocused) {
-        e.stopPropagation();
-      }
-    };
+  const formatDuration = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+  };
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isTextAreaFocused]);
+  const getCallStatusText = () => {
+    switch (status) {
+      case "calling":
+        return "Calling...";
+      case "ringing":
+        return "Ringing...";
+      case "connected":
+        return "Connected";
+      case "ended":
+        return "Call Ended";
+      case "idle":
+        return "Idle";
+      default:
+        return "";
+    }
+  };
+
+  if (!contact) return null;
 
   return (
     <motion.div
-      className="w-full rounded-3xl flex flex-col items-center justify-start space-y-6"
-      style={{
-        backgroundColor: "#f9fcfe",
-        padding: "20px",
-      }}
-      initial={{ scale: 0.95, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      className="w-full h-full flex flex-col justify-between px-4 md:px-8 py-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
     >
-      {/* Contact Info */}
-      <Stack align="center" gap="xs" className="w-full mb-5">
-        {contact?.number ? (
-          <>
-            <Avatar size={110} radius="50%" color="ocean">
-              {contact.name[0].toUpperCase()}
-            </Avatar>
-            <CallStatusBadge status={status} />
-            <Text fw={600} size="xl" className="text-center tracking-tight">
-              {contact.name}
+      <Box style={{ flexGrow: 1, overflowY: "auto", paddingBottom: "16px" }}>
+        <Paper
+          p="md"
+          radius="md"
+          className="bg-[#E8E4FF] rounded-xl p-6 shadow-md border border-white/20 mb-4"
+        >
+          <Stack gap="xs">
+            <Text size="xl" fw={600}>
+              {contact.fullName || contact.name}
             </Text>
-            <Text size="md" fw={600} className="text-center tracking-tight -mt-1 text-[#8b94a9]">
-              {contact.number}
-            </Text>
+
             {status !== "idle" && (
-              <Text size="sm" className="font-mono text-[#8b94a9] mb-[20px]">
-                {formatDuration(duration)}
-              </Text>
+              <Group justify="space-between" align="center" mt="xs" mb="xs">
+                <Text
+                  size="md"
+                  fw={500}
+                  c={
+                    status === "connected"
+                      ? "green.6"
+                      : status === "ringing" || status === "calling"
+                        ? "blue.6"
+                        : status === "ended"
+                          ? "red.6"
+                          : "dimmed"
+                  }
+                >
+                  {getCallStatusText()}
+                </Text>
+                {status === "connected" && (
+                  <Text size="md" fw={500} c="green.6">
+                    {formatDuration(duration)}
+                  </Text>
+                )}
+              </Group>
             )}
-          </>
-        ) : (
-          <div className="flex flex-col items-center justify-center text-center px-4 py-6">
-            <IconPhone size={100} className="mb-2" color="#6D57FC" />
-            <Text fw={600} size="lg" className="text-primary mb-1">
-              No Active Call
+
+            <Text size="sm" c="black">
+              {contact.title} <span className="text-[#6D57FC]">@{contact.company}</span>
             </Text>
-            <Text size="xs" className="text-[#a0a7b8] max-w-xs">
-              Start a call to see contact details, take notes, and manage audio settings.
+            <Divider />
+            <Text size="sm" fw={600}>
+              Company Info
             </Text>
+            <Group gap="xs" wrap="wrap">
+              <CustomBadge icon={<IconUsers size={14} />} value={contact.employeeCount || "-"} />
+              <CustomBadge icon={<IconBuildings size={14} />} value={contact.industry || "-"} />
+              <CustomBadge icon={<IconWallet size={14} />} value={contact.revenue || "-"} />
+              <CustomBadge
+                icon={<IconWallet size={14} />}
+                value={
+                  contact.city && contact.location
+                    ? `${contact.city}, ${contact.location}`
+                    : contact.city || contact.location || "-"
+                }
+              />
+            </Group>
+            <Text size="sm" fw={600} mt="md">
+              Contact Info
+            </Text>
+            <Group gap="xs" wrap="wrap">
+              <CustomBadge icon={<IconPhone size={14} />} value={contact.phone} />
+              <CustomBadge icon={<IconMail size={14} />} value={contact.email} />
+            </Group>
+
+            <Group justify="flex-start" mt="md">
+              <Button
+                radius="md"
+                size="md"
+                disabled={status !== "connected" && !isAutoDialerReady}
+                leftSection={<IconCalendarEvent size={16} />}
+                onClick={() => setDrawerOpened(true)}
+              >
+                Schedule Meeting
+              </Button>
+            </Group>
+          </Stack>
+        </Paper>
+
+        {(status !== "idle" || callId) && (
+          <div className="w-full">
+            <NoteEditor
+              key={callId || "no-call-id"}
+              content={noteInput}
+              theme="dialer"
+              onChange={(value) => {
+                setNoteInput(value);
+                debouncedSave(value);
+              }}
+              onBlur={() => {
+                if (noteInput.length > 0) toast.success("Notes saved");
+              }}
+            />
           </div>
         )}
-      </Stack>
+      </Box>
 
-      {/* Action Buttons */}
-      {contact && (
-        <>
-          <Group
-            justify="center"
-            gap="xl"
-            style={{
-              margin: "20px",
-            }}
-          >
-            <ActionIcon
-              variant={muted ? "filled" : "light"}
-              size={60}
-              radius="xl"
-              color={muted ? "red" : "gray"}
-              onClick={handleMuteToggle}
-              disabled={status === "idle" || status === "ended"}
-              className="transition-all duration-200 hover:shadow-lg"
-            >
-              {muted ? <IconMicrophoneOff size={18} /> : <IconMicrophone size={18} />}
-            </ActionIcon>
-
-            {status === "idle" ? (
-              isManual ? (
-                <ActionIcon
-                  variant="filled"
-                  size={60}
-                  radius="xl"
-                  className="text-white shadow-lg"
-                  onClick={onCallStart}
-                  disabled={!contact.number}
-                >
-                  <IconPhone size={18} />
-                </ActionIcon>
-              ) : (
-                <Tooltip label="Click on Start to begin auto-calling" position="top" withArrow>
-                  <ActionIcon
-                    variant="filled"
-                    size={60}
-                    radius="xl"
-                    className="text-white shadow-lg"
-                    onClick={onCallStart}
-                    disabled={isAutoDialerReady !== true}
-                  >
-                    <IconPhone size={18} />
-                  </ActionIcon>
-                </Tooltip>
-              )
+      <Paper
+        p="xs"
+        radius="md"
+        mt="sm"
+        shadow="xs"
+        className="bg-[#E8E4FF] w-[50%] h-[60px] rounded-xl shadow-md border border-white/20 self-center
+        flex justify-center items-center
+        "
+      >
+        <Group justify="around" align="center">
+          <ActionIcon variant="transparent" onClick={handleMuteToggle} size={48}>
+            {muted ? (
+              <IconMicrophoneOff size={20} color="#555461" stroke={1.5} />
             ) : (
-              status !== "ended" && (
-                <ActionIcon
-                  variant="filled"
-                  size={60}
-                  radius="xl"
-                  color="red"
-                  onClick={() => onCallEnd(callId)}
-                  className="transition-all duration-200 hover:shadow-lg"
-                >
-                  <IconPhone size={18} />
-                </ActionIcon>
-              )
+              <IconMicrophone size={20} color="#555461" stroke={1.5} />
             )}
+          </ActionIcon>
 
-            <ActionIcon
-              variant={speaker ? "filled" : "light"}
-              size={60}
-              radius="xl"
-              color={speaker ? "primary" : "gray"}
-              onClick={handleSpeakerToggle}
-              disabled={status === "idle" || status === "ended"}
-              className="transition-all duration-200 hover:shadow-lg"
-            >
-              {speaker ? <IconVolume size={18} /> : <IconVolumeOff size={18} />}
-            </ActionIcon>
-          </Group>
-        </>
-      )}
+          <ActionIcon variant="transparent" onClick={handleSpeakerToggle} size={48}>
+            {speaker ? (
+              <IconVolume size={20} color="#555461" stroke={1.5} />
+            ) : (
+              <IconVolumeOff size={20} color="#555461" stroke={1.5} />
+            )}
+          </ActionIcon>
 
-      {/* Notes */}
-      {status !== "idle" && callId && (
-        <div
-          className="w-full my-5"
-          style={{
-            border: "1px solid #f0f3f5",
-            borderRadius: "10px",
-          }}
-        >
-          <NoteEditor
-            key={callId}
-            content={noteInput}
-            onChange={(value) => {
-              setNoteInput(value);
-              debouncedSave(value);
-            }}
-            onBlur={() => {
-              setIsTextAreaFocused(false);
-              toast.success("Notes saved");
-            }}
+          <Button
+            radius="md"
+            size="md"
+            color="red"
+            onClick={() => onCallEnd(callId)}
+            className="font-normal text-sm"
+            leftSection={<IconPhone size={16} stroke={1.5} />}
+          >
+            End Call
+          </Button>
+        </Group>
+      </Paper>
+
+      <Drawer
+        opened={drawerOpened}
+        onClose={() => setDrawerOpened(false)}
+        position="right"
+        size="60%"
+        title="Schedule a Meeting"
+      >
+        {calendlyLoading ? (
+          <Text>Loading...</Text>
+        ) : calendlyWithParams ? (
+          <iframe
+            src={calendlyWithParams}
+            width="100%"
+            height="100%"
+            style={{ minHeight: "80vh" }}
+            title="Calendly Meeting Scheduler"
           />
-        </div>
-      )}
+        ) : (
+          <Text>No Calendly link available for this campaign.</Text>
+        )}
+      </Drawer>
     </motion.div>
   );
 }

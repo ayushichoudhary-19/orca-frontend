@@ -10,6 +10,8 @@ import CustomTextInput from "@/components/Utils/CustomTextInput";
 import AudioRecorderForQuestion from "@/components/ApplyPage/AudioRecorderForQuestion";
 import { toast } from "@/lib/toast";
 import Image from "next/image";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
 
 export default function ApplyPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -23,6 +25,7 @@ export default function ApplyPage() {
   const [audioResponses, setAudioResponses] = useState<Record<string, Blob | null>>({});
 
   const campaignId = usePathname().split("/")[2];
+  const salesRepId = useSelector((state: RootState) => state.auth.user?.uid);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -66,32 +69,50 @@ export default function ApplyPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     const allQuestionsAnswered = questions.every((q) => !!audioResponses[q._id]);
-
-    if (!experience || !country || !linkedin || !allQuestionsAnswered) {
+  
+    if (!experience || !country || !linkedin || !allQuestionsAnswered || !resumeFile) {
       toast.error("Please complete all fields and record all audio answers.");
       return;
     }
-
+  
     try {
       setIsSubmitting(true);
+  
+      // 1. Upload resume
+      const resumeForm = new FormData();
+      resumeForm.append("file", resumeFile);
+      resumeForm.append("folder", "resumes");
+      const resumeUploadRes = await axiosClient.post("/api/uploads/upload", resumeForm);
+      const resumeS3Key = resumeUploadRes.data.key;
+  
+      // 2. Upload each audio
       const uploadedAudioUrls: { questionId: string; audioUrl: string }[] = [];
+  
       for (const q of questions) {
         const blob = audioResponses[q._id];
         if (blob) {
-          const tempAudioUrl = URL.createObjectURL(blob);
-          uploadedAudioUrls.push({ questionId: q._id, audioUrl: tempAudioUrl });
-          console.log(`Simulated upload for Q:${q._id}, temp URL: ${tempAudioUrl}`);
+          const formData = new FormData();
+          formData.append("file", blob, `audio-${q._id}.webm`);
+          formData.append("folder", "auditions");
+  
+          const audioRes = await axiosClient.post("/api/uploads/upload", formData);
+          uploadedAudioUrls.push({ questionId: q._id, audioUrl: audioRes.data.key });
         }
       }
+      console.log("Uploaded audio URLs:", uploadedAudioUrls);
+      // 3. Submit audition data
       const payload = {
+        salesRepId,
         responses: uploadedAudioUrls,
-        resumeUrl: resumeUrl,
+        resumeUrl: resumeS3Key,
         experienceYears: experience,
         country,
         linkedInUrl: linkedin,
       };
+      
+      await axiosClient.post(`/api/auditions/${campaignId}/submit`, payload);
       toast.success("Application submitted successfully!");
     } catch (err) {
       console.error("Submission failed:", err);
@@ -100,6 +121,7 @@ export default function ApplyPage() {
       setIsSubmitting(false);
     }
   };
+  
 
   if (isLoading)
     return <div className="flex justify-center items-center h-screen">Loading questions...</div>;

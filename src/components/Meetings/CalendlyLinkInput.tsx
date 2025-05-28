@@ -1,78 +1,61 @@
 "use client";
-import React, { useState } from 'react';
-import { axiosClient } from '@/lib/axiosClient';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-import { Button } from '@mantine/core';
+import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { Button } from "@mantine/core";
+import { RootState } from "@/store/store";
+import { axiosClient } from "@/lib/axiosClient";
+import { toast } from "@/lib/toast";
 
 const CalendlyLinkInput = () => {
-  const [calendlyLink, setCalendlyLink] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState({ text: '', isError: false });
   const campaignId = useSelector((state: RootState) => state.campaign.campaignId);
+  const [calendlyConnected, setCalendlyConnected] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const handleSubmit = async () => {
-    if (!calendlyLink) return;
-    
-    setIsSubmitting(true);
-    setMessage({ text: '', isError: false });
-    
-    try {
-      // Validate the URL format
-      if (!calendlyLink.includes('calendly.com')) {
-        throw new Error('Please enter a valid Calendly link');
-      }
-      
-      await axiosClient.post(`/api/campaign/${campaignId}/calendly-link`, { calendlyLink });
-      setMessage({ text: 'Calendly link updated successfully!', isError: false });
-      
-    } catch (error) {
-      console.error('Error updating calendly link:', error);
-      setMessage({ 
-        text: error.message || 'Failed to update Calendly link. Please try again.', 
-        isError: true 
-      });
-    } finally {
-      setIsSubmitting(false);
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("connected") === "calendly") {
+      toast.success("Calendly connected successfully!");
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchCalendlyLink = async () => {
+      try {
+        const res = await axiosClient.get(`/api/campaign/${campaignId}/calendly-link`);
+        if (res.data?.calendlyLink) {
+          setCalendlyConnected(true);
+        }
+      } catch (err) {
+        console.error("Failed to fetch Calendly link", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCalendlyLink();
+  }, [campaignId]);
+
+  const handleConnectCalendly = () => {
+    if (!campaignId) return;
+    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/calendly/oauth/start?campaignId=${campaignId}`;
+    window.location.href = url;
   };
 
+  if (loading || calendlyConnected) return null;
+
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold mb-4">Connect Your Calendly</h2>
+    <div className="bg-white p-6 rounded-lg shadow-md border mb-6">
+      <h2 className="text-xl font-semibold mb-2">Connect Your Calendly</h2>
       <p className="text-gray-600 mb-4">
-        Add your Calendly link to allow users to schedule meetings with you.
+        You haven't connected Calendly yet. Click below to authorize and let reps schedule meetings
+        through your link.
       </p>
-      
-      <div className="space-y-4">
-        <div>
-          <label htmlFor="calendlyLink" className="block text-sm font-medium text-gray-700 mb-1">
-            Calendly Link
-          </label>
-          <input
-            type="url"
-            id="calendlyLink"
-            value={calendlyLink}
-            onChange={(e) => setCalendlyLink(e.target.value)}
-            placeholder="https://calendly.com/your-username"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        
-        {message.text && (
-          <div className={`p-3 rounded-md ${message.isError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
-            {message.text}
-          </div>
-        )}
-        
-        <Button
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className=" text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-        >
-          {isSubmitting ? 'Updating...' : 'Update Calendly Link'}
-        </Button>
-      </div>
+      <Button
+        onClick={handleConnectCalendly}
+        className=" py-2 px-4 rounded-md"
+      >
+        Connect Calendly
+      </Button>
     </div>
   );
 };

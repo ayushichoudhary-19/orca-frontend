@@ -9,7 +9,8 @@ import { Button, Divider, Group, TextInput } from "@mantine/core";
 import Image from "next/image";
 import { ViewToggleButton } from "@/components/Training/ViewToggleButton";
 import CustomBadge from "@/components/Leads/CustomBadge";
-import { useRouter } from "next/navigation";import { useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 
 interface Campaign {
@@ -35,7 +36,7 @@ export default function CampaignMarketplace() {
   const [priceFilter, setPriceFilter] = useState<number | null>(null);
   const [businessFilter, setBusinessFilter] = useState<string | null>(null);
   const [uniqueBusinesses, setUniqueBusinesses] = useState<string[]>([]);
-  
+
   const router = useRouter();
   const salesRepId = useSelector((state: RootState) => state.auth.user?.uid);
 
@@ -47,15 +48,15 @@ export default function CampaignMarketplace() {
     try {
       setIsLoading(true);
       let response;
-      
+
       if (campaignView === "my" && salesRepId) {
-        // response = await axiosClient.get(`/api/campaign/salesrep/${salesRepId}`);
-        setCampaigns([]);
-        return;
+        response = await axiosClient.post("/api/campaign/my-campaigns", {
+          salesRepId,
+        });
       } else {
         response = await axiosClient.get("/api/campaign/public");
       }
-      
+
       setCampaigns(response.data);
       setFilteredCampaigns(response.data);
 
@@ -109,13 +110,13 @@ export default function CampaignMarketplace() {
             border: "1px solid #E4E4E7",
           }}
         >
-          <button 
+          <button
             className={`px-6 py-3 border-none ${campaignView === "my" ? "bg-[#6D57FC] text-white" : "text-gray-700 hover:bg-gray-50 bg-white"}`}
             onClick={() => setCampaignView("my")}
           >
             My Campaigns
           </button>
-          <button 
+          <button
             className={`px-6 py-3 border-none ${campaignView === "all" ? "bg-[#6D57FC] text-white" : "text-gray-700 hover:bg-gray-50 bg-white"}`}
             onClick={() => setCampaignView("all")}
           >
@@ -225,9 +226,9 @@ export default function CampaignMarketplace() {
                 </select>
               </div>
               <div className="flex items-end">
-                <button onClick={resetFilters} className="p-2 text-[#6D57FC] hover:underline">
+                <Button onClick={resetFilters}>
                   Reset Filters
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -243,7 +244,7 @@ export default function CampaignMarketplace() {
       )}
 
       {!isLoading && viewMode === "grid" && (
-        <div className="px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="px-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredCampaigns.map((campaign) => (
             <div
               key={campaign._id}
@@ -312,7 +313,9 @@ export default function CampaignMarketplace() {
                     </div>
                     <div className="flex-1">
                       <div className="flex justify-between items-start mb-2">
-                        <h3 className="text-[16px] text-darker font-bold">{campaign.campaignName}</h3>
+                        <h3 className="text-[16px] text-darker font-bold">
+                          {campaign.campaignName}
+                        </h3>
                         <div className="md:hidden">
                           <CustomBadge value={campaign.campaignTag} />
                         </div>
@@ -323,7 +326,10 @@ export default function CampaignMarketplace() {
                       <div className="hidden md:block">
                         <div className="flex gap-2 flex-wrap">
                           {campaign.industry.slice(0, 2).map((ind, index) => (
-                            <span key={index} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                            <span
+                              key={index}
+                              className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded"
+                            >
                               {ind}
                             </span>
                           ))}
@@ -358,9 +364,9 @@ export default function CampaignMarketplace() {
       {!isLoading && filteredCampaigns.length === 0 && (
         <div className="flex flex-col items-center justify-center h-64">
           <p className="text-xl text-gray-500 mb-4">No campaigns found</p>
-          <button onClick={resetFilters} className="text-primary hover:underline">
-            Reset filters
-          </button>
+          <Button onClick={resetFilters}>
+                  Reset Filters
+                </Button>
         </div>
       )}
     </div>

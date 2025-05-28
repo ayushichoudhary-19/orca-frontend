@@ -5,15 +5,22 @@ import { useState } from "react";
 import AuditionReviewDrawer from "./AuditionDrawer";
 import { IconArrowRight } from "@tabler/icons-react";
 
+interface Language {
+  language: string;
+  proficiency: string;
+}
+
+interface SalesRepProfile {
+  fullName: string;
+  phoneNumber: string;
+  resumeUrl?: string;
+  languages?: Language[];
+}
+
 interface SalesRep {
   _id: string;
-  userId: string;
-  fullName: string;
   email: string;
-  phone: string;
-  bio: string;
-  createdAt: string;
-  updatedAt: string;
+  salesRepProfile: SalesRepProfile;
 }
 
 interface Rep {
@@ -24,6 +31,11 @@ interface Rep {
   auditionStatus: string;
   auditionAttempts: number;
   createdAt: string;
+  lastAuditionAt?: string;
+  resumeUrl?: string;
+  experienceYears?: string;
+  country?: string;
+  linkedInUrl?: string;
 }
 
 export default function PendingRepsTable({ reps: initialReps }: { reps: Rep[] }) {
@@ -38,7 +50,6 @@ export default function PendingRepsTable({ reps: initialReps }: { reps: Rep[] })
 
   const getStatusBadgeColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case "retrying":
       case "retry":
         return "gray";
       case "approved":
@@ -78,68 +89,55 @@ export default function PendingRepsTable({ reps: initialReps }: { reps: Rep[] })
       <Paper radius="md" p="xl" className="bg-white">
         <Table highlightOnHover verticalSpacing="md" horizontalSpacing="xl">
           <thead>
-            <tr 
-            style={{
-              borderBottom: "1px solid #E7E7E9",
-              paddingBottom: "16px"
-            }}
-            >
+            <tr style={{ borderBottom: "1px solid #E7E7E9" }}>
               <th className="text-left text-tinteddark8 font-[500] text-[12px] py-4">Caller</th>
+              <th className="text-left text-tinteddark8 font-[500] text-[12px] py-4">Email</th>
               <th className="text-left text-tinteddark8 font-[500] text-[12px] py-4">Status</th>
               <th className="text-left text-tinteddark8 font-[500] text-[12px] py-4">Attempts</th>
-              <th className="text-left text-tinteddark8 font-[500] text-[12px] py-4">
-                Last Attempt
-              </th>
+              <th className="text-left text-tinteddark8 font-[500] text-[12px] py-4">Last Attempt</th>
               <th className="text-left text-tinteddark8 font-[500] text-[12px] py-4">Action</th>
             </tr>
           </thead>
           <tbody>
-            {reps.map((rep) => (
-              <tr key={rep._id} className="last:border-0"
-              style={
-                {
-                  borderBottom: "1px solid #E7E7E9",
-                  paddingBottom: "16px"
-                }
-              }
-              >
-                <td className="py-4">
-                  <div className="flex items-center gap-3">
-                    {/* <Avatar radius="xl" size="md" color="#6D57FC"> */}
-                      {/* {rep.salesRepId?.fullName?.charAt(0) || "?"}
-                    </Avatar> */}
+            {reps.map((rep) => {
+              const profile = rep.salesRepId?.salesRepProfile;
+              return (
+                <tr key={rep._id} style={{ borderBottom: "1px solid #E7E7E9" }}>
+                  <td className="py-4">
                     <span className="font-medium text-[14px]">
-                      {rep.salesRepId?.fullName || "Unknown"}
+                      {profile?.fullName || "Unknown"}
                     </span>
-                  </div>
-                </td>
-                <td className="py-4">
-                  <Badge
-                    radius="md"
-                    className="text-[12px] font-semibold text-black"
-                    color={getStatusBadgeColor(rep.auditionStatus)}
-                    variant="light"
-                    size="lg"
-                  >
-                    {formatStatus(rep.auditionStatus)}
-                  </Badge>
-                </td>
-                <td className="py-4 text-[14px]">{rep.auditionAttempts}</td>
-                <td className="py-4 text-[14px]">{formatDate(rep.createdAt)}</td>
-                <td className="py-4">
-                  <Button
-                    variant="light"
-                    size="sm"
-                    // color="gray"
-                    className="text-[12px] font-semibold text-black"
-                    onClick={() => handleViewAttempts(rep)}
-                    rightSection={<IconArrowRight size={15} stroke={1.5} />}
-                  >
-                    View last audition
-                  </Button>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="py-4 text-[14px]">{rep.salesRepId?.email}</td>
+                  <td className="py-4">
+                    <Badge
+                      radius="md"
+                      className="text-[12px] font-semibold text-black"
+                      color={getStatusBadgeColor(rep.auditionStatus)}
+                      variant="light"
+                      size="lg"
+                    >
+                      {formatStatus(rep.auditionStatus)}
+                    </Badge>
+                  </td>
+                  <td className="py-4 text-[14px]">{rep.auditionAttempts}</td>
+                  <td className="py-4 text-[14px]">
+                    {rep.lastAuditionAt ? formatDate(rep.lastAuditionAt) : "-"}
+                  </td>
+                  <td className="py-4">
+                    <Button
+                      variant="light"
+                      size="sm"
+                      className="text-[12px] font-semibold text-black"
+                      onClick={() => handleViewAttempts(rep)}
+                      rightSection={<IconArrowRight size={15} stroke={1.5} />}
+                    >
+                      View audition
+                    </Button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </Table>
       </Paper>

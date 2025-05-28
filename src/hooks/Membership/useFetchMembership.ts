@@ -24,6 +24,7 @@ export const useFetchMembership = () => {
       try {
         const res = await axiosClient.get(`/api/memberships/by-user/${user.uid}`);
         const memberships: Membership[] = res.data;
+        console.log("Memberships:", memberships);
 
         if (memberships.length > 0) {
           const m = memberships[0];

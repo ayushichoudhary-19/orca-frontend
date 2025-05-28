@@ -25,9 +25,11 @@ export const toast = {
         duration: options?.duration ?? 3000,
         icon: 'ℹ️',
       }),
-    
-
-
+    warn: (message: string, options?: ToastOptions) =>
+      hotToast(message, {
+        duration: options?.duration?? 3000,
+        icon: '⚠️',
+      }),
   promise: <T>(
     promise: Promise<T>,
     messages: {
