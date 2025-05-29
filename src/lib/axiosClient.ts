@@ -39,6 +39,9 @@ const createAxiosClient = ({ baseURL, timeout = 20000 }: CreateClientOptions): A
   const axiosInstance = axios.create({
     baseURL,
     timeout,
+    headers: {
+      "ngrok-skip-browser-warning": "true",
+    },
   });
 
   const refreshToken = async (): Promise<string> => {
