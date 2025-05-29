@@ -103,6 +103,7 @@ export default function Sidebar() {
   const [activeItem, setActiveItem] = useState<string>("Dashboard");
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [campaignsMenuOpen, setCampaignsMenuOpen] = useState(false);
+  const [hasFetchedCampaigns, setHasFetchedCampaigns] = useState(false);
   const [campaigns, setCampaigns] = useState<{ label: string; value: string; status: string }[]>(
     []
   );
@@ -115,6 +116,8 @@ export default function Sidebar() {
   const { getByBusiness, getApprovedActiveCampaignsForSdr } = useCampaign();
 
   useEffect(() => {
+    if (hasFetchedCampaigns) return;
+
     const fetchCampaigns = async () => {
       try {
         if (isSdr) {
@@ -134,13 +137,15 @@ export default function Sidebar() {
           }));
           setCampaigns([{ label: "+ Add New", value: "new", status: "NEW" }, ...mapped]);
         }
+
+        setHasFetchedCampaigns(true);
       } catch (err) {
         console.error("Failed to fetch campaigns", err);
       }
     };
 
     fetchCampaigns();
-  }, [businessId, isSdr, getByBusiness, getApprovedActiveCampaignsForSdr]);
+  }, [businessId, isSdr, hasFetchedCampaigns, getByBusiness, getApprovedActiveCampaignsForSdr]);
 
   useEffect(() => {
     const path = window.location.pathname;
@@ -179,7 +184,7 @@ export default function Sidebar() {
       router.push(destination);
     }
     setCampaignsMenuOpen(false);
-  };  
+  };
 
   return (
     <motion.aside

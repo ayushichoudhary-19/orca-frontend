@@ -32,6 +32,7 @@ export const Header = () => {
   const [campaigns, setCampaigns] = useState<{ label: string; value: string; status: string }[]>(
     []
   );
+  const [hasFetchedCampaigns, setHasFetchedCampaigns] = useState(false);
   const [selected, setSelected] = useState<string | null>(campaignId);
 
   const { getByBusiness } = useCampaign();
@@ -43,7 +44,8 @@ export const Header = () => {
 
   useEffect(() => {
     const fetchCampaigns = async () => {
-      if (!businessId) return;
+      if (!businessId || hasFetchedCampaigns) return;
+  
       try {
         const all = await getByBusiness(businessId);
         const mapped = all.map((c) => ({
@@ -51,15 +53,16 @@ export const Header = () => {
           value: c._id,
           status: c.status,
         }));
-
+  
         if (isCampaignCreation) {
           const draftId = localStorage.getItem("draftCampaign");
           const currentDraft = mapped.find((c) => c.value === draftId);
           if (currentDraft) setSelected(currentDraft.value);
         }
-
+  
         setCampaigns([{ label: "+ Add New", value: "new", status: "NEW" }, ...mapped]);
-
+        setHasFetchedCampaigns(true);
+  
         if (!campaignId && !isOnboarding && !isCampaignCreation) {
           const firstLaunched = mapped.find((c) => c.status === "LAUNCHED");
           if (firstLaunched) {
@@ -71,9 +74,9 @@ export const Header = () => {
         console.error("Failed to fetch campaigns", err);
       }
     };
-
+  
     if (!isSdr && !isOnboarding) fetchCampaigns();
-  }, [businessId, isOnboarding, isCampaignCreation]);
+  }, [businessId, isOnboarding, isCampaignCreation, campaignId, isSdr, hasFetchedCampaigns]);  
 
   const handleChange = (value: string | null) => {
     setSelected(value);
