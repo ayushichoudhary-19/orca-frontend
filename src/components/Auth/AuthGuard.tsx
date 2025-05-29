@@ -92,7 +92,6 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     });
     return <Loader />;
   }
-  
 
   return <>{children}</>;
 }

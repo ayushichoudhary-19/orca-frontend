@@ -40,6 +40,7 @@ export default function CampaignMarketplace() {
   const salesRepId = useSelector((state: RootState) => state.auth.user?.uid);
 
   useEffect(() => {
+    if (campaignView === "my" && !salesRepId) return;
     fetchCampaigns();
   }, [campaignView, salesRepId, statusFilter]);
 
@@ -49,7 +50,9 @@ export default function CampaignMarketplace() {
       let response;
 
       if (campaignView === "my" && salesRepId) {
-        response = await axiosClient.get(`/api/campaign/sales-rep-campaigns/${salesRepId}?type=${statusFilter}`);
+        response = await axiosClient.get(
+          `/api/campaign/sales-rep-campaigns/${salesRepId}?type=${statusFilter}`
+        );
       } else {
         response = await axiosClient.get("/api/campaign/public");
       }
