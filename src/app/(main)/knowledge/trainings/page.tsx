@@ -84,6 +84,7 @@ export default function TrainingPage() {
 
       await axiosClient.post("/api/trainings/reorder", { order: orderPayload });
       await axiosClient.post("/api/trainings/visibility-bulk", { updates: visibilityPayload });
+      await axiosClient.post(`/api/trainings/publish-bulk/${campaignId}`);
 
       toast.success("Changes published!");
       fetchTrainings();
@@ -172,11 +173,13 @@ export default function TrainingPage() {
         )}
       </DragDropContext>
 
-      {pendingChanges && (
+      {(
         <div className="sticky bottom-0 z-30 bg-[#F4F0FF] border border-violet-200 rounded-xl shadow-sm px-6 py-4 flex items-center justify-between mt-10">
+          {pendingChanges && (
           <Text size="sm" className="text-primary font-medium">
             You have changes waiting to be published
           </Text>
+          )}
           <Button
             variant="filled"
             className="h-[40px] px-[20px] py-[10px] rounded-[12px] font-normal"
@@ -186,6 +189,7 @@ export default function TrainingPage() {
           </Button>
         </div>
       )}
+      
 
       <Modal
         opened={modalOpened}
