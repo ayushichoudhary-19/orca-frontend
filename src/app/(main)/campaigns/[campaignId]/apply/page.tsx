@@ -34,7 +34,6 @@ export default function ApplyPage() {
   const [audioResponses, setAudioResponses] = useState<Record<string, Blob | null>>({});
   const [auditionStatus, setAuditionStatus] = useState<AuditionStatus | null>(null);
   const [feedbackNotes, setFeedbackNotes] = useState<string | null>(null);
-
   const campaignId = usePathname().split("/")[2];
   const salesRepId = useSelector((state: RootState) => state.auth.user?.uid);
 
@@ -82,7 +81,7 @@ export default function ApplyPage() {
   };
 
   const isEditable = ["not_started", "in_progress", "retry"].includes(auditionStatus || "");
-  const canEditInputs = auditionStatus === "in_progress";
+  const canEditInputs = auditionStatus === "in_progress" || auditionStatus === "not_started";
   const isRetry = auditionStatus === "retry";
   const getPreviousAudioUrl = (response: Blob | string | null | undefined): string | undefined => {
     return typeof response === "string" ? response : undefined;
