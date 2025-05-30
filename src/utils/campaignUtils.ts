@@ -10,10 +10,8 @@ import { Campaign } from "@/types/campaign";
 export const getStepFromDraft = (campaign: Campaign): number => {
   if (!campaign) return 0;
 
-  // Step 1: campaign name and website filled
   const hasStep1 = Boolean(campaign.campaignName && campaign.companyWebsite);
 
-  // Step 2: either contacts uploaded or ideal customer info filled
   const hasStep2 = Boolean(
     campaign.uploadedCsvFilename ||
     campaign.allowAutoLeads ||
@@ -24,7 +22,6 @@ export const getStepFromDraft = (campaign: Campaign): number => {
     campaign.keywords?.length
   );
 
-  // Step 3: signature done
   const hasStep3 = Boolean(
     campaign.signatoryName &&
     campaign.signatoryTitle &&

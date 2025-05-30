@@ -6,24 +6,24 @@ import { auth } from "@/lib/firebase";
 import { toast } from "@/lib/toast";
 import { useRouter } from "next/navigation";
 import CustomTextInput from "@/components/Utils/CustomTextInput";
-import { useCreateBusinessProfile } from "@/hooks/Onboarding/useCreateBusinessProfile";
 import { IconArrowRight } from "@tabler/icons-react";
-import { useUpdateOnboardingStep } from "@/hooks/Onboarding/useUpdateOnboardingStep";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import CustomCheckbox from "@/components/Utils/CustomCheckbox";
 import { zodResolver } from "@mantine/form";
 import { step1Schema, Step1FormValues } from "@/schemas/step1Schema";
+import { updateStep } from "@/store/businessSlice";
+import { useCreateBusinessProfile } from "@/hooks/Onboarding/useCreateBusinessProfile";
 import { useState } from "react";
+import { useBusiness } from "@/hooks/Business/useBusiness";
 
 export default function Step1() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const { createProfile } = useCreateBusinessProfile();
-  const { updateStep } = useUpdateOnboardingStep();
-  const businessId = useSelector((state: RootState) => state.membership.businessId);
-  const membershipId = useSelector((state: RootState) => state.membership.membershipId);
+  const user = useAppSelector((state) => state.auth.user);
+  const businessId = user?.businessId;
+  const { updateStep: updateBusinessStep } = useBusiness();
 
   const form = useForm<Step1FormValues>({
     validate: zodResolver(step1Schema),
@@ -35,18 +35,19 @@ export default function Step1() {
 
   const handleSubmit = async (values: typeof form.values) => {
     const user = auth.currentUser;
-    if (!user || !membershipId || !businessId) return;
+    if (!user || !businessId) return;
 
     try {
       setIsSubmitting(true);
       await createProfile({
-        businessId: businessId,
+        businessId,
         companySize: values.companySize,
         referralSource: values.referralSource,
       });
 
-      await updateStep(membershipId, 1);
+      await dispatch(updateStep(1));
       toast.success("Profile saved");
+      updateBusinessStep(businessId, 1);
       router.push("/onboarding/hub");
     } catch {
       toast.error("Error saving profile");

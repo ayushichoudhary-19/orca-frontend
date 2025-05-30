@@ -4,27 +4,29 @@ import { useForm } from "@mantine/form";
 import { Button, Container, Title, Text, Checkbox, Box, Paper } from "@mantine/core";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
-import { useUpdateOnboardingStep } from "@/hooks/Onboarding/useUpdateOnboardingStep";
 import SignatureCanvas from "react-signature-canvas";
 import { useEffect, useRef, useState } from "react";
 import { useCampaign } from "@/hooks/Campaign/useCampaign";
 import CustomTextInput from "@/components/Utils/CustomTextInput";
 import { Campaign } from "@/types/campaign";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store/store";
 import { clearDraftCampaignId, getDraftCampaignId } from "@/utils/campaignUtils";
 import { zodResolver } from "@mantine/form";
 import { reviewSignSchema, ReviewSignFormValues } from "@/schemas/reviewSignSchema";
+import { updateStep } from "@/store/businessSlice";
+import { useBusiness } from "@/hooks/Business/useBusiness";
 
 export default function ReviewSign() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [existingCampaign, setExistingCampaign] = useState<Campaign | null>(null);
-  const { updateStep } = useUpdateOnboardingStep();
   const { signCampaign, getByBusiness, getById } = useCampaign();
-  const businessId = useSelector((state: RootState) => state.membership.businessId);
-  const membershipId = useSelector((state: RootState) => state.membership.membershipId);
+  const user = useSelector((state: RootState) => state.auth.user);
+  const businessId = user?.businessId;
   const pathname = usePathname();
   const isCreateFlow = pathname.includes("/campaign/create");
+  const { updateStep: updateBusinessStep } = useBusiness();
 
   useEffect(() => {
     const fetchCampaign = async () => {
@@ -41,10 +43,9 @@ export default function ReviewSign() {
 
   useEffect(() => {
     const fetchExistingCampaign = async () => {
-      if (!membershipId || !businessId) return;
+      if (!businessId) return;
       try {
         const campaigns = await getByBusiness(businessId);
-
         if (campaigns && campaigns.length == 1) {
           setExistingCampaign(campaigns[0]);
         }
@@ -53,7 +54,7 @@ export default function ReviewSign() {
       }
     };
     fetchExistingCampaign();
-  }, [membershipId, businessId]);
+  }, [businessId]);
 
   const sigRef = useRef<SignatureCanvas>(null);
 
@@ -68,7 +69,7 @@ export default function ReviewSign() {
   });
 
   const handleSubmit = async (values: typeof form.values) => {
-    if (!membershipId || !businessId) return;
+    if (!businessId) return;
 
     const base64Signature = sigRef.current?.getTrimmedCanvas().toDataURL("image/png");
 
@@ -92,7 +93,8 @@ export default function ReviewSign() {
         clearDraftCampaignId();
         router.push("/dashboard");
       } else {
-        await updateStep(membershipId, 4);
+        dispatch(updateStep(4));
+        updateBusinessStep(businessId, 4);
         router.push("/dashboard");
       }
       toast.success("Signed successfully 🎉");
@@ -164,9 +166,7 @@ export default function ReviewSign() {
               value="Specified by the OPS team."
               disabled
               className="h-[50px]"
-              style={{
-                backgroundColor: "#e7e7e9",
-              }}
+              style={{ backgroundColor: "#e7e7e9" }}
             />
           </div>
           <div>
@@ -177,9 +177,7 @@ export default function ReviewSign() {
               value="Specified by the OPS team."
               disabled
               className="h-[50px]"
-              style={{
-                backgroundColor: "#e7e7e9",
-              }}
+              style={{ backgroundColor: "#e7e7e9" }}
             />
           </div>
           <div>
@@ -190,9 +188,7 @@ export default function ReviewSign() {
               value="Separate addendum to be shared."
               disabled
               className="h-[50px]"
-              style={{
-                backgroundColor: "#e7e7e9",
-              }}
+              style={{ backgroundColor: "#e7e7e9" }}
             />
           </div>
         </div>
@@ -233,9 +229,7 @@ export default function ReviewSign() {
           </label>
           <Box
             className="rounded-md overflow-hidden bg-white"
-            style={{
-              border: "1px solid #E7E7E9",
-            }}
+            style={{ border: "1px solid #E7E7E9" }}
           >
             <SignatureCanvas
               penColor="black"

@@ -5,6 +5,7 @@ import { Dispatch } from "@reduxjs/toolkit";
 
 export const executeLogout = async (dispatch: Dispatch) => {
   try {
+    localStorage.setItem("manualLogout", "true");
     await auth.signOut();
     dispatch(clearAuth());
     await persistor.purge();

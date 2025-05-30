@@ -17,5 +17,15 @@ export const useBusiness = () => {
     return res.data;
   };
 
-  return { createBusiness, getById, getByUser };
+  const updateStep = async (businessId: string, step: number) => {
+    const res = await axiosClient.patch(`/api/business/${businessId}/onboarding-step`, { step });
+    return res.data;
+  };
+
+  return {
+    createBusiness,
+    getById,
+    getByUser,
+    updateStep,
+  };
 };

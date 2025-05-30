@@ -9,6 +9,7 @@ import { AuthHeader } from "../Auth/AuthHeader";
 import { getErrorMessage } from "@/utils/errorUtils";
 import Link from "next/link";
 import CustomTextInput from "../Utils/CustomTextInput";
+import { useRouter } from "next/navigation";
 
 type Props = {
   onSubmit: (email: string, password: string) => Promise<void>;
@@ -20,6 +21,7 @@ export const AuthForm = ({ onSubmit, onGoogleAuth }: Props) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [step, setStep] = useState(1);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +57,7 @@ export const AuthForm = ({ onSubmit, onGoogleAuth }: Props) => {
           step === 1 ? `url('/bg-auth-base.png'), url('/bg-auth-0.png')` : `url('/bg-auth-1.png')`,
         backgroundSize: step === 1 ? "contain, contain" : "cover",
         backgroundRepeat: step === 1 ? "no-repeat, no-repeat" : "repeat",
-        backgroundBlendMode: step === 1 ? "normal" : "normal",
+        backgroundBlendMode: "normal",
       }}
     >
       <motion.div
@@ -119,15 +121,10 @@ export const AuthForm = ({ onSubmit, onGoogleAuth }: Props) => {
                       }
                     }}
                   >
-                    {"Login with Google"}
+                    Login with Google
                   </Button>
 
-                  <EmailInput
-                    value={email}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-                      setEmail(e.target.value)
-                    }
-                  />
+                  <EmailInput value={email} onChange={(e) => setEmail(e.target.value)} />
 
                   {email.trim() !== "" && (
                     <motion.div
@@ -142,7 +139,7 @@ export const AuthForm = ({ onSubmit, onGoogleAuth }: Props) => {
                         className="bg-primary rounded-lg text-base hover:bg-darker transition-colors"
                         rightSection={<IconArrowRight size={18} />}
                       >
-                        Sign In
+                        Continue
                       </Button>
                     </motion.div>
                   )}
@@ -162,10 +159,7 @@ export const AuthForm = ({ onSubmit, onGoogleAuth }: Props) => {
                 <Stack>
                   <ErrorAlert message={error} />
 
-                  <EmailInput
-                    value={email}
-                    onChange={(e) => setEmail((e.target as HTMLInputElement).value)}
-                  />
+                  <EmailInput value={email} onChange={(e) => setEmail(e.target.value)} />
 
                   <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} />
 
@@ -193,12 +187,21 @@ export const AuthForm = ({ onSubmit, onGoogleAuth }: Props) => {
               </form>
             </motion.div>
           )}
+
+          <span className="text-xs">
+            Not a member?{" "}
+            <Link href="/sales-rep-auth" className="underline hover:opacity-90 text-primary">
+              Sign up as a Sales Rep
+            </Link>
+          </span>
         </AnimatePresence>
       </motion.div>
+
       <div
         className={`absolute bottom-8 text-center text-xs ${step === 1 ? "text-black" : "text-white"}`}
       >
         @2025 ORCA All Right Reserved.
+        <br />
       </div>
     </div>
   );
@@ -248,8 +251,12 @@ const PasswordInput = ({
         <button
           type="button"
           onClick={() => setVisible(!visible)}
-          className="absolute top-0 right-0 h-full w-10 flex items-center justify-center bg-white rounded-r-md border border-softgray border-solid rounded-md border-l-0 rounded-tl-none rounded-bl-none hover:cursor-pointer appearance-none shadow-none"
-        >
+          className="absolute top-0 right-0 h-full w-10 flex items-center justify-center bg-white rounded-r-md border border-l-0 hover:cursor-pointer"
+          style={{
+            border: "1px solid #e7e7e7",
+            borderLeft: "0px"
+          }}
+  >
           {visible ? (
             <IconEyeOff size={25} color="#292D32" />
           ) : (

@@ -1,6 +1,6 @@
 "use client";
+import { Droppable, Draggable } from "@hello-pangea/dnd";
 
-import { Droppable, Draggable } from "react-beautiful-dnd";
 import { Button, Card, Group, Text } from "@mantine/core";
 import { IconEye, IconEyeOff, IconGripVertical } from "@tabler/icons-react";
 import Image from "next/image";
@@ -20,12 +20,10 @@ export const TrainingGrid = ({
 }: TrainingGridProps): React.ReactNode => {
   const router = useRouter();
   const toggleVisibility = (id: string) => {
-    const updated = trainings.map((t) =>
-      t._id === id ? { ...t, isVisible: !t.isVisible } : t
-    );
+    const updated = trainings.map((t) => (t._id === id ? { ...t, isVisible: !t.isVisible } : t));
     setTrainings(updated);
     setPendingChanges(true);
-  };  
+  };
 
   return (
     <Droppable
@@ -50,7 +48,6 @@ export const TrainingGrid = ({
                     withBorder
                     radius="md"
                   >
-                    {/* Visibility Toggle Button */}
                     <div className="size-[42px] flex justify-center items-center absolute top-0 right-0 bg-lighter rounded-bl-3xl z-10">
                       <Button
                         size="xs"

@@ -7,19 +7,20 @@ import { IconArrowRight } from "@tabler/icons-react";
 import CustomTextInput from "@/components/Utils/CustomTextInput";
 import { toast } from "@/lib/toast";
 import { useCampaign } from "@/hooks/Campaign/useCampaign";
-import { useUpdateOnboardingStep } from "@/hooks/Onboarding/useUpdateOnboardingStep";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
 import { setDraftCampaignId } from "@/utils/campaignUtils";
-import { zodResolver } from '@mantine/form';
-import { campaignFormSchema, CampaignFormValues } from '@/schemas/campaignFormSchema';
+import { zodResolver } from "@mantine/form";
+import { campaignFormSchema, CampaignFormValues } from "@/schemas/campaignFormSchema";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { updateStep } from "@/store/businessSlice";
+import { useBusiness } from "@/hooks/Business/useBusiness";
 
 export default function CampaignForm() {
   const router = useRouter();
   const { createCampaign } = useCampaign();
-  const { updateStep } = useUpdateOnboardingStep();
-  const businessId = useSelector((state: RootState) => state.membership.businessId);
-  const membershipId = useSelector((state: RootState) => state.membership.membershipId);
+  const user = useAppSelector((state) => state.auth.user);
+  const businessId = user?.businessId;
+  const { updateStep: updateBusinessStep } = useBusiness();
+  const dispatch = useAppDispatch();
 
   const form = useForm<CampaignFormValues>({
     validate: zodResolver(campaignFormSchema),
@@ -33,7 +34,7 @@ export default function CampaignForm() {
   const isCreateFlow = pathname.includes("/campaign/create");
 
   const handleSubmit = async (values: typeof form.values) => {
-    if (!membershipId || !businessId) return;
+    if (!businessId) return;
     try {
       const newCampaign = await createCampaign({
         businessId,
@@ -43,12 +44,15 @@ export default function CampaignForm() {
       });
 
       if (isCreateFlow) {
-        setDraftCampaignId(newCampaign._id);
+        if (typeof window !== "undefined") {
+          setDraftCampaignId(newCampaign._id);
+        }
         router.push("/campaign/create?step=contacts");
       } else {
-        await updateStep(membershipId, 2);
+        dispatch(updateStep(2));
+        updateBusinessStep(businessId,2);
         router.push("/onboarding/hub");
-      }
+      }      
       toast.success("Campaign saved");
     } catch (err) {
       console.error(err);
@@ -62,14 +66,14 @@ export default function CampaignForm() {
         Start your campaign
       </Title>
       <Text size="sm" c="dimmed" mb="xl">
-       {"Let’s "}get to know your product.
+        {"Let’s "}get to know your product.
       </Text>
       <form onSubmit={form.onSubmit(handleSubmit)} className="space-y-5">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Company website</label>
           <CustomTextInput
             {...form.getInputProps("companyWebsite")}
-            placeholder="www.websitename.com"
+            placeholder="https://www.websitename.com"
             required
             className="h-[50px]"
           />
@@ -94,15 +98,17 @@ export default function CampaignForm() {
           )}
         </div>
         <div className="flex justify-between pt-6">
-            <Button
-              variant="light"
-              size="md"
-              radius="md"
-              className="text-[#555461] bg-[#E7E7E7]"
-              onClick={() => router.push(isCreateFlow ? "/campaign/create?step=hub" : "/onboarding/hub")}
-            >
-              Back
-            </Button>
+          <Button
+            variant="light"
+            size="md"
+            radius="md"
+            className="text-[#555461] bg-[#E7E7E7]"
+            onClick={() =>
+              router.push(isCreateFlow ? "/campaign/create?step=hub" : "/onboarding/hub")
+            }
+          >
+            Back
+          </Button>
           <Button
             type="submit"
             size="md"

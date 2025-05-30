@@ -1,18 +1,21 @@
-"use client"
-import { useState } from "react"
-import { Switch, Button, Divider } from "@mantine/core"
-import { axiosClient } from "@/lib/axiosClient"
-import { motion } from "framer-motion"
+"use client";
+import { useState } from "react";
+import { Switch, Button, Divider } from "@mantine/core";
+import { axiosClient } from "@/lib/axiosClient";
+import { motion } from "framer-motion";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import toast from "react-hot-toast";
 
-const days = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"]
+const days = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
 
 export default function CampaignControlsPage() {
   const [controls, setControls] = useState({
-    selfSourced: true,
+    selfSourced: false,
     dialerAllowed: false,
-    marketplaceVisible: false,
+    marketplaceVisible: true,
     callbacksAllowed: false,
-  })
+  });
   const [hours, setHours] = useState<Record<string, boolean>>({
     SUNDAY: false,
     MONDAY: false,
@@ -21,26 +24,32 @@ export default function CampaignControlsPage() {
     THURSDAY: false,
     FRIDAY: false,
     SATURDAY: false,
-  })
+  });
+
+  const campaignId = useSelector((state: RootState) => state.campaign.campaignId);
 
   const handleToggle = (key: string) => {
-    setControls((prev) => ({ ...prev, [key]: !prev[key as keyof typeof prev] }))
-  }
+    setControls((prev) => ({ ...prev, [key]: !prev[key as keyof typeof prev] }));
+  };
 
   const toggleDay = (day: string) => {
-    setHours((prev) => ({ ...prev, [day]: !prev[day] }))
-  }
+    setHours((prev) => ({ ...prev, [day]: !prev[day] }));
+  };
 
   const saveControls = async () => {
-    await axiosClient.patch("/api/campaign/settings/controls", { controls, hours })
-  }
+    try {
+      await axiosClient.patch(`/api/campaign/${campaignId}/settings/controls`, { controls, hours });
+      toast.success("Controls saved");
+    } catch (error) {
+      toast.error("Error saving controls");
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto p-6">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-bold mb-0">Campaign Controls</h1>
         <Divider />
-        {/* <div className="text-sm text-gray-500">Note: controls are saved automatically!</div> */}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
@@ -65,7 +74,9 @@ export default function CampaignControlsPage() {
           <div className="flex justify-between items-center">
             <div>
               <h3 className="font-medium">Dialer Allowed</h3>
-              <p className="text-sm text-gray-500">Control when callers can access and use the dialer to make calls</p>
+              <p className="text-sm text-gray-500">
+                Control when callers can access and use the dialer to make calls
+              </p>
             </div>
             <Switch
               checked={controls.dialerAllowed}
@@ -97,7 +108,9 @@ export default function CampaignControlsPage() {
           <div className="flex justify-between items-center">
             <div>
               <h3 className="font-medium">Campaign Visible On Marketplace</h3>
-              <p className="text-sm text-gray-500">Control when your campaign displays in the ORCA marketplace</p>
+              <p className="text-sm text-gray-500">
+                Control when your campaign displays in the ORCA marketplace
+              </p>
             </div>
             <Switch
               checked={controls.marketplaceVisible}
@@ -118,9 +131,9 @@ export default function CampaignControlsPage() {
               onClick={() => toggleDay(day)}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
-              className={`px-4 py-3 rounded-md border ${
-                hours[day] ? "border-[#6D57FC] bg-[#F0EDFF]" : "border-gray-200 bg-white"
-              }`}
+              className={`px-4 py-3 rounded-md border 
+                hover:bg-lighter hover:cursor-pointer border-none
+                ${hours[day] ? "border-2 border-primary bg-lighter" : "border-gray-200 bg-white"}`}
             >
               <div className="text-center">
                 <div className="font-medium">{day.charAt(0) + day.slice(1).toLowerCase()}</div>
@@ -131,12 +144,9 @@ export default function CampaignControlsPage() {
         </div>
       </div>
 
-      <Button
-        onClick={saveControls}
-        className="bg-[#6D57FC] hover:bg-[#5A48D6] text-white px-8 py-2 rounded-md transition-colors"
-      >
-        Save calling hours
+      <Button onClick={saveControls} size="md">
+        Save
       </Button>
     </div>
-  )
+  );
 }

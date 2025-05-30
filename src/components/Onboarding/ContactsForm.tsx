@@ -1,10 +1,18 @@
 "use client";
 
 import { useForm } from "@mantine/form";
-import { Button, Container, Title, Group, Text, MultiSelect, TagsInput, NumberInput } from "@mantine/core";
+import {
+  Button,
+  Container,
+  Title,
+  Group,
+  Text,
+  MultiSelect,
+  TagsInput,
+  NumberInput,
+} from "@mantine/core";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "@/lib/toast";
-import { useUpdateOnboardingStep } from "@/hooks/Onboarding/useUpdateOnboardingStep";
 import { useCampaign } from "@/hooks/Campaign/useCampaign";
 import { useState, useEffect } from "react";
 import UploadCsvModal from "./UploadCsvModal";
@@ -14,29 +22,32 @@ import { RootState } from "@/store/store";
 import { getDraftCampaignId } from "@/utils/campaignUtils";
 import CustomSelect from "../Utils/CustomSelect";
 import CustomCheckbox from "../Utils/CustomCheckbox";
-import { zodResolver } from '@mantine/form';
-import { contactFormSchema, ContactFormValues } from '@/schemas/contactFormSchema';
+import { zodResolver } from "@mantine/form";
+import { contactFormSchema, ContactFormValues } from "@/schemas/contactFormSchema";
+import { useAppDispatch } from "@/store/hooks";
+import { updateStep } from "@/store/businessSlice";
+import { useBusiness } from "@/hooks/Business/useBusiness";
 
 const commonInputStyles = {
   input: {
-    width: '100%',
-    backgroundColor: 'white',
-    height: '50px',
-    padding: '12px 16px',
-    fontSize: '14px',
-    color: '#2C2C35',
-    border: '1px solid #E7E7E9',
-    borderRadius: '6px',
-    '&:focus': {
-      outline: 'none',
-      border: '1px solid #E7E7E9'
-    }
-  }
+    width: "100%",
+    backgroundColor: "white",
+    height: "50px",
+    padding: "12px 16px",
+    fontSize: "14px",
+    color: "#2C2C35",
+    border: "1px solid #E7E7E9",
+    borderRadius: "6px",
+    "&:focus": {
+      outline: "none",
+      border: "1px solid #E7E7E9",
+    },
+  },
 };
 
 export default function ContactsForm() {
   const router = useRouter();
-  const { updateStep } = useUpdateOnboardingStep();
+  const dispatch = useAppDispatch();
   const {
     getByBusiness,
     getById,
@@ -50,11 +61,11 @@ export default function ContactsForm() {
   const [csvFilename, setCsvFilename] = useState<string>("");
   const [existingCampaign, setExistingCampaign] = useState<Campaign | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const businessId = useSelector((state: RootState) => state.membership.businessId);
-  const membershipId = useSelector((state: RootState) => state.membership.membershipId);
+  const businessId = useSelector((state: RootState) => state.auth.user?.businessId);
 
   const pathname = usePathname();
   const isCreateFlow = pathname.includes("/campaign/create");
+  const { updateStep: updateBusinessStep } = useBusiness();
 
   const form = useForm<ContactFormValues>({
     validate: zodResolver(contactFormSchema),
@@ -87,20 +98,18 @@ export default function ContactsForm() {
   }, []);
 
   useEffect(() => {
-    console.log("existingCampaign", existingCampaign);
     const fetchExistingCampaign = async () => {
-      if (!membershipId || !businessId || isCreateFlow){
+      if (!businessId || isCreateFlow) {
         return;
       }
 
       try {
         setIsLoading(true);
         const campaigns = await getByBusiness(businessId);
-        console.log("campaigns", campaigns);
         if (campaigns && campaigns.length > 0) {
           const campaign = campaigns[0];
           setExistingCampaign(campaign);
-          }
+        }
       } catch (error) {
         console.error("Error fetching existing campaign:", error);
       } finally {
@@ -109,7 +118,7 @@ export default function ContactsForm() {
     };
 
     fetchExistingCampaign();
-  }, [membershipId, businessId]);
+  }, [businessId]);
 
   const handleFileRead = (content: string, filename: string) => {
     setCsvContent(content);
@@ -118,12 +127,7 @@ export default function ContactsForm() {
   };
 
   const handleSubmit = async (values: ContactFormValues) => {
-    if (!membershipId || !businessId) {
-      console.error('Membership or business not found');
-      return;
-    }
-
-    // Check if CSV is uploaded
+    if (!businessId) return;
     if (!csvContent || !csvFilename) {
       toast.error("Please upload a CSV file");
       return;
@@ -157,7 +161,8 @@ export default function ContactsForm() {
       if (isCreateFlow) {
         router.push("/campaign/create?step=hub");
       } else {
-        await updateStep(membershipId, 3);
+        dispatch(updateStep(3));
+        updateBusinessStep(businessId,3);
         router.push("/onboarding/hub");
       }
     } catch (error) {
@@ -166,7 +171,6 @@ export default function ContactsForm() {
     }
   };
 
-  // Industries list for dropdown
   const industriesList = [
     "Tech",
     "Finance",
@@ -190,7 +194,6 @@ export default function ContactsForm() {
       </p>
 
       <form onSubmit={form.onSubmit(handleSubmit)} className="space-y-4">
-        {/* CSV Upload Section */}
         <div>
           <label className="text-md font-medium text-tinteddark7 block mb-1">
             Upload lead list
@@ -243,8 +246,6 @@ export default function ContactsForm() {
             onChange={(event) => form.setFieldValue("allowAutoLeads", event.currentTarget.checked)}
           />
         </div>
-
-        {/* Company Size */}
         <div>
           <label className="text-md font-medium text-tinteddark7 block mb-1">Company Size</label>
           <CustomSelect
@@ -317,7 +318,9 @@ export default function ContactsForm() {
 
         {/* Company Location */}
         <div>
-          <label className="text-md font-medium text-tinteddark7 block mb-1">Company Location</label>
+          <label className="text-md font-medium text-tinteddark7 block mb-1">
+            Company Location
+          </label>
           <TagsInput
             placeholder="Enter company locations separated by comma"
             value={form.values.companyLocation}
@@ -334,7 +337,9 @@ export default function ContactsForm() {
 
         {/* Employee Location */}
         <div>
-          <label className="text-md font-medium text-tinteddark7 block mb-1">Employee Location</label>
+          <label className="text-md font-medium text-tinteddark7 block mb-1">
+            Employee Location
+          </label>
           <TagsInput
             placeholder="Enter employee locations separated by comma"
             value={form.values.employeeLocation}
@@ -403,7 +408,7 @@ export default function ContactsForm() {
             radius="md"
             className="bg-primary text-white px-6"
             loading={campaignLoading || isLoading}
-            disabled={!membershipId || isLoading}
+            disabled={isLoading}
           >
             Save
           </Button>

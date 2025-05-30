@@ -1,7 +1,12 @@
-import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from "axios";
+import axios, {
+  AxiosInstance,
+  AxiosError,
+  InternalAxiosRequestConfig,
+} from "axios";
 import { getAuth } from "firebase/auth";
 import { store } from "../store/store";
 import { executeLogout } from "@/utils/logoutHelper";
+import toast from "react-hot-toast";
 
 interface CreateClientOptions {
   baseURL: string;
@@ -35,6 +40,12 @@ const extractTokenPayload = (token: string): JwtPayload | null => {
   }
 };
 
+// Extended Axios config to support manual auth override
+interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+  __manualAuthToken?: string;
+  _retry?: boolean;
+}
+
 const createAxiosClient = ({ baseURL, timeout = 20000 }: CreateClientOptions): AxiosInstance => {
   const axiosInstance = axios.create({
     baseURL,
@@ -64,7 +75,7 @@ const createAxiosClient = ({ baseURL, timeout = 20000 }: CreateClientOptions): A
                 reject(new AuthError("Token refresh failed"));
               });
           } else {
-            reject(new AuthError("No authenticated user"));
+            reject(new AuthError("You're not authenticated"));
           }
         });
       });
@@ -94,16 +105,21 @@ const createAxiosClient = ({ baseURL, timeout = 20000 }: CreateClientOptions): A
   };
 
   axiosInstance.interceptors.request.use(
-    async (config) => {
+    async (config: CustomAxiosRequestConfig) => {
       try {
-        const token = await validateToken();
+        const token =
+          config.__manualAuthToken || (await validateToken());
+
         if (config.headers && typeof config.headers === "object") {
-          (config.headers as Record<string, string>)["Authorization"] = `Bearer ${token}`;
+          config.headers["Authorization"] = `Bearer ${token}`;
         }
+
         return config;
       } catch (error: unknown) {
         console.error("Token validation error", error);
-        return Promise.reject(error);
+        toast.error("Authentication failed. Please sign in again.");
+        handleAuthError();
+        return Promise.reject(new AuthError("Token validation error"));
       }
     },
     (error) => Promise.reject(error)
@@ -112,9 +128,7 @@ const createAxiosClient = ({ baseURL, timeout = 20000 }: CreateClientOptions): A
   axiosInstance.interceptors.response.use(
     (response) => response,
     async (error: AxiosError<{ error: string }>) => {
-      const originalRequest = error.config as AxiosRequestConfig & {
-        _retry?: boolean;
-      };
+      const originalRequest = error.config as CustomAxiosRequestConfig;
 
       const is401 =
         error.response?.status === 401 ||
@@ -124,10 +138,11 @@ const createAxiosClient = ({ baseURL, timeout = 20000 }: CreateClientOptions): A
         originalRequest._retry = true;
         try {
           const newToken = await refreshToken();
-          originalRequest.headers = {
-            ...originalRequest.headers,
-            Authorization: `Bearer ${newToken}`,
-          };
+          if (originalRequest.headers?.set) {
+            originalRequest.headers.set("Authorization", `Bearer ${newToken}`);
+          } else {
+            (originalRequest.headers as Record<string, string>)["Authorization"] = `Bearer ${newToken}`;
+          }          
           return axiosInstance(originalRequest);
         } catch {
           handleAuthError();

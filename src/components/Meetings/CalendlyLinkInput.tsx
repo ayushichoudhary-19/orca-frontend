@@ -13,8 +13,12 @@ const CalendlyLinkInput = () => {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("connected") === "calendly") {
+    const connected = urlParams.get("connected");
+
+    if (connected === "calendly") {
       toast.success("Calendly connected successfully!");
+    } else if (connected === "calendly_no_webhook") {
+      toast.warn("Calendly connected, but auto-tracking meetings needs a Standard plan.");
     }
   }, []);
 
@@ -44,15 +48,14 @@ const CalendlyLinkInput = () => {
   if (loading || calendlyConnected) return null;
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md border mb-6">
-      <h2 className="text-xl font-semibold mb-2">Connect Your Calendly</h2>
-      <p className="text-gray-600 mb-4">
-       {"You haven't connected Calendly yet. Click below to authorize and let reps schedule meetings through your link."}
+    <div className="bg-white p-6 mb-6 ">
+      <h2 className="text-3xl font-semibold mb-2">Connect Your Calendly</h2>
+      <p className="text-gray-500 mb-4">
+        {
+          "You haven't connected Calendly yet. Click below to authorize and let reps schedule meetings through your link."
+        }
       </p>
-      <Button
-        onClick={handleConnectCalendly}
-        className=" py-2 px-4 rounded-md"
-      >
+      <Button onClick={handleConnectCalendly} className="py-2 px-4 rounded-md">
         Connect Calendly
       </Button>
     </div>

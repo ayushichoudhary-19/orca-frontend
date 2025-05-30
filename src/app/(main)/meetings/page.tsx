@@ -52,17 +52,16 @@ const AdminDashboard = () => {
           const meetingsData = Array.isArray(response.data)
             ? response.data
             : response.data.meetings || [];
-            const mappedMeetings = (meetingsData as any[]).map((meeting: any) => ({
-              id: meeting._id,
-              time: meeting.time,
-              status: meeting.status,
-              prospect: meeting.fullName,
-              account: "",
-              email: meeting.email,
-              caller: "",
-              accountExecutive: "",
-            }));
-            
+          const mappedMeetings = (meetingsData as any[]).map((meeting: any) => ({
+            id: meeting._id,
+            time: meeting.time,
+            status: meeting.status,
+            prospect: meeting.fullName,
+            account: "",
+            email: meeting.email,
+            caller: "",
+            accountExecutive: "",
+          }));
 
           setMeetings(mappedMeetings);
         } else {
@@ -117,7 +116,7 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="bg-white min-h-screen flex flex-col">
+    <div className="bg-white min-h-screen flex flex-col items-centre">
       {!calendlyLinkSet ? (
         <CalendlyLinkInput />
       ) : (

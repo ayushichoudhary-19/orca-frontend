@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { useAppSelector } from "@/store/hooks";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { auth } from "@/lib/firebase";
 import { toast } from "@/lib/toast";
 import { signOut } from "firebase/auth";
 import Loader from "../Utils/Loader";
+import { useBusiness } from "@/hooks/Business/useBusiness";
+import { setBusiness, setLoading as setBusinessLoading } from "@/store/businessSlice";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -18,78 +20,80 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   const [authInitialized, setAuthInitialized] = useState(false);
 
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
-  const membership = useAppSelector((state) => state.membership.data);
-  const membershipLoading = useAppSelector((state) => state.membership.loading);
+  const user = useAppSelector((state) => state.auth.user);
+  const business = useAppSelector((state) => state.business.data);
+  const loadingBusiness = useAppSelector((state) => state.business.loading);
+  const businessId = user?.businessId;
+
+  const dispatch = useAppDispatch();
+  const { getById } = useBusiness();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(() => {
-      setAuthInitialized(true);
-    });
+    const unsubscribe = auth.onAuthStateChanged(() => setAuthInitialized(true));
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    if (!authInitialized || !isAuthenticated || membershipLoading) return;
+    const fetchBusiness = async () => {
+      if (!businessId || user?.role === "sdr") return;
+      try {
+        dispatch(setBusinessLoading(true));
+        const biz = await getById(businessId);
+        dispatch(setBusiness(biz));
+      } catch {
+        toast.error("Failed to fetch business info");
+      } finally {
+        dispatch(setBusinessLoading(false));
+      }
+    };
 
-    if (!membership || !membership.roleId) {
-      toast.error("Your session is invalid. Please log in again.");
-      signOut(auth).then(() => {
-        router.replace("/signin");
-      });
+    if (authInitialized && isAuthenticated && user?.role !== "sdr") {
+      fetchBusiness();
+    }
+  }, [authInitialized, isAuthenticated, user]);
+
+  useEffect(() => {
+    if (!authInitialized || !isAuthenticated || !user || user.role === "sdr") return;
+
+    const manuallyLoggedOut = localStorage.getItem("manualLogout") === "true";
+    if (!user.role) {
+      if (!manuallyLoggedOut) toast.error("Your session is invalid. Please log in again.");
+      localStorage.removeItem("manualLogout");
+      signOut(auth).then(() => router.replace("/signin"));
       return;
     }
 
-    const hasBusiness = !!membership.businessId;
-    const step = membership.onboardingStep || 0;
+    if (loadingBusiness || !business) return;
+
+    const onboardingStep = business.onboardingStep ?? 0;
     const isOnboardingPage = pathname.startsWith("/onboarding");
 
-    if (hasBusiness) {
-      if (step < 1 && pathname !== "/onboarding/step1") {
-        router.replace("/onboarding/step1");
-        return;
-      }
-
-      if (step === 1) {
-        const isHub = pathname.includes("/onboarding/hub");
-        const isCampaign = pathname.includes("/onboarding/campaign");
-        if (!(isHub || isCampaign)) {
-          router.replace("/onboarding/hub");
-          return;
-        }
-      }
-
-      if (
-        step === 2 &&
-        !pathname.includes("/onboarding/contacts") &&
-        !pathname.includes("/onboarding/hub")
-      ) {
-        router.replace("/onboarding/hub");
-        return;
-      }
-
-      if (
-        step === 3 &&
-        !pathname.includes("/onboarding/review-sign") &&
-        !pathname.includes("/onboarding/hub")
-      ) {
-        router.replace("/onboarding/hub");
-        return;
-      }
-
-      if (step >= 4 && isOnboardingPage) {
-        toast.success("You're all set! Redirecting to dashboard 🎉");
-        setTimeout(() => router.replace("/dashboard"), 1500);
-      }
+    if (onboardingStep < 1 && pathname !== "/onboarding/step1") {
+      router.replace("/onboarding/step1");
+    } else if (
+      onboardingStep === 1 &&
+      !(pathname.includes("/campaign") || pathname.includes("/hub"))
+    ) {
+      router.replace("/onboarding/hub");
+    } else if (
+      onboardingStep === 2 &&
+      !pathname.includes("/contacts") &&
+      !pathname.includes("/hub")
+    ) {
+      router.replace("/onboarding/hub");
+    } else if (
+      onboardingStep === 3 &&
+      !pathname.includes("/review-sign") &&
+      !pathname.includes("/hub")
+    ) {
+      router.replace("/onboarding/hub");
+    } else if (onboardingStep >= 4 && isOnboardingPage) {
+      toast.success("You're all set! Redirecting to dashboard 🎉");
+      setTimeout(() => router.replace("/dashboard"), 1500);
     }
-  }, [authInitialized, isAuthenticated, membership, membershipLoading, pathname, router]);
+  }, [authInitialized, isAuthenticated, user, loadingBusiness, business, pathname, router]);
 
-  if (!authInitialized || !isAuthenticated || !membership) {
-    console.log("Still waiting", {
-      authInitialized,
-      isAuthenticated,
-      membershipLoading,
-      membership,
-    });
+  if (!authInitialized || !isAuthenticated || !user || (user.role !== "sdr" && loadingBusiness)) {
     return <Loader />;
   }
 

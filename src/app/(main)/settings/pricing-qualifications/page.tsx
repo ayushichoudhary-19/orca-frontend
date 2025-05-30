@@ -1,14 +1,23 @@
-"use client"
-import { useState } from "react"
-import { Divider, Table } from "@mantine/core"
+"use client";
+import { useState } from "react";
+import { Button, Divider, Table } from "@mantine/core";
+import { axiosClient } from "@/lib/axiosClient";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store/store";
+import toast from "react-hot-toast";
 
 export default function PricingQualificationsPage() {
-  const [price, setPrice] = useState(0)
+  const [price, setPrice] = useState(0);
+  const campaignId = useSelector((state: RootState) => state.campaign.campaignId);
 
-
-//   const handleSave = async () => {
-//     await axiosClient.patch("/api/campaign/settings/qualification", { price, criteria })
-//   }
+  const handleSave = async () => {
+    try {
+      await axiosClient.patch(`/api/campaign/${campaignId}/settings/qualification`, { price });
+      toast.success("Price saved");
+    } catch (error) {
+      toast.error("Error saving price");
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto p-6">
@@ -25,7 +34,6 @@ export default function PricingQualificationsPage() {
             <input
               type="text"
               value={price}
-              disabled
               onChange={(e) => setPrice(Number(e.target.value) || 0)}
               className="w-full pl-10 bg-transparent pr-4 py-4 text-3xl font-medium rounded-md"
               style={{
@@ -36,7 +44,8 @@ export default function PricingQualificationsPage() {
             />
           </div>
           <div className="mt-2 text-sm">
-            Use <span className="text-[#6D57FC]">this pricing calculator</span> to help estimate the price
+            Use <span className="text-[#6D57FC]">this pricing calculator</span> to help estimate the
+            price
           </div>
         </div>
 
@@ -46,7 +55,9 @@ export default function PricingQualificationsPage() {
             <Table>
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Criteria type</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                    Criteria type
+                  </th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Input</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Payout</th>
                 </tr>
@@ -75,10 +86,14 @@ export default function PricingQualificationsPage() {
             </Table>
           </div>
           <div className="mt-4 text-sm">
-            Want to update your qualification criteria? <span className="text-[#6D57FC]">Contact us</span>
+            Want to update your qualification criteria?{" "}
+            <span className="text-[#6D57FC]">Contact us</span>
           </div>
         </div>
+        <Button onClick={handleSave} className="mt-4 rounded-md h-[50px]">
+          Save
+        </Button>
       </div>
     </div>
-  )
+  );
 }

@@ -4,21 +4,20 @@ import { useEffect, useState } from "react";
 import { Button, Container, Title, Text } from "@mantine/core";
 import { usePathname, useRouter } from "next/navigation";
 import { IconCircleCheck, IconCircleCheckFilled } from "@tabler/icons-react";
-import dayjs from "dayjs";
-import { useFetchMembership } from "@/hooks/Membership/useFetchMembership";
 import { getDraftCampaignId, getStepFromDraft } from "@/utils/campaignUtils";
 import { useCampaign } from "@/hooks/Campaign/useCampaign";
 import { toast } from "@/lib/toast";
-
+import { useAppSelector } from "@/store/hooks";
+import dayjs from "dayjs";
 
 export default function Hub() {
   const router = useRouter();
-  const { membership } = useFetchMembership();
-  const [onboardingStep, setStep] = useState<number>(0);
   const pathname = usePathname();
   const isCreateFlow = pathname.includes("/campaign/create");
   const { getById } = useCampaign();
-  
+
+  const onboardingStep = useAppSelector((state) => state.business.data?.onboardingStep || 0);
+
   useEffect(() => {
     const fetchStep = async () => {
       if (isCreateFlow) {
@@ -27,29 +26,16 @@ export default function Hub() {
           toast.error("No campaign found");
           return;
         }
-        const campaign = await getById(campaignId);
-        const step = getStepFromDraft(campaign);
-        setStep(step);
-      } else {
-        setStep(membership?.onboardingStep || 0);
       }
     };
     fetchStep();
   }, []);
 
-  
-  useEffect(() => {
-    if (membership && !isCreateFlow) {
-      setStep(membership.onboardingStep || 0);
-    }
-  }, [membership]);
-
   return (
     <Container size="sm" className="pt-8 pb-20">
-      {/* Header */}
       <div className="mb-6">
         <div className="flex justify-between items-center">
-          <Title order={2}>{isCreateFlow ? 'Campaign Setup' : 'Welcome'}</Title>
+          <Title order={2}>{isCreateFlow ? "Campaign Setup" : "Welcome"}</Title>
           <Text c="dimmed" size="xs">
             {dayjs().format("ddd, MMM D · h:mm A")}
           </Text>
@@ -60,8 +46,8 @@ export default function Hub() {
           style={{ border: "1px solid #B0A4FD" }}
         >
           <Text fw={600} className="text-[18px] mb-1 text-[#0C0A1C]">
-            {isCreateFlow 
-              ? "Let's set up your campaign 🚀" 
+            {isCreateFlow
+              ? "Let's set up your campaign 🚀"
               : "We're a sales game changer for a reason 🥳🥳"}
           </Text>
           <Text size="sm" c="#555461" mb="md">
@@ -90,7 +76,6 @@ export default function Hub() {
         </div>
       </div>
 
-      {/* Step Items */}
       <div className="space-y-5">
         <HubItem
           title={isCreateFlow ? "Campaign details" : "Start your first campaign"}
@@ -101,13 +86,17 @@ export default function Hub() {
           title={"About your contacts"}
           done={onboardingStep > 2}
           disabled={onboardingStep < 2}
-          onClick={() => router.push(isCreateFlow ? "/campaign/create?step=contacts" : "/onboarding/contacts")}
+          onClick={() =>
+            router.push(isCreateFlow ? "/campaign/create?step=contacts" : "/onboarding/contacts")
+          }
         />
         <HubItem
           title={"Review & sign"}
           done={onboardingStep > 3}
           disabled={onboardingStep < 3}
-          onClick={() => router.push(isCreateFlow ? "/campaign/create?step=review" : "/onboarding/review-sign")}
+          onClick={() =>
+            router.push(isCreateFlow ? "/campaign/create?step=review" : "/onboarding/review-sign")
+          }
         />
       </div>
     </Container>

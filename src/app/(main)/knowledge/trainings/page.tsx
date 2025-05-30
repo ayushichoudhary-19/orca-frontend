@@ -1,6 +1,6 @@
 "use client";
 
-import { DragDropContext, DropResult } from "react-beautiful-dnd";
+import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { Container, Text, Group, Button, Modal, Stack, Divider } from "@mantine/core";
 import {
   IconArrowRight,

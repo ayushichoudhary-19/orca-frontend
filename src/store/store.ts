@@ -3,23 +3,22 @@ import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import notesReducer from "./notesSlice";
 import authReducer from "./authSlice";
-import membershipReducer from "./membershipSlice";
 import campaignReducer from "./campaignSlice";
 import notificationReducer from "./notificationSlice";
+import businessReducer from "./businessSlice";
 
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["notes", "auth", "features", "membership", "campaign", "notification"],
-  blacklist: ['membership.loading'],
+  whitelist: ["notes", "auth", "features", "campaign", "notification", "business"],
 };
 
 const rootReducer = combineReducers({
   notes: notesReducer,
   auth: authReducer,
-  membership: membershipReducer,
   campaign: campaignReducer,
   notification: notificationReducer,
+  business: businessReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

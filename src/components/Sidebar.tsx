@@ -108,9 +108,9 @@ export default function Sidebar() {
     []
   );
 
-  const membership = useSelector((state: RootState) => state.membership.data);
-  const businessId = useSelector((state: RootState) => state.membership.businessId);
-  const isSdr = membership?.roleId?.name.toLowerCase() === "sdr";
+  const user = useSelector((state: RootState) => state.auth.user);
+  const businessId = user?.role === "admin" ? user.businessId : null;
+  const isSdr = user?.role === "sdr";
   const navItems = isSdr ? sdrNavItems : adminNavItems;
 
   const { getByBusiness, getApprovedActiveCampaignsForSdr } = useCampaign();

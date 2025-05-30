@@ -24,10 +24,10 @@ export const Header = () => {
   const hasUnreadPosts = notifications.some((n) => n.type === "post" && !n.read);
   const hasUnreadMessages = notifications.some((n) => n.type === "message" && !n.read);
 
-  const membership = useSelector((state: RootState) => state.membership.data);
-  const businessId = useSelector((state: RootState) => state.membership.businessId);
+  const user = useSelector((state: RootState) => state.auth.user);
+  const businessId = user?.role === "admin" ? user.businessId : null;
   const campaignId = useSelector((state: RootState) => state.campaign.campaignId);
-  const isSdr = membership && !membership.businessId;
+  const isSdr = user?.role === "sdr";
 
   const [campaigns, setCampaigns] = useState<{ label: string; value: string; status: string }[]>(
     []

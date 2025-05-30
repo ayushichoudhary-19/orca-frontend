@@ -7,15 +7,15 @@ import { useCreateBlockNote } from "@blocknote/react";
 import { useEffect } from "react";
 
 interface Props {
-  content: any;
-  onSave: (content: any) => void;
+  content: any[] | null;
+  onSave?: (content: any) => void;
   handleUpload: (file: File) => Promise<string | null>;
   onChange: (content: any) => void;
 }
 
 export default function TrainingEditor({ content, handleUpload, onChange }: Props) {
   const editor = useCreateBlockNote({
-    initialContent: content,
+    initialContent: (Array.isArray(content) && content.length > 0) ? content : undefined,
     uploadFile: async (file: File) => {
       const result = await handleUpload(file);
       return result ?? '';
@@ -23,8 +23,10 @@ export default function TrainingEditor({ content, handleUpload, onChange }: Prop
   });
 
   useEffect(() => {
-    if (editor && content) {
-      editor.replaceBlocks(editor.document, content);
+    if (editor) {
+      const blocksToLoad = Array.isArray(content) ? content : [];
+      
+      editor.replaceBlocks(editor.document, blocksToLoad);
     }
   }, [editor, content]);
 
